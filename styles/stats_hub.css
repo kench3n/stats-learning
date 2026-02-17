@@ -233,6 +233,54 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .res-link:hover,.res-link:focus{color:var(--amber);text-decoration:underline;}
 .res-link:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
 
+/* Daily Digest */
+.daily-digest{
+  max-width:640px;margin:0 auto 32px;padding:20px 24px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+}
+.digest-row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.digest-stat{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:60px;}
+.digest-num{font-size:24px;font-weight:700;color:var(--cyan);font-family:'Space Mono',monospace;}
+.digest-label{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:0.5px;}
+.digest-cta{margin-top:16px;text-align:center;}
+.digest-action-btn{
+  padding:12px 28px;background:var(--cyan);color:var(--bg);border:none;border-radius:8px;
+  font-family:'Space Mono',monospace;font-size:14px;font-weight:700;
+  cursor:pointer;transition:background 0.2s,transform 0.1s;
+}
+.digest-action-btn:hover{background:var(--amber);transform:scale(1.02);}
+.digest-action-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+.digest-next-milestone{
+  margin-top:12px;text-align:center;font-size:12px;color:var(--muted);
+  font-family:'Space Mono',monospace;
+}
+@media(max-width:480px){
+  .digest-row{gap:8px;}
+  .digest-num{font-size:18px;}
+  .digest-stat{min-width:50px;}
+}
+
+/* Practice → Visualizer link */
+.viz-link{
+  margin-left:auto;font-size:12px;color:var(--cyan);text-decoration:none;
+  font-family:'Space Mono',monospace;white-space:nowrap;
+  transition:color 0.2s;
+}
+.viz-link:hover,.viz-link:focus{color:var(--amber);text-decoration:underline;}
+.viz-link:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+.pc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+/* Visualizer → Practice button */
+.viz-practice-link{margin-top:20px;text-align:center;padding:16px 0;border-top:1px solid var(--border);}
+.viz-practice-btn{
+  padding:10px 24px;background:transparent;color:var(--cyan);
+  border:1px solid var(--cyan);border-radius:8px;
+  font-family:'Space Mono',monospace;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;
+}
+.viz-practice-btn:hover{background:var(--cyan);color:var(--bg);}
+.viz-practice-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+
 /* Roles */
 .roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;max-width:1100px;margin:0 auto;}
 .role-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:26px;transition:all 0.3s;}

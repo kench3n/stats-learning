@@ -54,6 +54,36 @@
     <h1>Stats Learning <em>Hub</em></h1>
     <p>Your all-in-one tool for learning statistics. Roadmap to track what to learn, interactive visualizations to build intuition, and practice problems to test your understanding.</p>
   </header>
+  <div class="daily-digest" id="dailyDigest" style="display:none;">
+    <div class="digest-row">
+      <div class="digest-stat">
+        <span class="digest-num" id="digestStreak">0</span>
+        <span class="digest-label">Day Streak</span>
+      </div>
+      <div class="digest-stat">
+        <span class="digest-num" id="digestXP">0</span>
+        <span class="digest-label">Total XP</span>
+      </div>
+      <div class="digest-stat">
+        <span class="digest-num" id="digestLevel">1</span>
+        <span class="digest-label">Level</span>
+      </div>
+      <div class="digest-stat">
+        <span class="digest-num" id="digestDue">0</span>
+        <span class="digest-label">Cards Due</span>
+      </div>
+      <div class="digest-stat">
+        <span class="digest-num" id="digestBadges">0</span>
+        <span class="digest-label">Badges</span>
+      </div>
+    </div>
+    <div class="digest-cta" id="digestCTA">
+      <!-- Single recommended action button inserted by JS -->
+    </div>
+    <div class="digest-next-milestone" id="digestMilestone">
+      <!-- Next unlockable milestone shown here -->
+    </div>
+  </div>
   <div class="home-cards">
     <div class="home-card card-roadmap" onclick="goPage('roadmap')" role="button" tabindex="0" aria-label="Open Quant Roadmap" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('roadmap')}">
       <div class="card-icon" aria-hidden="true">&#x1f5fa;</div>
@@ -222,6 +252,9 @@
     </div>
   </div>
   <div id="viz-dynamic" style="display:none" role="tabpanel" aria-live="polite"></div>
+  <div class="viz-practice-link">
+    <button class="viz-practice-btn" onclick="goPage('practice');setUnit(1);">Practice Unit 1: Descriptive Statistics →</button>
+  </div>
 </section>
 
 <!-- ==================== PRACTICE ==================== -->

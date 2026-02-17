@@ -1,5 +1,7 @@
 # Stats Learning Hub
 [![Tests](https://github.com/kench3n/stats-learning/actions/workflows/test.yml/badge.svg)](https://github.com/kench3n/stats-learning/actions/workflows/test.yml)
+[![Deploy](https://github.com/kench3n/stats-learning/actions/workflows/deploy.yml/badge.svg)](https://kench3n.github.io/stats-learning/stats_hub.html)
+[![Deploy](https://github.com/kench3n/stats-learning/actions/workflows/deploy.yml/badge.svg)](https://kench3n.github.io/stats-learning/stats_hub.html)
 
 A self-contained learning platform for introductory statistics and quantitative finance. Built with vanilla JavaScript and HTML5 Canvas — no external libraries.
 
