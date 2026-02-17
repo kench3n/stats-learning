@@ -279,6 +279,7 @@
     <h2 class="section-title">Practice <em>Problems</em></h2>
     <p class="section-desc">Practice problems from easy to hard. Work them by hand, then check.</p>
     <button class="focus-btn" id="focusBtn" onclick="toggleFocusMode()" aria-label="Toggle focus mode">🎯 Focus Mode</button>
+    <button class="export-pdf-btn" onclick="exportPracticePDF(currentUnit)" aria-label="Export problems as PDF">🖨 Export PDF</button>
   </header>
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>
@@ -442,6 +443,24 @@
   <div class="achieve-history" id="achieveHistory">
     <h3 class="achieve-section-title">Activity Heatmap (Last 90 Days)</h3>
     <div class="heatmap" id="heatmapGrid"></div>
+  </div>
+  <div class="analytics-section">
+    <h3 class="achieve-section-title">📈 Learning Analytics</h3>
+    <div class="analytics-tabs">
+      <button class="analytics-tab active" onclick="showAnalytics('accuracy',event)">Accuracy</button>
+      <button class="analytics-tab" onclick="showAnalytics('xp',event)">XP Over Time</button>
+      <button class="analytics-tab" onclick="showAnalytics('units',event)">Unit Breakdown</button>
+    </div>
+    <canvas id="analyticsCanvas" height="220" style="width:100%;max-width:600px;display:block;margin-top:12px;" aria-label="Analytics chart" role="img"></canvas>
+  </div>
+  <div class="calendar-section">
+    <h3 class="achieve-section-title">📅 Study Calendar</h3>
+    <div class="cal-nav">
+      <button onclick="calPrev()">◀</button>
+      <span id="calMonth"></span>
+      <button onclick="calNext()">▶</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
   </div>
 </section>
 <div class="install-banner" id="installBanner" style="display:none;">

@@ -2871,6 +2871,8 @@ function buildHeatmap(){
 
 function buildAchievementsPage(){
   if(typeof document==='undefined')return;
+  buildCalendar();
+  showAnalytics('accuracy',null);
   const statsEl=document.getElementById('achieveStats');
   const badgeGrid=document.getElementById('achieveBadgeGrid');
   if(!statsEl||!badgeGrid)return;
@@ -3007,6 +3009,147 @@ function filterProblems(filter){
     el.style.display=show?'':'none';
   });
 }
+
+
+// ===================== PHASE 15: ANALYTICS, PDF EXPORT, CALENDAR =====================
+let calDate=typeof Date!=='undefined'?new Date():null;
+
+function showAnalytics(type,evt){
+  if(typeof document==='undefined')return;
+  if(evt&&evt.target){
+    document.querySelectorAll('.analytics-tab').forEach(t=>t.classList.remove('active'));
+    evt.target.classList.add('active');
+  }
+  if(type==='accuracy')drawAccuracyChart();
+  else if(type==='xp')drawXPChart();
+  else if(type==='units')drawUnitBreakdown();
+}
+
+function drawAccuracyChart(){
+  const canvas=document.getElementById('analyticsCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=typeof window!=='undefined'?(window.devicePixelRatio||1):1;
+  const W=canvas.clientWidth||600;const H=220;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  if(typeof ctx.setTransform==='function')ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  const summary=getProgressSummary();
+  const units=Object.keys(UNIT_META).map(Number);
+  const pad=40;const bw=Math.floor((W-pad*2)/units.length)-4;
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  units.forEach((u,i)=>{
+    const r=summary[u]||{total:0,correct:0};
+    const pct=r.total?r.correct/r.total:0;
+    const x=pad+i*(bw+4);const bh=pct*(H-60);
+    ctx.fillStyle=pct>=0.8?'#00e5c7':pct>=0.5?'#f59e0b':'#ff4081';
+    ctx.fillRect(x,H-30-bh,bw,bh);
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px monospace';ctx.textAlign='center';
+    ctx.fillText('U'+u,x+bw/2,H-16);
+    if(bh>14)ctx.fillText(Math.round(pct*100)+'%',x+bw/2,H-34-bh);
+  });
+}
+
+function drawXPChart(){
+  const canvas=document.getElementById('analyticsCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=typeof window!=='undefined'?(window.devicePixelRatio||1):1;
+  const W=canvas.clientWidth||600;const H=220;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  if(typeof ctx.setTransform==='function')ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  const xpData=getXPData();const hist=xpData.history||[];
+  if(!hist.length){ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='14px monospace';ctx.textAlign='center';ctx.fillText('No XP history yet',W/2,H/2);return;}
+  const byDate={};hist.forEach(e=>{byDate[e.date]=(byDate[e.date]||0)+e.earned;});
+  const dates=Object.keys(byDate).sort();const last30=dates.slice(-30);
+  let cum=0;const points=last30.map(d=>{cum+=byDate[d];return{date:d,total:cum};});
+  const maxXP=Math.max(...points.map(p=>p.total),1);
+  const pad=40;
+  ctx.strokeStyle='#00e5c7';ctx.lineWidth=2.5;ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x=pad+i*((W-pad*2)/Math.max(points.length-1,1));
+    const y=H-30-(p.total/maxXP)*(H-60);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });ctx.stroke();
+  ctx.fillStyle='#00e5c7';
+  points.forEach((p,i)=>{
+    const x=pad+i*((W-pad*2)/Math.max(points.length-1,1));
+    const y=H-30-(p.total/maxXP)*(H-60);
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function drawUnitBreakdown(){
+  const canvas=document.getElementById('analyticsCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=typeof window!=='undefined'?(window.devicePixelRatio||1):1;
+  const W=canvas.clientWidth||600;const H=220;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  if(typeof ctx.setTransform==='function')ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  const summary=getProgressSummary();
+  const units=Object.keys(UNIT_META).map(Number);
+  const pad=40;const rowH=(H-60)/units.length;
+  units.forEach((u,i)=>{
+    const r=summary[u]||{total:0,correct:0,attempted:0};
+    const total=r.total;if(!total)return;
+    const correct=r.correct,wrong=(r.attempted||0)-correct,unanswered=total-correct-wrong;
+    const y=pad+i*rowH;const maxW=W-pad*2;
+    const cw=Math.round(correct/total*maxW),ww=Math.round(wrong/total*maxW),uw=maxW-cw-ww;
+    ctx.fillStyle='#00e5c7';ctx.fillRect(pad,y,cw,rowH-2);
+    ctx.fillStyle='#ff4081';ctx.fillRect(pad+cw,y,ww,rowH-2);
+    ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(pad+cw+ww,y,uw,rowH-2);
+    ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='9px monospace';ctx.textAlign='right';
+    ctx.fillText('U'+u,pad-4,y+rowH/2+4);
+  });
+}
+
+function exportPracticePDF(unit){
+  if(typeof window==='undefined')return;
+  const probs=allProbs[unit]||[];
+  if(!probs.length){showToast('No problems for this unit.');return;}
+  let content='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Stats Hub — Unit '+unit+': '+UNIT_META[unit].name+'</title><style>body{font-family:sans-serif;color:#111;padding:40px;max-width:700px;margin:0 auto;line-height:1.6;}h1{font-size:20px;border-bottom:2px solid #111;padding-bottom:8px;}.prob{margin-bottom:24px;page-break-inside:avoid;}.prob-head{font-size:12px;color:#555;margin-bottom:4px;}.prob-q{font-size:14px;margin-bottom:8px;}.choice{margin:4px 0 4px 20px;font-size:13px;}.answer{margin-top:12px;padding:8px 12px;background:#f0f0f0;border-radius:4px;font-size:12px;}</style></head><body><h1>Unit '+unit+': '+UNIT_META[unit].name+'</h1>';
+  probs.forEach((p,i)=>{
+    content+='<div class="prob"><div class="prob-head">#'+(i+1)+' · '+p.diff+' · '+p.topic+'</div><div class="prob-q">'+p.q+'</div>';
+    if(p.data)content+='<div style="background:#f5f5f5;padding:8px;border-radius:4px;font-size:12px;margin-bottom:8px;">'+p.data+'</div>';
+    if(p.type==='mc'){const L='ABCD';p.ch.forEach((c,j)=>{content+='<div class="choice">'+L[j]+'. '+c+'</div>';});}
+    else{content+='<div style="border:1px solid #ccc;padding:8px;border-radius:4px;min-height:30px;margin-top:8px;color:#999;">Your answer:</div>';}
+    content+='<div class="answer"><strong>Answer:</strong> '+(p.type==='mc'?'ABCD'[p.ans]:p.ans)+'<br><strong>Explanation:</strong> '+p.ex+'</div></div>';
+  });
+  const formulas=FORMULAS[unit]||[];
+  if(formulas.length){
+    content+='<div style="margin-top:32px;border-top:2px solid #111;padding-top:16px;"><h2 style="font-size:16px;">Formula Reference</h2>';
+    formulas.forEach(f=>{content+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd;font-size:12px;"><span>'+f.name+'</span><span>'+f.formula+'</span></div>';});
+    content+='</div>';
+  }
+  content+='</body></html>';
+  const win=window.open('','_blank');
+  if(win){win.document.write(content);win.document.close();if(typeof win.print==='function')win.print();}
+}
+
+function buildCalendar(){
+  if(typeof document==='undefined')return;
+  const grid=document.getElementById('calGrid');
+  const monthLabel=document.getElementById('calMonth');
+  if(!grid||!monthLabel||!calDate)return;
+  const year=calDate.getFullYear(),month=calDate.getMonth();
+  monthLabel.textContent=calDate.toLocaleString('default',{month:'long',year:'numeric'});
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const streak=getStreakData();const history=streak.history||[];
+  let html='<div class="cal-header">Su</div><div class="cal-header">Mo</div><div class="cal-header">Tu</div><div class="cal-header">We</div><div class="cal-header">Th</div><div class="cal-header">Fr</div><div class="cal-header">Sa</div>';
+  for(let i=0;i<firstDay;i++)html+='<div class="cal-cell empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const active=history.includes(dateStr);const isToday=dateStr===todayStr();
+    html+='<div class="cal-cell '+(active?'cal-active':'')+' '+(isToday?'cal-today':'')+'">'+d+'</div>';
+  }
+  grid.innerHTML=html;
+}
+
+function calPrev(){if(calDate){calDate.setMonth(calDate.getMonth()-1);buildCalendar();}}
+function calNext(){if(calDate){calDate.setMonth(calDate.getMonth()+1);buildCalendar();}}
 
 let toastTimer=null;
 function showToast(msg,duration=2000){

@@ -813,3 +813,24 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .filter-chip{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
 .filter-chip:hover{border-color:var(--cyan);color:var(--cyan);}
 .filter-chip.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
+
+/* ===== PHASE 15: ANALYTICS, PDF EXPORT, CALENDAR ===== */
+.export-pdf-btn{background:none;border:1px solid var(--cyan);border-radius:6px;padding:6px 14px;color:var(--cyan);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;margin-top:8px;}
+.export-pdf-btn:hover{background:var(--cyan);color:var(--bg);}
+
+.analytics-section{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);}
+.analytics-tabs{display:flex;gap:8px;margin-bottom:12px;}
+.analytics-tab{padding:6px 14px;background:none;border:1px solid var(--border);border-radius:20px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
+.analytics-tab.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
+.analytics-tab:hover:not(.active){border-color:var(--cyan);color:var(--cyan);}
+
+.calendar-section{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);}
+.cal-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;}
+.cal-nav button{background:none;border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'Space Mono',monospace;}
+.cal-nav span{font-family:'Space Mono',monospace;font-size:14px;color:var(--text);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:320px;margin:0 auto;}
+.cal-header{font-size:11px;color:var(--muted);text-align:center;font-family:'Space Mono',monospace;padding:4px;}
+.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;color:var(--muted);background:var(--bg2);font-family:'Space Mono',monospace;}
+.cal-cell.empty{background:transparent;}
+.cal-active{background:var(--cyan) !important;color:var(--bg) !important;font-weight:700;}
+.cal-today{border:2px solid var(--amber);}
