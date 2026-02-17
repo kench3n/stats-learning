@@ -1056,3 +1056,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .leaderboard-rank{font-size:13px;font-weight:700;color:var(--muted);width:20px;text-align:center;}
 .leaderboard-name{flex:1;font-size:14px;color:var(--fg);}
 .leaderboard-xp{font-size:13px;color:var(--cyan);font-weight:600;}
+.diff-vote-row{display:flex;align-items:center;gap:6px;padding:6px 12px 8px;flex-wrap:wrap;}
+.diff-vote-label{font-size:11px;color:var(--muted);margin-right:4px;}
+.diff-vote-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:12px;padding:3px 10px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
+.diff-vote-btn:hover{border-color:var(--cyan);}
+.diff-vote-btn.active{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 15%,var(--bg2));color:var(--cyan);}

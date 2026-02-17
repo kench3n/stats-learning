@@ -1014,7 +1014,7 @@ buildProblems=function(unit=currentUnit){
     }else{
       html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
     }
-    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')"></div></div>`;
+    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')"></div><div class="diff-vote-row" id="dvr-${p.id}"><span class="diff-vote-label">Rate difficulty:</span><button class="diff-vote-btn" data-vote="easy" onclick="voteDiff(${p.id},\'easy\')">😅 Too Easy</button><button class="diff-vote-btn" data-vote="ok" onclick="voteDiff(${p.id},\'ok\')">✓ Just Right</button><button class="diff-vote-btn" data-vote="hard" onclick="voteDiff(${p.id},\'hard\')">😤 Too Hard</button></div></div>`;
   });
   c.innerHTML=html;
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
@@ -1036,6 +1036,18 @@ buildProblems=function(unit=currentUnit){
     },{threshold:0.5});
     document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
   }
+  if(typeof localStorage!=='undefined'){
+    try{
+      var dvotes=JSON.parse(localStorage.getItem('sh-diff-votes')||'{}');
+      Object.keys(dvotes).forEach(function(pid){
+        var row=document.getElementById('dvr-'+pid);
+        if(!row)return;
+        row.querySelectorAll('.diff-vote-btn').forEach(function(b){b.classList.remove('active');});
+        var active=row.querySelector('[data-vote="'+dvotes[pid]+'"]');
+        if(active)active.classList.add('active');
+      });
+    }catch(e){}
+  }
   const saved=getPracticeState(unit);
   answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
   pScore=0;
@@ -1055,6 +1067,20 @@ buildProblems=function(unit=currentUnit){
   setAllScores();
 }
 
+function voteDiff(probId,vote){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var votes=JSON.parse(localStorage.getItem('sh-diff-votes')||'{}');
+    votes[String(probId)]=vote;
+    localStorage.setItem('sh-diff-votes',JSON.stringify(votes));
+  }catch(e){}
+  if(typeof document==='undefined')return;
+  var row=document.getElementById('dvr-'+probId);
+  if(!row)return;
+  row.querySelectorAll('.diff-vote-btn').forEach(function(b){b.classList.remove('active');});
+  var active=row.querySelector('[data-vote="'+vote+'"]');
+  if(active)active.classList.add('active');
+}
 function ansMC(id,ch){
   if(answered[id]!==undefined)return;
   if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
