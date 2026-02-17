@@ -1012,3 +1012,6 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 #page-visualizer .unit-selector{max-width:1100px;}
 #fcBuildMode{max-width:780px;margin:0 auto;padding:0 24px;}
 #page-achievements .achieve-stats,#page-achievements .achieve-badges,#page-achievements .achieve-history{max-width:1100px;margin-left:auto;margin-right:auto;padding:0 24px;}
+.report-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0 4px;opacity:0.6;transition:color 0.2s,opacity 0.2s;}
+.report-btn:hover{color:var(--amber);opacity:1;}
+.report-btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:3px;}
