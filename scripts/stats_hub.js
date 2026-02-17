@@ -3418,6 +3418,9 @@ function buildQuickStats(){
   el('qsCorrect',totalCorrect);
   el('qsAccuracy',acc+'%');
   el('qsStreak',streak);
+  var todayCount=0;
+  if(typeof localStorage!=='undefined'){try{var act=JSON.parse(localStorage.getItem('sh-activity')||'{}');todayCount=act[typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10)]||0;}catch(e){}}
+  el('qsToday',todayCount);
   var unitsStarted=0;
   if(typeof allProbs!=='undefined'&&typeof getPracticeState!=='undefined'){
     for(var u2=1;u2<=MAX_UNIT;u2++){
