@@ -3287,6 +3287,15 @@ function completeDailyChallenge(){
   checkMilestones();
 }
 
+function toggleCompareMode(){
+  if(typeof document==='undefined')return;
+  var container=document.getElementById('probContainer');
+  var btn=document.getElementById('compareModeBtn');
+  if(!container)return;
+  container.classList.toggle('compare-mode');
+  var active=container.classList.contains('compare-mode');
+  if(btn)btn.textContent=active?'Exit Compare':'Compare Mode';
+}
 function toggleCollapse(btn){
   if(typeof document==='undefined')return;
   var card=btn.closest('.pc');
