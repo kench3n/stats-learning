@@ -26,7 +26,7 @@
 
 ## Phase 2: Visualizer Upgrades & Bug Fixes (CURRENT)
 
-### Status: IN PROGRESS
+### Status: COMPLETE
 
 ### IN SCOPE
 1. Upgrade 10 placeholder visualizers to full interactive versions with proper math
@@ -56,7 +56,7 @@
 
 ## Phase 3: Content Expansion (PLANNED)
 
-### Status: NOT STARTED
+### Status: COMPLETE
 
 ### IN SCOPE
 1. Expand to 10 problems per unit (Units 2-11): 50 additional problems

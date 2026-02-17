@@ -65,19 +65,19 @@ function assertEqual(a, b, msg) {
 }
 
 // ── Expected unit specs ──
-// Phase 1: 5 problems per new unit (2 easy, 2 medium, 1 hard). Unit 1 keeps its 15.
+// Phase 3: 10 problems per new unit (2 easy, 2 medium, 1 hard minimum present). Unit 1 keeps its 15.
 const UNIT_SPECS = {
   1:  { min: 15, maxId: 99,   name: 'Descriptive Statistics' },
-  2:  { min: 5,  maxId: 199,  name: 'Normal Distribution' },
-  3:  { min: 5,  maxId: 299,  name: 'Bivariate Data' },
-  4:  { min: 5,  maxId: 399,  name: 'Sampling & Design' },
-  5:  { min: 5,  maxId: 499,  name: 'Probability' },
-  6:  { min: 5,  maxId: 599,  name: 'Random Variables' },
-  7:  { min: 5,  maxId: 699,  name: 'Sampling Distributions' },
-  8:  { min: 5,  maxId: 799,  name: 'Confidence Intervals' },
-  9:  { min: 5,  maxId: 899,  name: 'Hypothesis Testing' },
-  10: { min: 5,  maxId: 999,  name: 'Chi-Square Tests' },
-  11: { min: 5,  maxId: 1099, name: 'Regression Inference' }
+  2:  { min: 10, maxId: 199,  name: 'Normal Distribution' },
+  3:  { min: 10, maxId: 299,  name: 'Bivariate Data' },
+  4:  { min: 10, maxId: 399,  name: 'Sampling & Design' },
+  5:  { min: 10, maxId: 499,  name: 'Probability' },
+  6:  { min: 10, maxId: 599,  name: 'Random Variables' },
+  7:  { min: 10, maxId: 699,  name: 'Sampling Distributions' },
+  8:  { min: 10, maxId: 799,  name: 'Confidence Intervals' },
+  9:  { min: 10, maxId: 899,  name: 'Hypothesis Testing' },
+  10: { min: 10, maxId: 999,  name: 'Chi-Square Tests' },
+  11: { min: 10, maxId: 1099, name: 'Regression Inference' }
 };
 
 const ID_RANGES = {
@@ -216,9 +216,9 @@ test('No duplicate IDs across ALL units', () => {
   assert(dupes.length === 0, `Global duplicate IDs: ${dupes.join(', ')}`);
 });
 
-test('Total problem count >= 65', () => {
+test('Total problem count >= 115', () => {
   const total = Object.values(unitProblems).reduce((s, a) => s + a.length, 0);
-  assert(total >= 65, `Expected >= 65 total problems (Phase 1), got ${total}`);
+  assert(total >= 115, `Expected >= 115 total problems (Phase 3), got ${total}`);
 });
 
 // ── MC Answer Verification (spot checks) ──

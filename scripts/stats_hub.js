@@ -394,7 +394,12 @@ allProbs[2]=[
   {id:102,unit:2,diff:'easy',topic:'68-95-99.7',q:'Within 2 SD of the mean is about:',data:null,type:'mc',ans:2,tol:0.01,ch:['50%','68%','95%','99.7%'],ex:'Rule: about 95% is within 2 SD.'},
   {id:103,unit:2,diff:'medium',topic:'Percentile',q:'For z=1.25, enter percentile as a percent.',data:null,type:'fr',ans:89.44,tol:0.2,ex:'P(Z<1.25)=0.8944, so 89.44%.'},
   {id:104,unit:2,diff:'medium',topic:'Relative Position',q:'A: x=82,mu=75,s=5. B: x=88,mu=80,s=4. Who is higher relative to class?',data:null,type:'mc',ans:1,tol:0.01,ch:['A','B','Equal','Cannot compare'],ex:'zA=1.4 and zB=2.0; B is higher.'},
-  {id:105,unit:2,diff:'hard',topic:'Reverse Z',q:'Normal(mu=50,sigma=10). 90th percentile score is closest to:',data:null,type:'mc',ans:1,tol:0.01,ch:['56.4','62.8','69.6','74.0'],ex:'x=50+1.28*10=62.8.'}
+  {id:105,unit:2,diff:'hard',topic:'Reverse Z',q:'Normal(mu=50,sigma=10). 90th percentile score is closest to:',data:null,type:'mc',ans:1,tol:0.01,ch:['56.4','62.8','69.6','74.0'],ex:'x=50+1.28*10=62.8.'},
+  {id:106,unit:2,diff:'easy',topic:'Normal Shape',q:'In a normal distribution, what proportion lies above the mean?',data:null,type:'mc',ans:1,tol:0.01,ch:['About 34%','About 50%','About 68%','About 95%'],ex:'The normal curve is symmetric, so half the area is above the mean.'},
+  {id:107,unit:2,diff:'easy',topic:'Standardization',q:'Standardize x=84 using mu=76 and sigma=8.',data:'x=84, mu=76, sigma=8',type:'fr',ans:1,tol:0.01,ex:'(84-76)/8=1.'},
+  {id:108,unit:2,diff:'medium',topic:'Combining Normals',q:'If X and Y are independent with means 100 and 30, what is E(X+Y)?',data:'X: mu=100, Y: mu=30',type:'fr',ans:130,tol:0.01,ex:'Means add: 100+30=130.'},
+  {id:109,unit:2,diff:'medium',topic:'Normal Approximation Check',q:'For a binomial model with n=200 and p=0.08, compute np.',data:'n=200, p=0.08',type:'fr',ans:16,tol:0.01,ex:'np=200*0.08=16.'},
+  {id:110,unit:2,diff:'hard',topic:'Difference of Normals',q:'If X~N(50,4) and Y~N(20,3) are independent, SD(X-Y) is closest to:',data:null,type:'mc',ans:2,tol:0.01,ch:['1.0','4.0','5.0','7.0'],ex:'Var(X-Y)=4^2+3^2=25, so SD=5.'}
 ];
 
 allProbs[3]=[
@@ -402,7 +407,12 @@ allProbs[3]=[
   {id:202,unit:3,diff:'easy',topic:'Correlation',q:'r=-0.85 means:',data:null,type:'mc',ans:1,tol:0.01,ch:['Weak positive','Strong negative','No linear relation','Causation'],ex:'Near -1 implies strong negative linear relation.'},
   {id:203,unit:3,diff:'medium',topic:'Prediction',q:'yhat=12+1.8x. Find yhat for x=15.',data:null,type:'fr',ans:39,tol:0.01,ex:'12+1.8*15=39.'},
   {id:204,unit:3,diff:'medium',topic:'Residual',q:'Observed y=42 and yhat=39.5. Find residual.',data:null,type:'fr',ans:2.5,tol:0.01,ex:'Residual=y-yhat=2.5.'},
-  {id:205,unit:3,diff:'hard',topic:'Causation',q:'Ice cream sales and drownings both rise in summer. Best conclusion?',data:null,type:'mc',ans:2,tol:0.01,ch:['Ice cream causes drownings','Drownings cause ice cream sales','Lurking variable like temperature affects both','Correlation proves causation'],ex:'Temperature can drive both variables.'}
+  {id:205,unit:3,diff:'hard',topic:'Causation',q:'Ice cream sales and drownings both rise in summer. Best conclusion?',data:null,type:'mc',ans:2,tol:0.01,ch:['Ice cream causes drownings','Drownings cause ice cream sales','Lurking variable like temperature affects both','Correlation proves causation'],ex:'Temperature can drive both variables.'},
+  {id:206,unit:3,diff:'easy',topic:'r-squared Interpretation',q:'If r^2=0.64 in a linear model, this means:',data:null,type:'mc',ans:0,tol:0.01,ch:['64% of variation in y is explained by x','64% of points are on the line','r equals 0.64','64% of x is caused by y'],ex:'r^2 is the proportion of y-variation explained by the linear model.'},
+  {id:207,unit:3,diff:'easy',topic:'Slope Interpretation',q:'For yhat=12+1.8x, what is the predicted change in y when x increases by 5?',data:'yhat=12+1.8x',type:'fr',ans:9,tol:0.01,ex:'Slope*change in x = 1.8*5 = 9.'},
+  {id:208,unit:3,diff:'medium',topic:'Extrapolation',q:'A model was fit using x values from 10 to 30. Predicting at x=45 is:',data:null,type:'mc',ans:1,tol:0.01,ch:['Interpolation and safe','Extrapolation and potentially unreliable','Always valid if r is positive','Guaranteed unbiased'],ex:'x=45 is outside observed range, so this is extrapolation.'},
+  {id:209,unit:3,diff:'medium',topic:'Residual Pattern',q:'A fitted line (with intercept) has residuals -2, -1, 0, 1, 2. Find the mean residual.',data:'Residuals: -2, -1, 0, 1, 2',type:'fr',ans:0,tol:0.01,ex:'They sum to 0, so mean residual is 0.'},
+  {id:210,unit:3,diff:'hard',topic:'Influential Points',q:'A point lies far in x and far from the trend. It is most likely to:',data:null,type:'mc',ans:1,tol:0.01,ch:['Only change the intercept slightly','Strongly affect slope and correlation','Never affect the fitted line','Increase sample size but nothing else'],ex:'High-leverage outliers can strongly pull the regression line.'}
 ];
 
 allProbs[4]=[
@@ -410,7 +420,12 @@ allProbs[4]=[
   {id:302,unit:4,diff:'easy',topic:'Sampling Method',q:'Randomly take 10 students from each grade. This is:',data:null,type:'mc',ans:1,tol:0.01,ch:['Cluster','Stratified random','Systematic','Convenience'],ex:'Sampling within each grade stratum is stratified.'},
   {id:303,unit:4,diff:'medium',topic:'Bias',q:'Survey posted only in a fitness app. Main bias?',data:null,type:'mc',ans:0,tol:0.01,ch:['Selection bias','Response bias','Measurement bias','Confounding'],ex:'App users are not representative.'},
   {id:304,unit:4,diff:'medium',topic:'Allocation',q:'A stratified sample of 40 is split equally across 4 groups. Per group?',data:null,type:'fr',ans:10,tol:0.01,ex:'40/4=10.'},
-  {id:305,unit:4,diff:'hard',topic:'Design',q:'Best test of caffeine effect on quiz scores:',data:null,type:'mc',ans:3,tol:0.01,ch:['Compare current drinkers vs non-drinkers','Let students choose caffeine','Give caffeine to top students only','Randomly assign caffeine or placebo and keep conditions same'],ex:'Randomized placebo-controlled design reduces confounding.'}
+  {id:305,unit:4,diff:'hard',topic:'Design',q:'Best test of caffeine effect on quiz scores:',data:null,type:'mc',ans:3,tol:0.01,ch:['Compare current drinkers vs non-drinkers','Let students choose caffeine','Give caffeine to top students only','Randomly assign caffeine or placebo and keep conditions same'],ex:'Randomized placebo-controlled design reduces confounding.'},
+  {id:306,unit:4,diff:'easy',topic:'Confounding',q:'In an observational study, coffee drinkers had higher exam scores. The main concern is:',data:null,type:'mc',ans:2,tol:0.01,ch:['Sampling error only','Measurement rounding','A lurking variable like study time','No concern because n is large'],ex:'Without random assignment, lurking variables can confound the association.'},
+  {id:307,unit:4,diff:'easy',topic:'Blocking',q:'A trial has 120 participants split equally into 3 blocks. How many per block?',data:'Total=120, blocks=3',type:'fr',ans:40,tol:0.01,ex:'120/3=40 participants per block.'},
+  {id:308,unit:4,diff:'medium',topic:'Blinding',q:'A double-blind experiment means:',data:null,type:'mc',ans:1,tol:0.01,ch:['Only subjects know treatment','Neither subjects nor evaluators know treatment assignments','Only researchers know treatment','Everyone knows treatment after randomization'],ex:'Double-blind hides treatment from participants and evaluators.'},
+  {id:309,unit:4,diff:'medium',topic:'Sampling Frame',q:'Population has 2400 households; the sampling frame lists 2100. What percent of households are missing?',data:'Population=2400, frame=2100',type:'fr',ans:12.5,tol:0.1,ex:'Missing=300, and 300/2400=0.125=12.5%.'},
+  {id:310,unit:4,diff:'hard',topic:'Voluntary Response',q:'A news website asks readers to click a poll about taxes. The biggest issue is:',data:null,type:'mc',ans:0,tol:0.01,ch:['Voluntary-response bias from self-selection','No bias if many people respond','Random assignment error','Blocking was not used'],ex:'People with strong opinions are more likely to respond.'}
 ];
 
 allProbs[5]=[
@@ -418,7 +433,12 @@ allProbs[5]=[
   {id:402,unit:5,diff:'easy',topic:'Mutually Exclusive',q:'Which pair is mutually exclusive in one die roll?',data:null,type:'mc',ans:1,tol:0.01,ch:['Even and >3','Roll 2 and roll 5','<4 and even','Prime and odd'],ex:'2 and 5 cannot happen together.'},
   {id:403,unit:5,diff:'medium',topic:'Conditional',q:'40 are in music, 20 in both music and soccer. Find P(Soccer|Music).',data:null,type:'fr',ans:0.5,tol:0.001,ex:'20/40=0.5.'},
   {id:404,unit:5,diff:'medium',topic:'Addition Rule',q:'If P(A)=0.45, P(B)=0.35, P(A and B)=0.15, then P(A union B)=',data:null,type:'mc',ans:2,tol:0.01,ch:['0.80','0.95','0.65','0.30'],ex:'0.45+0.35-0.15=0.65.'},
-  {id:405,unit:5,diff:'hard',topic:'Bayes',q:'Prevalence 1%, sensitivity 92%, false positive 8%. Find P(Disease|Positive).',data:null,type:'fr',ans:0.104,tol:0.01,ex:'Bayes gives about 0.104.'}
+  {id:405,unit:5,diff:'hard',topic:'Bayes',q:'Prevalence 1%, sensitivity 92%, false positive 8%. Find P(Disease|Positive).',data:null,type:'fr',ans:0.104,tol:0.01,ex:'Bayes gives about 0.104.'},
+  {id:406,unit:5,diff:'easy',topic:'Multiplication Rule',q:'If events A and B are independent with P(A)=0.60 and P(B)=0.30, find P(A and B).',data:'P(A)=0.60, P(B)=0.30',type:'fr',ans:0.18,tol:0.001,ex:'For independence, multiply: 0.60*0.30=0.18.'},
+  {id:407,unit:5,diff:'easy',topic:'Independence',q:'Given P(A)=0.40, P(B)=0.50, and P(A and B)=0.20, are A and B independent?',data:null,type:'mc',ans:0,tol:0.01,ch:['Yes, because 0.40*0.50=0.20','No, because P(A and B) is too small','No, because probabilities must add to 1','Cannot determine'],ex:'Since P(A and B)=P(A)P(B), the events are independent.'},
+  {id:408,unit:5,diff:'medium',topic:'At Least One',q:'A fair coin is tossed 3 times. Find P(at least one head).',data:null,type:'fr',ans:0.875,tol:0.001,ex:'Use complement: 1-P(no heads)=1-(1/2)^3=7/8=0.875.'},
+  {id:409,unit:5,diff:'medium',topic:'Two-Way Table',q:'From counts A and B=18, A only=12, B only=22, neither=48, find P(A and B).',data:'A and B=18, A only=12, B only=22, neither=48',type:'mc',ans:0,tol:0.01,ch:['0.18','0.30','0.40','0.52'],ex:'Total is 100, so P(A and B)=18/100=0.18.'},
+  {id:410,unit:5,diff:'hard',topic:'Tree Diagram',q:'Branch 1 has probability 0.4 with red chance 0.7; Branch 2 has probability 0.6 with red chance 0.2. Find overall P(red).',data:'P(B1)=0.4, P(red|B1)=0.7, P(B2)=0.6, P(red|B2)=0.2',type:'fr',ans:0.4,tol:0.001,ex:'Total probability: 0.4*0.7 + 0.6*0.2 = 0.4.'}
 ];
 
 allProbs[6]=[
@@ -426,7 +446,12 @@ allProbs[6]=[
   {id:502,unit:6,diff:'easy',topic:'Expected Value',q:'X:0,1,2,3 with probs 0.1,0.3,0.4,0.2. Find E(X).',data:null,type:'fr',ans:1.7,tol:0.001,ex:'sum xP(x)=1.7.'},
   {id:503,unit:6,diff:'medium',topic:'Binomial',q:'For X~Binomial(5,0.4), find P(X=3).',data:null,type:'fr',ans:0.2304,tol:0.001,ex:'C(5,3)(0.4)^3(0.6)^2=0.2304.'},
   {id:504,unit:6,diff:'medium',topic:'Transform',q:'If E(X)=5, SD(X)=2, for Y=3X+2 which is correct?',data:null,type:'mc',ans:0,tol:0.01,ch:['E(Y)=17, SD(Y)=6','E(Y)=17, SD(Y)=2','E(Y)=15, SD(Y)=6','E(Y)=15, SD(Y)=8'],ex:'E(aX+b)=aE(X)+b and SD(aX+b)=|a|SD(X).'},
-  {id:505,unit:6,diff:'hard',topic:'Combine',q:'Independent X,Y with SD(X)=3 and SD(Y)=4. Find SD(X+Y).',data:null,type:'fr',ans:5,tol:0.01,ex:'sqrt(3^2+4^2)=5.'}
+  {id:505,unit:6,diff:'hard',topic:'Combine',q:'Independent X,Y with SD(X)=3 and SD(Y)=4. Find SD(X+Y).',data:null,type:'fr',ans:5,tol:0.01,ex:'sqrt(3^2+4^2)=5.'},
+  {id:506,unit:6,diff:'easy',topic:'Binomial Conditions',q:'Which setting is binomial?',data:null,type:'mc',ans:2,tol:0.01,ch:['Time until a bus arrives','Weight of 12 apples','Number of defective chips in 20 independent chips with same defect chance','Temperature at noon for 7 days'],ex:'Fixed n, independent trials, two outcomes, constant p.'},
+  {id:507,unit:6,diff:'easy',topic:'Variance',q:'If SD(X)=4.5, find Var(X).',data:'SD(X)=4.5',type:'fr',ans:20.25,tol:0.01,ex:'Variance is SD squared: 4.5^2=20.25.'},
+  {id:508,unit:6,diff:'medium',topic:'Probability Table',q:'Given X:0,1,2 with probabilities 0.25, 0.50, 0.25, find P(X>=1).',data:'X:0,1,2 and P:0.25,0.50,0.25',type:'fr',ans:0.75,tol:0.001,ex:'P(X>=1)=0.50+0.25=0.75.'},
+  {id:509,unit:6,diff:'medium',topic:'Geometric',q:'If success probability per trial is p=0.20, the expected trial of first success is:',data:null,type:'mc',ans:1,tol:0.01,ch:['2','5','10','20'],ex:'For geometric random variable, E(X)=1/p=1/0.20=5.'},
+  {id:510,unit:6,diff:'hard',topic:'SD of X',q:'X takes values 1 and 4 with probabilities 0.3 and 0.7. Find SD(X).',data:'X=1 (0.3), X=4 (0.7)',type:'fr',ans:1.375,tol:0.02,ex:'mu=3.1, Var=E(X^2)-mu^2=11.5-9.61=1.89, so SD=sqrt(1.89)=1.375.'}
 ];
 
 allProbs[7]=[
@@ -434,7 +459,12 @@ allProbs[7]=[
   {id:602,unit:7,diff:'easy',topic:'SE',q:'If sigma=18 and n=36, find SE of xbar.',data:null,type:'fr',ans:3,tol:0.01,ex:'18/sqrt(36)=3.'},
   {id:603,unit:7,diff:'medium',topic:'CLT Probability',q:'mu=50, sigma=12, n=36. Find P(xbar<53).',data:null,type:'fr',ans:0.9332,tol:0.01,ex:'z=1.5 so probability is 0.9332.'},
   {id:604,unit:7,diff:'medium',topic:'CLT Conditions',q:'Which is sufficient for normal approximation of xbar?',data:null,type:'mc',ans:1,tol:0.01,ch:['No assumptions ever needed','Random sample and large n (or normal population)','Only know mean','Only n<10'],ex:'Need randomness and normality/large n.'},
-  {id:605,unit:7,diff:'hard',topic:'phat Distribution',q:'If p=0.40 and n=200, find P(phat>0.46).',data:null,type:'fr',ans:0.0416,tol:0.01,ex:'Using normal approx gives about 0.0416.'}
+  {id:605,unit:7,diff:'hard',topic:'phat Distribution',q:'If p=0.40 and n=200, find P(phat>0.46).',data:null,type:'fr',ans:0.0416,tol:0.01,ex:'Using normal approx gives about 0.0416.'},
+  {id:606,unit:7,diff:'easy',topic:'Mean of Sampling Dist',q:'For the sample mean xbar, which is true?',data:null,type:'mc',ans:0,tol:0.01,ch:['E(xbar)=mu','E(xbar)=sigma','E(xbar)=nmu','E(xbar)=0 always'],ex:'The sampling distribution of xbar is centered at the population mean.'},
+  {id:607,unit:7,diff:'easy',topic:'Sample Size for SE',q:'If sigma=15 and desired SE(xbar)=3, find n.',data:'sigma=15, SE=3',type:'fr',ans:25,tol:0.01,ex:'SE=sigma/sqrt(n) so n=(15/3)^2=25.'},
+  {id:608,unit:7,diff:'medium',topic:'Effect of n',q:'If sample size is multiplied by 4, SE of xbar will:',data:null,type:'mc',ans:1,tol:0.01,ch:['Double','Be cut in half','Stay the same','Increase by factor 4'],ex:'SE is proportional to 1/sqrt(n), so quadrupling n halves SE.'},
+  {id:609,unit:7,diff:'medium',topic:'Bias',q:'An estimator has expected value 48 when the true parameter is 50. Compute bias (E-estimator minus true).',data:'E(estimator)=48, true=50',type:'fr',ans:-2,tol:0.01,ex:'Bias=48-50=-2.'},
+  {id:610,unit:7,diff:'hard',topic:'Shape of Sampling Dist',q:'Population is strongly right-skewed, but n=45 random observations are averaged. Shape of xbar is best described as:',data:null,type:'mc',ans:2,tol:0.01,ch:['Still strongly right-skewed','Uniform','Approximately normal by CLT','Exactly symmetric for any n'],ex:'With large n, CLT makes sampling distribution of xbar approximately normal.'}
 ];
 
 allProbs[8]=[
@@ -442,7 +472,12 @@ allProbs[8]=[
   {id:702,unit:8,diff:'easy',topic:'Point Estimate',q:'Given CI (0.42, 0.54), point estimate and ME are:',data:null,type:'mc',ans:0,tol:0.01,ch:['0.48 and 0.06','0.42 and 0.12','0.54 and 0.06','0.48 and 0.12'],ex:'Center 0.48 and half-width 0.06.'},
   {id:703,unit:8,diff:'medium',topic:'CI Bound',q:'For phat=0.60, n=100, 95% CI: lower endpoint?',data:null,type:'fr',ans:0.504,tol:0.01,ex:'ME=0.096 so lower=0.504.'},
   {id:704,unit:8,diff:'medium',topic:'Sample Size',q:'95% confidence, ME=0.03, use p-hat=0.5. Minimum n?',data:null,type:'fr',ans:1068,tol:1,ex:'Compute and round up to 1068.'},
-  {id:705,unit:8,diff:'hard',topic:'Misinterpretation',q:'Choose the WRONG confidence-interval statement.',data:null,type:'mc',ans:1,tol:0.01,ch:['About 95% of intervals from this method capture truth','This specific interval has 95% chance to contain true value','Higher confidence usually means wider intervals','Larger n usually lowers margin of error'],ex:'The parameter is fixed; the interval is random.'}
+  {id:705,unit:8,diff:'hard',topic:'Misinterpretation',q:'Choose the WRONG confidence-interval statement.',data:null,type:'mc',ans:1,tol:0.01,ch:['About 95% of intervals from this method capture truth','This specific interval has 95% chance to contain true value','Higher confidence usually means wider intervals','Larger n usually lowers margin of error'],ex:'The parameter is fixed; the interval is random.'},
+  {id:706,unit:8,diff:'easy',topic:'Margin of Error',q:'Find the margin of error for CI (42, 58).',data:'CI=(42,58)',type:'fr',ans:8,tol:0.01,ex:'Margin of error is half-width: (58-42)/2=8.'},
+  {id:707,unit:8,diff:'easy',topic:'Effect of CL',q:'If confidence level increases from 90% to 99% (same n), the interval will usually:',data:null,type:'mc',ans:2,tol:0.01,ch:['Become narrower','Stay same width','Become wider','Shift upward'],ex:'Higher confidence needs a larger critical value, so width increases.'},
+  {id:708,unit:8,diff:'medium',topic:'Width Factors',q:'A study has margin of error 0.10 at sample size n. If sample size becomes 4n, new margin of error is:',data:null,type:'fr',ans:0.05,tol:0.005,ex:'ME scales as 1/sqrt(n), so quadrupling n halves ME.'},
+  {id:709,unit:8,diff:'medium',topic:'CI for Mean',q:'For a small sample with unknown population sigma, which critical distribution is used for a mean CI?',data:null,type:'mc',ans:1,tol:0.01,ch:['Normal z only','Student t','Chi-square','Binomial'],ex:'For mean inference with unknown sigma, use t critical values.'},
+  {id:710,unit:8,diff:'hard',topic:'Capture Rate',q:'If a 95% CI method is repeated 200 times, about how many intervals should capture the true parameter?',data:'Confidence=95%, intervals=200',type:'fr',ans:190,tol:1,ex:'Expected captures are 0.95*200=190.'}
 ];
 
 allProbs[9]=[
@@ -450,7 +485,12 @@ allProbs[9]=[
   {id:802,unit:9,diff:'easy',topic:'Type I',q:'Rejecting a true H0 is called:',data:null,type:'mc',ans:0,tol:0.01,ch:['Type I error','Type II error','Power','No error'],ex:'Type I error is false rejection.'},
   {id:803,unit:9,diff:'medium',topic:'z-test',q:'Compute z for phat=0.55, p0=0.50, n=200.',data:null,type:'fr',ans:1.414,tol:0.02,ex:'z=(0.55-0.50)/sqrt(0.5*0.5/200)=1.414.'},
   {id:804,unit:9,diff:'medium',topic:'Conclusion',q:'If p-value=0.03 and alpha=0.05, conclude:',data:null,type:'mc',ans:0,tol:0.01,ch:['Reject H0','Fail to reject H0','Accept H0 as true','Cannot test'],ex:'Since 0.03 < 0.05, reject H0.'},
-  {id:805,unit:9,diff:'hard',topic:'t-test',q:'Compute t for xbar=52, mu0=50, s=8, n=36.',data:null,type:'fr',ans:1.5,tol:0.01,ex:'t=(52-50)/(8/sqrt(36))=1.5.'}
+  {id:805,unit:9,diff:'hard',topic:'t-test',q:'Compute t for xbar=52, mu0=50, s=8, n=36.',data:null,type:'fr',ans:1.5,tol:0.01,ex:'t=(52-50)/(8/sqrt(36))=1.5.'},
+  {id:806,unit:9,diff:'easy',topic:'Type II Error',q:'A Type II error occurs when you:',data:null,type:'mc',ans:2,tol:0.01,ch:['Reject a true H0','Reject a false H0','Fail to reject a false H0','Fail to reject a true H0'],ex:'Type II error is missing a real effect (false null not rejected).'},
+  {id:807,unit:9,diff:'easy',topic:'Effect of n',q:'SE for a proportion was 0.10 at n=100. If n increases to 400 (same p), new SE is:',data:'SE=0.10 at n=100, new n=400',type:'fr',ans:0.05,tol:0.005,ex:'SE scales by 1/sqrt(n), so multiplying n by 4 halves SE.'},
+  {id:808,unit:9,diff:'medium',topic:'Power',q:'Holding alpha fixed, which action usually increases test power?',data:null,type:'mc',ans:1,tol:0.01,ch:['Use a smaller sample','Use a larger sample','Increase measurement noise','Move effect closer to null'],ex:'Larger n reduces SE and makes true effects easier to detect.'},
+  {id:809,unit:9,diff:'medium',topic:'Two-Sided Test',q:'A one-sided p-value is 0.018 for a symmetric test statistic. What is the two-sided p-value?',data:'one-sided p=0.018',type:'fr',ans:0.036,tol:0.001,ex:'Two-sided doubles the one-tail area: 2*0.018=0.036.'},
+  {id:810,unit:9,diff:'hard',topic:'Practical Significance',q:'A study reports p<0.001 with a tiny effect size in a huge sample. Best interpretation?',data:null,type:'mc',ans:0,tol:0.01,ch:['Statistically significant but may lack practical importance','Practically important because p is tiny','No evidence against H0','Type I error is impossible'],ex:'Small p-value does not guarantee a meaningful real-world effect.'}
 ];
 
 allProbs[10]=[
@@ -458,7 +498,12 @@ allProbs[10]=[
   {id:902,unit:10,diff:'easy',topic:'df',q:'Goodness-of-fit with 6 categories: df=?',data:null,type:'mc',ans:2,tol:0.01,ch:['4','6','5','10'],ex:'df=k-1=5.'},
   {id:903,unit:10,diff:'medium',topic:'Chi-square',q:'Observed [30,25,20,25], expected [25,25,25,25]. Find chi-square.',data:null,type:'fr',ans:2,tol:0.01,ex:'Sum (O-E)^2/E = 2.'},
   {id:904,unit:10,diff:'medium',topic:'Conditions',q:'Which is NOT required for chi-square tests?',data:null,type:'mc',ans:3,tol:0.01,ch:['Independent observations','Expected counts large enough','Random sample or random assignment','Normally distributed population'],ex:'Normal population is not required.'},
-  {id:905,unit:10,diff:'hard',topic:'Interpretation',q:'Chi-square test gives p=0.012 at alpha=0.05. Conclusion?',data:null,type:'mc',ans:0,tol:0.01,ch:['Reject H0; evidence of association/difference','Fail to reject H0','Accept H0','Test invalid'],ex:'p<alpha so reject H0.'}
+  {id:905,unit:10,diff:'hard',topic:'Interpretation',q:'Chi-square test gives p=0.012 at alpha=0.05. Conclusion?',data:null,type:'mc',ans:0,tol:0.01,ch:['Reject H0; evidence of association/difference','Fail to reject H0','Accept H0','Test invalid'],ex:'p<alpha so reject H0.'},
+  {id:906,unit:10,diff:'easy',topic:'GOF Setup',q:'For a fair die goodness-of-fit test, the null hypothesis is:',data:null,type:'mc',ans:1,tol:0.01,ch:['At least one face has p>1/6','All six face probabilities equal 1/6','Observed counts must all match exactly','The die is biased toward 6'],ex:'GOF null specifies the full probability model, here p1=...=p6=1/6.'},
+  {id:907,unit:10,diff:'easy',topic:'Cell Contribution',q:'Compute this cell contribution to chi-square: (O-E)^2/E with O=18 and E=12.',data:'O=18, E=12',type:'fr',ans:3,tol:0.01,ex:'(18-12)^2/12 = 36/12 = 3.'},
+  {id:908,unit:10,diff:'medium',topic:'Independence vs Homogeneity',q:'Researchers compare beverage preference across three age groups sampled separately. This is a chi-square test of:',data:null,type:'mc',ans:2,tol:0.01,ch:['Goodness-of-fit','Independence only','Homogeneity','Paired means'],ex:'Different populations/groups with same categorical variable implies homogeneity.'},
+  {id:909,unit:10,diff:'medium',topic:'Small Expected',q:'A 3x4 table has 12 expected counts, and 2 are below 5. How many meet the >=5 rule?',data:'Total cells=12, below 5 =2',type:'fr',ans:10,tol:0.01,ex:'12-2=10 cells meet the rule.'},
+  {id:910,unit:10,diff:'hard',topic:'Post-Hoc',q:'After a significant chi-square test, which cell contributes most to the statistic?',data:null,type:'mc',ans:3,tol:0.01,ch:['The cell with largest expected count','The cell with smallest observed count','Any cell in first row','The cell with largest (O-E)^2/E'],ex:'Each cell contributes (O-E)^2/E, so the largest value drives the most contribution.'}
 ];
 
 allProbs[11]=[
@@ -466,7 +511,12 @@ allProbs[11]=[
   {id:1002,unit:11,diff:'easy',topic:'Output Reading',q:'Output: b1=2.5, SE(b1)=0.8, t=3.125, p=0.018. Slope and SE are:',data:null,type:'mc',ans:3,tol:0.01,ch:['2.5 and 3.125','0.8 and 0.018','3.125 and 0.8','2.5 and 0.8'],ex:'Slope 2.5 and SE 0.8.'},
   {id:1003,unit:11,diff:'medium',topic:'t-stat',q:'Compute t when b1=2.5 and SE(b1)=0.8.',data:null,type:'fr',ans:3.125,tol:0.01,ex:'t=b1/SE=3.125.'},
   {id:1004,unit:11,diff:'medium',topic:'CI',q:'For b1=2.5, SE=0.8, t*=2.048, find lower 95% CI endpoint.',data:null,type:'fr',ans:0.862,tol:0.02,ex:'2.5-2.048*0.8=0.862.'},
-  {id:1005,unit:11,diff:'hard',topic:'Significance',q:'Slope p-value is 0.018 at alpha=0.05. Is slope significant?',data:null,type:'mc',ans:0,tol:0.01,ch:['Yes, reject H0: beta1=0','No, fail to reject H0','Cannot decide without r^2','Only if p<0.01'],ex:'0.018<0.05 so slope is significant.'}
+  {id:1005,unit:11,diff:'hard',topic:'Significance',q:'Slope p-value is 0.018 at alpha=0.05. Is slope significant?',data:null,type:'mc',ans:0,tol:0.01,ch:['Yes, reject H0: beta1=0','No, fail to reject H0','Cannot decide without r^2','Only if p<0.01'],ex:'0.018<0.05 so slope is significant.'},
+  {id:1006,unit:11,diff:'easy',topic:'R-squared Interpretation',q:'If a regression reports r^2=0.81, this means:',data:null,type:'mc',ans:2,tol:0.01,ch:['81% of x is explained by y','r equals 0.81 exactly','81% of variation in y is explained by the model','81% of points lie on the line'],ex:'r^2 is explained variation in the response variable.'},
+  {id:1007,unit:11,diff:'easy',topic:'df for Regression',q:'In simple linear regression with n=24 observations, what are the degrees of freedom for slope t inference?',data:'n=24',type:'fr',ans:22,tol:0.01,ex:'For simple linear regression, df=n-2=22.'},
+  {id:1008,unit:11,diff:'medium',topic:'Residual Analysis',q:'A residual plot shows a clear curved pattern around 0. What does this suggest?',data:null,type:'mc',ans:1,tol:0.01,ch:['Variance is exactly constant','Linear model may be inappropriate','No outliers exist','r^2 must be 1'],ex:'Systematic curvature indicates nonlinearity not captured by a straight line.'},
+  {id:1009,unit:11,diff:'medium',topic:'Prediction Interval',q:'A 95% prediction interval for a new y is (48, 72). Find its margin of error.',data:'Prediction interval=(48,72)',type:'fr',ans:12,tol:0.01,ex:'Half-width is (72-48)/2=12.'},
+  {id:1010,unit:11,diff:'hard',topic:'SE Meaning',q:'Two models have the same slope b1=1.8. Model A has SE=0.9, Model B has SE=0.3. Which has stronger evidence against H0:beta1=0?',data:null,type:'mc',ans:1,tol:0.01,ch:['Model A, because larger SE is better','Model B, because smaller SE gives larger |t|','They are equal since slopes match','Cannot compare without intercept'],ex:'t=b1/SE, so Model B has much larger t and stronger evidence.'}
 ];
 
 function prepCanvas2(id,h){
