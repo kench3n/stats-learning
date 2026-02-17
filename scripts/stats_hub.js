@@ -371,7 +371,7 @@ function checkMilestones(){
   const summary=getProgressSummary();
 
   let totalCorrect=0,unitsComplete=0,perfectUnits=0;
-  for(let u=1;u<=11;u++){
+  for(let u=1;u<=MAX_UNIT;u++){
     const r=summary[u]||{total:0,correct:0};
     totalCorrect+=r.correct;
     if(r.total>0&&r.correct===r.total){unitsComplete++;perfectUnits++;}
@@ -840,6 +840,7 @@ function showHint(id){
 // ===================== CELEBRATIONS =====================
 function spawnConfetti(){
   if(typeof document==='undefined')return;
+  if(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const colors=['var(--cyan)','var(--amber)','var(--pink)','var(--green)','var(--purple)'];
   for(let i=0;i<20;i++){
     const el=document.createElement('div');
@@ -1016,7 +1017,7 @@ function ansFR(id){
 
 function findProblemById(probId){
   const key=String(probId);
-  for(let u=1;u<=11;u++){
+  for(let u=1;u<=MAX_UNIT;u++){
     const prob=(allProbs[u]||[]).find(p=>String(p.id)===key);
     if(prob)return prob;
   }
@@ -2434,9 +2435,10 @@ function pomoComplete(){
   if(label)label.textContent='Break time! 🎉';
   if(startBtn)startBtn.style.display='';
   if(pauseBtn)pauseBtn.style.display='none';
-  awardXP(15,'pomo-session');
+  const xp=pomoState.total>=2700?35:pomoState.total>=1500?20:pomoState.total>=900?10:15;
+  awardXP(xp,'pomo-session');
   recordActivity();
-  showToast('Focus session complete! +15 XP. Take a break.');
+  showToast('Focus session complete! +'+xp+' XP. Take a break.');
   showSessionSummary();
   if(typeof localStorage!=='undefined'){
     const today=todayStr();
@@ -2491,6 +2493,30 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcNext();}
     else if(e.key==='ArrowLeft'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcPrev();}
     else if(e.key===' '){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();flipCard();}}
+    else if(e.key==='j'||e.key==='J'){
+      // Scroll to next problem card
+      const cards=typeof document!=='undefined'?document.querySelectorAll('.prob-card'):[];
+      if(cards.length){
+        let found=false;
+        for(let i=0;i<cards.length-1;i++){
+          const r=cards[i].getBoundingClientRect();
+          if(r.bottom>window.innerHeight*0.5){cards[i+1].scrollIntoView({behavior:'smooth',block:'center'});found=true;break;}
+        }
+        if(!found&&cards.length)cards[0].scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    }
+    else if(e.key==='k'||e.key==='K'){
+      // Scroll to previous problem card
+      const cards=typeof document!=='undefined'?document.querySelectorAll('.prob-card'):[];
+      if(cards.length){
+        let found=false;
+        for(let i=cards.length-1;i>0;i--){
+          const r=cards[i].getBoundingClientRect();
+          if(r.top<window.innerHeight*0.5){cards[i-1].scrollIntoView({behavior:'smooth',block:'center'});found=true;break;}
+        }
+        if(!found&&cards.length)cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    }
   });
 }
 
@@ -4009,7 +4035,7 @@ const NLP_PATTERNS=[
   },
   {
     regex:/median.*of\s+([\d.,\s]+)/i,
-    solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const med=median(vals);return{answer:'Median = '+med,steps:['Values sorted: '+sorted(vals).join(', '),'n = '+vals.length,'Median = '+med]};},
+    solve:function(m){const vals=m[1].split(/[,\s]+/).map(Number).filter(function(v){return !isNaN(v);});const med=median(vals);return{answer:'Median = '+med,steps:['Values sorted: '+sorted(vals).join(', '),'n = '+vals.length,'Median = '+med]};},
   },
 ];
 

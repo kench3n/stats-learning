@@ -387,11 +387,6 @@
   <button onclick="solveNLP()">Solve</button>
 </div>
 <div class="nlp-result" id="nlpResult" style="display:none;"></div>
-<div class="nlp-bar" id="nlpBar">
-  <input type="text" id="nlpInput" placeholder="Try: 'What is the z-score if x=85, mean=70, stdev=5?'" onkeydown="if(event.key==='Enter')solveNLP()" aria-label="Natural language problem input">
-  <button onclick="solveNLP()">Solve</button>
-</div>
-<div class="nlp-result" id="nlpResult" style="display:none;"></div>
 <div class="formula-panel" id="formulaPanel">
   <button class="formula-toggle" id="formulaToggle" onclick="toggleFormulas()" aria-expanded="false">
     📐 Formulas <span id="formulaArrow">▸</span>
@@ -599,6 +594,9 @@
       <button onclick="calNext()">▶</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div style="text-align:center;margin:16px 0;">
+    <button class="cert-btn" onclick="generateCertificate()">🎓 Get Certificate</button>
   </div>
 </section>
 <div class="install-banner" id="installBanner" style="display:none;">
