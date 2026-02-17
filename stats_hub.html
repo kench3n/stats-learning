@@ -251,6 +251,9 @@
     <button class="sub-tab" id="viz-tab-norm" role="tab" aria-selected="false" aria-controls="viz-norm" onclick="showSub('viz','norm',this)">Normal Curve</button>
     <button class="sub-tab" id="viz-tab-comp" role="tab" aria-selected="false" aria-controls="viz-comp" onclick="showSub('viz','comp',this)">Compare</button>
   </div>
+  <div class="viz-screenshot-row">
+    <button class="viz-screenshot-btn" onclick="saveVizScreenshot()" title="Save current visualizer as PNG">📷 Save as PNG</button>
+  </div>
   <div id="viz-panels">
     <!-- Histogram -->
     <div class="sub-panel active" id="viz-hist" role="tabpanel" aria-labelledby="viz-tab-hist">

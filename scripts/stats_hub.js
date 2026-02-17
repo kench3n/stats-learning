@@ -1939,6 +1939,22 @@ function copyVizLink(){
   var href=(typeof window!=='undefined'&&window.location)?window.location.href:'';
   navigator.clipboard.writeText(href).then(function(){showToast('Link copied!');}).catch(function(){showToast('Could not copy link');});
 }
+function saveVizScreenshot(){
+  if(typeof document==='undefined')return;
+  // Find the active sub-panel canvas
+  var panel=document.querySelector('#viz-panels .sub-panel.active');
+  var canvas=panel?panel.querySelector('canvas'):null;
+  if(!canvas){showToast('No canvas found to save.');return;}
+  try{
+    var url=canvas.toDataURL('image/png');
+    if(typeof Blob==='undefined'){showToast('Download not supported in this browser.');return;}
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='stats-hub-visualizer.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    showToast('Visualizer saved as PNG!');
+  }catch(e){showToast('Could not save image.');}
+}
 function vizPracticeBtn(unit){
   return `<div class="viz-practice-link"><button class="viz-practice-btn" onclick="goPage('practice');setUnit(${unit});">Practice Unit ${unit}: ${UNIT_META[unit]?UNIT_META[unit].name:''} →</button><button class="viz-share-btn" onclick="copyVizLink()" title="Copy link to this visualizer">📋 Copy Link</button></div>`;
 }
