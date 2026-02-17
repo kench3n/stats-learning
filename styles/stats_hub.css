@@ -1042,3 +1042,7 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .report-btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:3px;}
 .prob-timer{font-size:11px;color:var(--muted);margin-left:8px;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .solve-time{font-size:11px;color:var(--muted);margin-left:4px;}
+.quick-stats-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:16px 0 8px;margin-bottom:8px;}
+.quick-stat-item{display:flex;flex-direction:column;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 20px;min-width:90px;}
+.quick-stat-value{font-size:24px;font-weight:700;color:var(--cyan);line-height:1;}
+.quick-stat-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}

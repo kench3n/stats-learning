@@ -26,7 +26,7 @@ function goPage(id){
   _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();}
+  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     const savedUnit=parseInt(localStorage.getItem('sh-filter-unit'))||1;
     const savedDiff=localStorage.getItem('sh-filter-diff')||'all';
@@ -3174,6 +3174,32 @@ function completeDailyChallenge(){
   checkMilestones();
 }
 
+function buildQuickStats(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var totalAttempted=0,totalCorrect=0;
+  if(typeof allProbs!=='undefined'&&typeof getPracticeState!=='undefined'){
+    for(var u=1;u<=MAX_UNIT;u++){
+      var state=getPracticeState(u);
+      var ans=state.answered&&typeof state.answered==='object'?state.answered:{};
+      var probs=allProbs[u]||[];
+      probs.forEach(function(p){
+        if(ans[p.id]!==undefined){
+          totalAttempted++;
+          var ok=p.type==='mc'?(+ans[p.id])===p.ans:Math.abs(parseFloat(ans[p.id])-p.ans)<=(p.tol||0.1);
+          if(ok)totalCorrect++;
+        }
+      });
+    }
+  }
+  var acc=totalAttempted>0?Math.round(totalCorrect/totalAttempted*100):0;
+  var streak=0;
+  try{var sd=JSON.parse(localStorage.getItem('sh-streak')||'{}');streak=sd.current||0;}catch(e){}
+  var el=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  el('qsAttempted',totalAttempted);
+  el('qsCorrect',totalCorrect);
+  el('qsAccuracy',acc+'%');
+  el('qsStreak',streak);
+}
 function buildPOD(){
   if(typeof document==='undefined')return;
   var widget=document.getElementById('podWidget');
@@ -4578,6 +4604,7 @@ if(typeof document!=='undefined'){
   updateGoalDisplay();
   buildNLPHistory();
   buildPOD();
+  buildQuickStats();
   buildPomoHistory();
 }
 if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){

@@ -60,6 +60,12 @@
     <p>Your all-in-one tool for learning statistics. Roadmap to track what to learn, interactive visualizations to build intuition, and practice problems to test your understanding.</p>
     <button class="export-all-btn" onclick="exportAllData()" style="margin-top:12px;">Export All Data</button>
   </header>
+  <div class="quick-stats-row" id="quickStatsRow">
+    <div class="quick-stat-item"><span class="quick-stat-value" id="qsAttempted">0</span><span class="quick-stat-label">Attempted</span></div>
+    <div class="quick-stat-item"><span class="quick-stat-value" id="qsCorrect">0</span><span class="quick-stat-label">Correct</span></div>
+    <div class="quick-stat-item"><span class="quick-stat-value" id="qsAccuracy">0%</span><span class="quick-stat-label">Accuracy</span></div>
+    <div class="quick-stat-item"><span class="quick-stat-value" id="qsStreak">0</span><span class="quick-stat-label">Day Streak</span></div>
+  </div>
   <div class="daily-digest" id="dailyDigest" style="display:none;">
     <div class="digest-row">
       <div class="digest-stat">
