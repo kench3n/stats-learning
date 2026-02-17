@@ -1100,3 +1100,6 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .jump-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);cursor:pointer;font-size:13px;padding:4px 12px;transition:border-color 0.2s;}
 .jump-btn:hover{border-color:var(--cyan);}
 .nav-badge{display:inline-block;background:var(--cyan);color:var(--bg);font-size:10px;font-weight:700;border-radius:10px;padding:0 5px;min-width:16px;text-align:center;vertical-align:middle;margin-left:4px;line-height:16px;}
+.reading-mode-btn{background:none;border:none;cursor:pointer;font-size:18px;opacity:0.6;transition:opacity 0.2s;padding:4px;}
+.reading-mode-btn:hover{opacity:1;}
+body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}

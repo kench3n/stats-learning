@@ -3338,6 +3338,18 @@ function updatePracticeNavBadge(){
   if(unanswered>0){badge.textContent=unanswered;badge.style.display='';}
   else{badge.style.display='none';}
 }
+function toggleReadingMode(){
+  if(typeof document==='undefined')return;
+  document.body.classList.toggle('reading-mode');
+  var active=document.body.classList.contains('reading-mode');
+  if(typeof localStorage!=='undefined'){try{localStorage.setItem('sh-reading-mode',active?'1':'0');}catch(e){}}
+  var btn=document.getElementById('readingModeBtn');
+  if(btn){btn.style.opacity=active?'1':'0.6';btn.title=active?'Exit Reading Mode':'Reading Mode';}
+}
+function loadReadingMode(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  try{if(localStorage.getItem('sh-reading-mode')==='1'){document.body.classList.add('reading-mode');var btn=document.getElementById('readingModeBtn');if(btn){btn.style.opacity='1';btn.title='Exit Reading Mode';}}}catch(e){}
+}
 function jumpToProblem(){
   if(typeof document==='undefined')return;
   var input=document.getElementById('jumpInput');
@@ -4903,6 +4915,7 @@ if(typeof document!=='undefined'){
   buildNLPHistory();
   buildPOD();
   buildQuickStats();
+  loadReadingMode();
   buildPomoHistory();
 }
 if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){
