@@ -1040,3 +1040,4 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .report-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0 4px;opacity:0.6;transition:color 0.2s,opacity 0.2s;}
 .report-btn:hover{color:var(--amber);opacity:1;}
 .report-btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:3px;}
+.prob-timer{font-size:11px;color:var(--muted);margin-left:8px;font-variant-numeric:tabular-nums;white-space:nowrap;}

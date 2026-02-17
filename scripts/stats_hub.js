@@ -962,6 +962,7 @@ const MAX_UNIT=Object.keys(UNIT_META).length;
 let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
 let currentUnit=1;
 let activeProbs=allProbs[1];
+let probTimers={},probTimerStart={};
 let vizDrawn={};
 let reviewQueue=[];
 let reviewIndex=0;
@@ -993,7 +994,7 @@ buildProblems=function(unit=currentUnit){
   let html='';
   activeProbs.forEach(p=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}">${p.diff}</span><span class="pc-topic">${p.topic}</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}">${p.diff}</span><span class="pc-topic">${p.topic}</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -1005,6 +1006,25 @@ buildProblems=function(unit=currentUnit){
     html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')"></div></div>`;
   });
   c.innerHTML=html;
+  if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
+    const obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        const id=entry.target.dataset.id;
+        if(entry.isIntersecting&&!probTimers[id]){
+          probTimerStart[id]=Date.now();
+          probTimers[id]=setInterval(function(){
+            if(typeof document==='undefined')return;
+            const el=document.getElementById('timer-'+id);
+            if(!el)return;
+            const secs=Math.floor((Date.now()-probTimerStart[id])/1000);
+            const m=Math.floor(secs/60),s=secs%60;
+            el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
+          },1000);
+        }
+      });
+    },{threshold:0.5});
+    document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
+  }
   const saved=getPracticeState(unit);
   answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
   pScore=0;
@@ -1026,6 +1046,7 @@ buildProblems=function(unit=currentUnit){
 
 function ansMC(id,ch){
   if(answered[id]!==undefined)return;
+  if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
@@ -1044,6 +1065,7 @@ function ansMC(id,ch){
 
 function ansFR(id){
   if(answered[id]!==undefined)return;
+  if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   const inp=document.getElementById('fi-'+id);if(!inp)return;
   const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
