@@ -2538,6 +2538,12 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='t'||e.key==='T'){togglePomoPanel();}
     else if(e.key==='d'||e.key==='D'){toggleTheme();}
     else if(e.key==='?'){toggleShortcutsHelp();}
+    else if(e.key==='Escape'){
+      const so=document.getElementById('shortcutsOverlay');if(so&&so.style.display!=='none')so.style.display='none';
+      const tp=document.getElementById('tutorPanel');if(tp&&tp.style.display!=='none')tp.style.display='none';
+      const sess=document.getElementById('sessionOverlay');if(sess&&sess.style.display!=='none')sess.style.display='none';
+      if(document.body.classList.contains('focus-mode'))document.body.classList.remove('focus-mode');
+    }
     else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcNext();}
     else if(e.key==='ArrowLeft'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcPrev();}
     else if(e.key===' '){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();flipCard();}}
