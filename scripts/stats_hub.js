@@ -1581,8 +1581,13 @@ function prepCanvas2(id,h){
   return {c,ctx,W,H:h};
 }
 
+function copyVizLink(){
+  if(typeof navigator==='undefined'||typeof navigator.clipboard==='undefined'){return;}
+  var href=(typeof window!=='undefined'&&window.location)?window.location.href:'';
+  navigator.clipboard.writeText(href).then(function(){showToast('Link copied!');}).catch(function(){showToast('Could not copy link');});
+}
 function vizPracticeBtn(unit){
-  return `<div class="viz-practice-link"><button class="viz-practice-btn" onclick="goPage('practice');setUnit(${unit});">Practice Unit ${unit}: ${UNIT_META[unit]?UNIT_META[unit].name:''} →</button></div>`;
+  return `<div class="viz-practice-link"><button class="viz-practice-btn" onclick="goPage('practice');setUnit(${unit});">Practice Unit ${unit}: ${UNIT_META[unit]?UNIT_META[unit].name:''} →</button><button class="viz-share-btn" onclick="copyVizLink()" title="Copy link to this visualizer">📋 Copy Link</button></div>`;
 }
 
 function vizTemplate(unit){

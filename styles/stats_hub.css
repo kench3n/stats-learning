@@ -289,6 +289,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 .viz-practice-btn:hover{background:var(--cyan);color:var(--bg);}
 .viz-practice-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+.viz-share-btn{
+  padding:10px 18px;background:transparent;color:var(--amber);
+  border:1px solid var(--amber);border-radius:8px;
+  font-family:'Space Mono',monospace;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;margin-left:12px;
+}
+.viz-share-btn:hover{background:var(--amber);color:var(--bg);}
+.viz-share-btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
 /* Roles */
 .roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;max-width:1100px;margin:0 auto;}
