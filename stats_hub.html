@@ -101,6 +101,26 @@
     <h4 class="wg-title">📅 This Week</h4>
     <div id="wgList"></div>
   </div>
+  <div class="path-section" id="pathSection">
+    <h3>Choose Your Learning Path</h3>
+    <div class="path-grid" id="pathGrid"></div>
+    <div class="active-path" id="activePath" style="display:none;">
+      <div class="path-progress-bar"><div class="path-progress-fill" id="pathFill"></div></div>
+      <span id="pathStatus">Unit 1 of 5</span>
+      <button class="path-next-btn" id="pathNextBtn" onclick="goToPathUnit()">Continue →</button>
+    </div>
+  </div>
+  <div class="goal-section" id="goalSection">
+    <h3>🎯 Set a Goal</h3>
+    <label>I want to finish my path by:
+      <input type="date" id="goalDate" onchange="setGoal()" aria-label="Goal deadline date">
+    </label>
+    <div class="goal-countdown" id="goalCountdown" style="display:none;">
+      <span class="goal-days" id="goalDays">0</span> days remaining
+      <div class="goal-pace" id="goalPace"></div>
+    </div>
+    <button class="cert-btn" onclick="generateCertificate()">🎓 Get Certificate</button>
+  </div>
   <div class="home-cards">
     <div class="home-card card-roadmap" onclick="goPage('roadmap')" role="button" tabindex="0" aria-label="Open Quant Roadmap" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('roadmap')}">
       <div class="card-icon" aria-hidden="true">&#x1f5fa;</div>

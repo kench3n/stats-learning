@@ -947,3 +947,31 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .nlp-answer{color:var(--cyan);font-weight:700;font-family:'Space Mono',monospace;margin-bottom:8px;font-size:14px;}
 .nlp-steps{display:flex;flex-direction:column;gap:4px;}
 .nlp-no-match{color:var(--muted);font-size:13px;line-height:1.6;}
+
+/* ===== Phase 20: Learning Paths ===== */
+.path-section{margin:16px 0;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);}
+.path-section h3{font-size:14px;font-family:'Space Mono',monospace;color:var(--text);margin:0 0 12px;}
+.path-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px;}
+.path-card{padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
+.path-card:hover{border-color:var(--cyan);background:var(--bg2);}
+.path-card-active{border-color:var(--cyan)!important;background:rgba(0,229,199,0.08)!important;}
+.path-card-icon{font-size:20px;margin-bottom:4px;}
+.path-card-name{font-weight:700;font-size:13px;color:var(--text);margin-bottom:2px;}
+.path-card-desc{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.4;}
+.path-card-meta{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
+.active-path{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border);}
+.path-progress-bar{flex:1;min-width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.path-progress-fill{height:100%;background:var(--cyan);border-radius:3px;transition:width 0.4s;}
+.path-next-btn{padding:6px 14px;background:var(--cyan);color:var(--bg);border:none;border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;}
+.path-next-btn:hover{opacity:0.85;}
+
+/* ===== Phase 20: Goals & Certificates ===== */
+.goal-section{margin:16px 0;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);}
+.goal-section h3{font-size:14px;font-family:'Space Mono',monospace;color:var(--text);margin:0 0 12px;}
+.goal-section label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.goal-section input[type="date"]{padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;}
+.goal-countdown{margin-top:10px;font-size:13px;color:var(--text);}
+.goal-days{font-size:24px;font-weight:700;color:var(--amber);font-family:'Space Mono',monospace;}
+.goal-pace{font-size:12px;color:var(--muted);margin-top:4px;}
+.cert-btn{margin-top:12px;padding:8px 18px;background:transparent;border:1px solid var(--amber);color:var(--amber);border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:12px;transition:all 0.2s;}
+.cert-btn:hover{background:var(--amber);color:var(--bg);}
