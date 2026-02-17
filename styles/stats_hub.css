@@ -612,6 +612,8 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
   font-family:'Space Mono',monospace;
 }
 .shortcuts-modal button:hover{border-color:var(--cyan);color:var(--cyan);}
+.shortcut-dl-btn{border-color:var(--green)!important;color:var(--green)!important;}
+.shortcut-dl-btn:hover{background:var(--green)!important;color:var(--bg)!important;}
 
 
 /* ===================== FORMULA REFERENCE ===================== */

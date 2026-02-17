@@ -3006,6 +3006,50 @@ function toggleShortcutsHelp(){
   const el=document.getElementById('shortcutsOverlay');
   if(el)el.style.display=el.style.display==='none'?'flex':'none';
 }
+function downloadShortcutCheatsheet(){
+  if(typeof Blob==='undefined'||typeof document==='undefined')return;
+  var lines=[
+    'STATS LEARNING HUB — KEYBOARD SHORTCUTS',
+    '========================================',
+    '',
+    'NAVIGATION',
+    '  1  Home',
+    '  2  Roadmap',
+    '  3  Visualizer',
+    '  4  Practice',
+    '  5  Review',
+    '  6  Achievements',
+    '  7  Flashcards',
+    '  8  Create',
+    '  R  Jump to Review',
+    '',
+    'PRACTICE',
+    '  J  Next Problem',
+    '  K  Previous Problem',
+    '  F  Toggle Focus Mode',
+    '',
+    'FLASHCARDS',
+    '  Space  Flip Card',
+    '  →      Mark Know',
+    '  ←      Mark Unsure',
+    '',
+    'INTERFACE',
+    '  T    Toggle Timer',
+    '  D    Toggle Theme',
+    '  ?    Show Keyboard Shortcuts',
+    '  Esc  Close Panel / Exit Focus',
+    '',
+    '========================================',
+    'stats-learning-hub'
+  ];
+  var text=lines.join('\n');
+  var blob=new Blob([text],{type:'text/plain'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='stats-hub-shortcuts.txt';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Cheatsheet downloaded!');
+}
 
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('keydown',function(e){
