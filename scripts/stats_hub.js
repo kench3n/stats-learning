@@ -1436,6 +1436,7 @@ function setUnit(n){
   buildVizForUnit(n);
   if(isVizPageActive())drawActiveVisualizer();
   filterProblems('all');
+  drawDiffChart();
 }
 
 allProbs[2]=[
@@ -2402,6 +2403,38 @@ function getProgressSummary(){
   return summary;
 }
 
+function drawDiffChart(){
+  if(typeof document==='undefined')return;
+  var canvas=document.getElementById('diffChart');
+  var row=document.getElementById('diffChartRow');
+  if(!canvas||typeof canvas.getContext!=='function')return;
+  var probs=(allProbs[currentUnit]||[]);
+  if(!probs.length){if(row)row.style.display='none';return;}
+  var easy=probs.filter(function(p){return p.diff==='easy';}).length;
+  var med=probs.filter(function(p){return p.diff==='medium';}).length;
+  var hard=probs.filter(function(p){return p.diff==='hard';}).length;
+  var total=probs.length;
+  if(row)row.style.display='';
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var colors=['#34d399','#f59e0b','#f87171'];
+  var vals=[easy,med,hard];
+  var labels=['Easy','Med','Hard'];
+  var barW=Math.floor((W-30)/(3*2));
+  vals.forEach(function(v,i){
+    var pct=total?v/total:0;
+    var bh=Math.round(pct*(H-20));
+    var x=10+i*(barW*2+5);
+    ctx.fillStyle=colors[i];
+    if(bh>0)ctx.fillRect(x,H-16-bh,barW,bh);
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.font='8px monospace';
+    ctx.textAlign='center';
+    ctx.fillText(labels[i],x+barW/2,H-2);
+    if(pct>0)ctx.fillText(Math.round(pct*100)+'%',x+barW/2,H-18-bh);
+  });
+}
 function buildProgressPanel(){
   if(typeof document==='undefined')return;
   const grid=document.getElementById('progressGrid');
@@ -2422,6 +2455,7 @@ function buildProgressPanel(){
   grid.innerHTML=html;
   updateMilestoneDisplay();
   updateWeakSpots();
+  drawDiffChart();
   // Restore collapsed state
   if(typeof document!=='undefined'&&typeof localStorage!=='undefined'){
     var _pp=document.getElementById('progressPanel');

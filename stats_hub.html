@@ -338,6 +338,10 @@
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>
     <div class="progress-grid" id="progressGrid" role="status" aria-live="polite"></div>
+    <div class="diff-chart-row" id="diffChartRow" style="display:none;text-align:center;padding:8px 0 4px;">
+      <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:4px;">Difficulty Distribution</div>
+      <canvas id="diffChart" width="200" height="50"></canvas>
+    </div>
     <div class="progress-actions" id="progressActions">
       <button class="share-btn" onclick="exportProgressJSON()">Export JSON</button>
       <button class="share-btn" onclick="copyProgressSummary()">Copy Summary</button>
