@@ -265,6 +265,7 @@
     <p class="section-tag" id="practiceUnitTag">Unit 1 — Descriptive Statistics</p>
     <h2 class="section-title">Practice <em>Problems</em></h2>
     <p class="section-desc">Practice problems from easy to hard. Work them by hand, then check.</p>
+    <button class="focus-btn" id="focusBtn" onclick="toggleFocusMode()" aria-label="Toggle focus mode">🎯 Focus Mode</button>
   </header>
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>
@@ -280,6 +281,10 @@
     <div class="milestone-shelf" id="milestoneShelf">
       <h3 class="milestone-title">Badges</h3>
       <div class="milestone-grid" id="milestoneGrid"></div>
+    </div>
+    <div class="weakspot-panel" id="weakspotPanel">
+      <h3 class="weakspot-title">🎯 Focus Areas</h3>
+      <div id="weakspotList"></div>
     </div>
   </div>
   <div class="unit-selector">

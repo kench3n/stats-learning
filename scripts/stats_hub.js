@@ -339,6 +339,7 @@ function awardXP(amount,reason){
   data.history.push({date:todayStr(),earned:amount,reason:String(reason||'')});
   if(data.history.length>100)data.history=data.history.slice(-100);
   saveXPData(data);
+  sessionData.xpEarned+=amount;
   updateXPDisplay();
   showXPPopup('+'+amount+' XP');
   if(data.level>oldLevel)showToast('Level Up! You are now Level '+data.level+' 🎉');
@@ -743,6 +744,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     updateMilestoneDisplay();
     checkMilestones();
     updateDailyDigest();
+    updateWeakSpots();
   });
 }
 
@@ -833,9 +835,11 @@ function ansMC(id,ch){
   persistPracticeState();
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
+  sessionData.problemsAnswered++;if(ok)sessionData.correct++;
   recordActivity();
   setAllScores();
   updateReviewBadge();
+  updateWeakSpots();
 }
 
 function ansFR(id){
@@ -850,9 +854,11 @@ function ansFR(id){
   persistPracticeState();
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
+  sessionData.problemsAnswered++;if(ok)sessionData.correct++;
   recordActivity();
   setAllScores();
   updateReviewBadge();
+  updateWeakSpots();
 }
 
 function findProblemById(probId){
@@ -1026,6 +1032,7 @@ function endReview(){
   saveReviewMeta(meta);
 
   awardXP(10,'review-session-'+meta.sessions);
+  sessionData.reviewsDone++;
   checkMilestones();
   updateReviewBadge();
 
@@ -2060,6 +2067,7 @@ function buildProgressPanel(){
   }
   grid.innerHTML=html;
   updateMilestoneDisplay();
+  updateWeakSpots();
 }
 
 function toggleProgressPanel(){
@@ -2193,6 +2201,7 @@ function pomoComplete(){
   awardXP(15,'pomo-session');
   recordActivity();
   showToast('Focus session complete! +15 XP. Take a break.');
+  showSessionSummary();
   if(typeof localStorage!=='undefined'){
     const today=todayStr();
     const data=JSON.parse(localStorage.getItem('sh-pomo')||'{}');
@@ -2249,6 +2258,8 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
 
 // ===================== PWA INSTALL =====================
 let deferredPrompt=null;
+let focusModeActive=false;
+let sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
 
 if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('beforeinstallprompt',function(e){
@@ -2302,6 +2313,102 @@ function dismissInstall(){
   const banner=document.getElementById('installBanner');
   if(banner)banner.style.display='none';
   if(typeof localStorage!=='undefined')localStorage.setItem('sh-install-dismissed','1');
+}
+
+
+function analyzeWeakSpots(){
+  if(typeof allProbs==='undefined'||typeof getPracticeState==='undefined')return[];
+  const spots=[];
+  for(let u=1;u<=11;u++){
+    const probs=allProbs[u]||[];
+    const state=getPracticeState(u);
+    const ans=state.answered||{};
+    let correct=0,wrong=0,unanswered=0;
+    const wt={};
+    probs.forEach(p=>{
+      if(ans[p.id]===undefined){unanswered++;return;}
+      let ok=false;
+      if(p.type==='mc'){ok=(+ans[p.id])===p.ans;}
+      else{const v=parseFloat(ans[p.id]);ok=Number.isFinite(v)&&Math.abs(v-p.ans)<=(p.tol||0.1);}
+      if(ok)correct++;
+      else{wrong++;wt[p.topic]=(wt[p.topic]||0)+1;}
+    });
+    if(wrong>0||unanswered>0){
+      spots.push({unit:u,name:UNIT_META[u].name,correct,wrong,unanswered,total:probs.length,pct:probs.length?Math.round(correct/probs.length*100):0,weakTopics:Object.entries(wt).sort((a,b)=>b[1]-a[1]).map(e=>e[0])});
+    }
+  }
+  spots.sort((a,b)=>a.pct-b.pct);
+  return spots;
+}
+
+function updateWeakSpots(){
+  if(typeof document==='undefined')return;
+  const list=document.getElementById('weakspotList');
+  if(!list)return;
+  const spots=analyzeWeakSpots();
+  if(!spots.length){list.innerHTML='<div class="weakspot-empty">No weak spots detected. Keep it up!</div>';return;}
+  let h='';
+  spots.slice(0,3).forEach(s=>{
+    h+=`<div class="weakspot-card" onclick="goPage('practice');setUnit(${s.unit});">
+      <div class="weakspot-unit">Unit ${s.unit}: ${s.name}</div>
+      <div class="weakspot-bar"><div class="weakspot-fill" style="width:${s.pct}%;"></div></div>
+      <div class="weakspot-detail">${s.correct}/${s.total} correct &middot; ${s.wrong} wrong &middot; ${s.unanswered} unanswered</div>
+      ${s.weakTopics.length?'<div class="weakspot-topics">Weak: '+s.weakTopics.slice(0,2).join(', ')+'</div>':''}
+    </div>`;
+  });
+  list.innerHTML=h;
+}
+
+function toggleFocusMode(){
+  if(typeof document==='undefined')return;
+  focusModeActive=!focusModeActive;
+  document.body.classList.toggle('focus-mode',focusModeActive);
+  const btn=document.getElementById('focusBtn');
+  if(btn)btn.textContent=focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
+  if(focusModeActive){
+    const probs=document.querySelectorAll('.pc');
+    for(const pc of probs){
+      if(!pc.classList.contains('correct')&&!pc.classList.contains('incorrect')){
+        if(typeof pc.scrollIntoView==='function')pc.scrollIntoView({behavior:'smooth',block:'center'});
+        pc.classList.add('focus-highlight');
+        break;
+      }
+    }
+  }else{
+    document.querySelectorAll('.focus-highlight').forEach(el=>el.classList.remove('focus-highlight'));
+  }
+}
+
+function showSessionSummary(){
+  if(typeof document==='undefined')return;
+  const elapsed=Math.round((Date.now()-sessionData.startTime)/60000);
+  if(sessionData.problemsAnswered===0&&sessionData.reviewsDone===0)return;
+  const overlay=document.createElement('div');
+  overlay.className='session-overlay';
+  overlay.onclick=function(){overlay.remove();};
+  const modal=document.createElement('div');
+  modal.className='session-modal';
+  modal.onclick=function(e){e.stopPropagation();};
+  modal.innerHTML=`<h3>Session Summary</h3>
+    <div class="session-stats">
+      <div class="session-stat"><span class="session-num">${elapsed}</span><span class="session-label">minutes</span></div>
+      <div class="session-stat"><span class="session-num">${sessionData.problemsAnswered}</span><span class="session-label">problems</span></div>
+      <div class="session-stat"><span class="session-num">${sessionData.correct}</span><span class="session-label">correct</span></div>
+      <div class="session-stat"><span class="session-num">+${sessionData.xpEarned}</span><span class="session-label">XP earned</span></div>
+    </div>
+    <div class="session-message">${getSessionMessage()}</div>
+    <button class="session-close" onclick="this.closest('.session-overlay').remove()">Nice! 🎉</button>`;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
+}
+
+function getSessionMessage(){
+  const pct=sessionData.problemsAnswered?Math.round(sessionData.correct/sessionData.problemsAnswered*100):0;
+  if(pct>=90)return'Incredible accuracy! You\'re on fire.';
+  if(pct>=70)return'Solid session. Keep building momentum.';
+  if(pct>=50)return'Good effort! Review the tricky ones tomorrow.';
+  return'Every problem makes you stronger. Come back tomorrow!';
 }
 
 let toastTimer=null;
