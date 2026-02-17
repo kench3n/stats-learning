@@ -749,3 +749,49 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .session-message{font-size:14px;color:var(--text);margin-bottom:20px;line-height:1.5;}
 .session-close{padding:12px 32px;background:var(--cyan);color:var(--bg);border:none;border-radius:8px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;cursor:pointer;}
 .session-close:hover{background:var(--amber);}
+
+/* ===== PHASE 13: DAILY CHALLENGES, WEEKLY GOALS, ACHIEVEMENTS ===== */
+.daily-challenge{max-width:640px;margin:0 auto 20px;padding:20px;background:var(--bg2);border:1px solid var(--amber);border-radius:12px;}
+.dc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.dc-title{font-size:15px;font-weight:700;color:var(--amber);font-family:'Space Mono',monospace;}
+.dc-date{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.dc-problem{padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.dc-q{font-size:13px;color:var(--text);margin-bottom:8px;}
+.dc-ch{padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin:4px 0;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s;}
+.dc-ch:hover:not(.dis){border-color:var(--cyan);}
+.dc-ch.dis{cursor:default;}
+.dc-ch.dc-right{border-color:var(--green);background:rgba(0,255,136,0.1);}
+.dc-ch.dc-wrong{border-color:var(--red);background:rgba(255,80,80,0.1);}
+.dc-fb{font-size:12px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;}
+.dc-fr{display:flex;gap:8px;margin-top:6px;}
+.dc-fr input{flex:1;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;}
+.dc-fr button{padding:6px 14px;background:var(--cyan);color:var(--bg);border:none;border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:12px;}
+.dc-status{text-align:center;margin-top:12px;font-size:13px;color:var(--green);font-family:'Space Mono',monospace;}
+
+.weekly-goals{max-width:640px;margin:0 auto 20px;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;}
+.wg-title{font-size:14px;font-weight:700;color:var(--cyan);font-family:'Space Mono',monospace;margin:0 0 12px;}
+.wg-item{margin-bottom:10px;}
+.wg-label{font-size:12px;color:var(--text);margin-bottom:4px;font-family:'Space Mono',monospace;}
+.wg-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:2px;}
+.wg-fill{height:100%;background:var(--cyan);border-radius:3px;transition:width 0.3s;}
+.wg-count{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+.achieve-stat-grid{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:24px;}
+.achieve-stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;text-align:center;min-width:100px;}
+.achieve-num{display:block;font-size:24px;font-weight:700;color:var(--cyan);font-family:'Space Mono',monospace;}
+.achieve-label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;margin-top:4px;font-family:'Space Mono',monospace;}
+.achieve-section-title{font-size:15px;color:var(--text);margin:24px 0 12px;font-family:'Space Mono',monospace;}
+#achieveBadgeGrid{display:flex;flex-wrap:wrap;gap:12px;}
+.achieve-badge-card{width:140px;padding:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;text-align:center;transition:border-color 0.2s;}
+.achieve-badge-card.achieved{border-color:var(--cyan);}
+.achieve-badge-card.locked{opacity:0.4;}
+.achieve-badge-icon{font-size:28px;margin-bottom:6px;}
+.achieve-badge-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;font-family:'Space Mono',monospace;}
+.achieve-badge-desc{font-size:10px;color:var(--muted);line-height:1.4;margin-bottom:6px;font-family:'Space Mono',monospace;}
+.achieve-badge-earned{font-size:11px;color:var(--green);font-family:'Space Mono',monospace;}
+.achieve-badge-locked{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+.heatmap{display:flex;flex-wrap:wrap;gap:3px;max-width:500px;margin-top:12px;}
+.heatmap-cell{width:12px;height:12px;border-radius:2px;}
+.heatmap-empty{background:var(--bg2);border:1px solid var(--border);}
+.heatmap-active{background:var(--cyan);border-color:var(--cyan);}

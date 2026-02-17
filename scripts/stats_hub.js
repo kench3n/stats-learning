@@ -21,7 +21,8 @@ function goPage(id){
   if(typeof window!=='undefined'&&typeof window.scrollTo==='function')window.scrollTo(0,0);
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home')updateDailyDigest();
+  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();}
+  if(id==='achievements'){buildHeatmap();buildAchievementsPage();}
 }
 function showSub(prefix,id,btn){
   if(prefix==='viz'&&currentUnit!==1)return;
@@ -766,6 +767,8 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     checkMilestones();
     updateDailyDigest();
     updateWeakSpots();
+    buildDailyChallenge();
+    buildWeeklyGoals();
   });
 }
 
@@ -861,6 +864,7 @@ function ansMC(id,ch){
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
   sessionData.problemsAnswered++;if(ok)sessionData.correct++;
+  updateWeeklyProgress('problems',1);
   recordActivity();
   setAllScores();
   updateReviewBadge();
@@ -880,6 +884,7 @@ function ansFR(id){
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
   sessionData.problemsAnswered++;if(ok)sessionData.correct++;
+  updateWeeklyProgress('problems',1);
   recordActivity();
   setAllScores();
   updateReviewBadge();
@@ -1058,6 +1063,7 @@ function endReview(){
 
   awardXP(10,'review-session-'+meta.sessions);
   sessionData.reviewsDone++;
+  updateWeeklyProgress('review',1);
   checkMilestones();
   updateReviewBadge();
 
@@ -2649,6 +2655,249 @@ function drawBayes(){
   // X axis labels
   ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px monospace';
   for(let i=0;i<=4;i++){const x=i/4;ctx.textAlign='center';ctx.fillText(x.toFixed(2),toX(x),H-pad+15);}
+}
+
+
+// ===================== PHASE 13: DAILY CHALLENGES, WEEKLY GOALS, ACHIEVEMENTS =====================
+function getDailyChallenge(){
+  const today=todayStr();
+  const parts=today.split('-');
+  let seed=parts.reduce((a,b)=>a*31+parseInt(b),0);
+  const allIds=[];
+  for(const u in allProbs)(allProbs[u]||[]).forEach(p=>allIds.push(p.id));
+  if(!allIds.length)return null;
+  const challenges=[];
+  const used=new Set();
+  for(let i=0;i<3;i++){
+    let idx=Math.abs((seed*7+i*13)%allIds.length);
+    while(used.has(idx))idx=(idx+1)%allIds.length;
+    used.add(idx);
+    const id=allIds[idx];
+    let prob=null;
+    for(const u in allProbs){prob=(allProbs[u]||[]).find(p=>p.id===id);if(prob)break;}
+    if(prob)challenges.push(prob);
+  }
+  return{date:today,problems:challenges};
+}
+
+function getDailyChallengeState(){
+  if(typeof localStorage==='undefined')return{};
+  try{return JSON.parse(localStorage.getItem('sh-daily')||'{}')||{};}catch{return{};}
+}
+
+function saveDailyChallengeState(state){
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-daily',JSON.stringify(state));
+}
+
+function completeDailyChallenge(){
+  const state=getDailyChallengeState();
+  const today=todayStr();
+  if(!state.completed)state.completed={};
+  if(state.completed[today])return;
+  state.completed[today]=true;
+  state.totalCompleted=(state.totalCompleted||0)+1;
+  saveDailyChallengeState(state);
+  awardXP(25,'daily-challenge-'+today);
+  showToast('Daily Challenge complete! +25 XP 🏅');
+  checkMilestones();
+}
+
+function buildDailyChallenge(){
+  if(typeof document==='undefined')return;
+  const panel=document.getElementById('dailyChallenge');
+  if(!panel)return;
+  const dc=getDailyChallenge();
+  if(!dc||!dc.problems.length){panel.style.display='none';return;}
+  panel.style.display='';
+  const state=getDailyChallengeState();
+  const today=todayStr();
+  const alreadyDone=!!(state.completed&&state.completed[today]);
+  const dcDate=document.getElementById('dcDate');
+  if(dcDate)dcDate.textContent=today;
+  const dcStatus=document.getElementById('dcStatus');
+  const dcProblems=document.getElementById('dcProblems');
+  if(!dcProblems)return;
+  if(alreadyDone){
+    dcProblems.innerHTML='';
+    if(dcStatus)dcStatus.textContent='✅ Completed! Come back tomorrow for a new challenge.';
+    return;
+  }
+  if(dcStatus)dcStatus.textContent='';
+  let answeredCount=0;
+  let correctCount=0;
+  function checkComplete(){
+    if(correctCount>=dc.problems.length){
+      completeDailyChallenge();
+      if(dcStatus)dcStatus.textContent='✅ All 3 correct! Challenge complete!';
+    }else if(answeredCount>=dc.problems.length){
+      if(dcStatus)dcStatus.textContent=correctCount+'/'+dc.problems.length+' correct. Try again tomorrow!';
+    }
+  }
+  let html='';
+  dc.problems.forEach((p,i)=>{
+    html+='<div class="dc-problem" id="dcp-'+i+'"><div class="dc-q">'+(i+1)+'. ['+p.topic+'] '+p.q+'</div>';
+    if(p.type==='mc'){
+      p.ch.forEach((ch,j)=>{
+        html+='<div class="dc-ch" id="dc-ch-'+i+'-'+j+'" onclick="dcAnsMC('+i+','+j+')">'+ch+'</div>';
+      });
+    }else{
+      html+='<div class="dc-fr"><input type="text" id="dc-fi-'+i+'" placeholder="Your answer..." onkeydown="if(event.key===&quot;Enter&quot;)dcAnsFR('+i+')"><button onclick="dcAnsFR('+i+')">Check</button></div>';
+    }
+    html+='<div class="dc-fb" id="dc-fb-'+i+'"></div></div>';
+  });
+  dcProblems.innerHTML=html;
+
+  window._dcProbs=dc.problems;
+  window._dcAnswered={};
+
+  window.dcAnsMC=function(i,j){
+    if(window._dcAnswered[i]!==undefined)return;
+    window._dcAnswered[i]=j;
+    answeredCount++;
+    const p=window._dcProbs[i];
+    const ok=j===p.ans;
+    if(ok)correctCount++;
+    p.ch.forEach((_,k)=>{
+      const el=document.getElementById('dc-ch-'+i+'-'+k);
+      if(!el)return;
+      el.classList.add('dis');
+      if(k===p.ans)el.classList.add('dc-right');
+      else if(k===j&&!ok)el.classList.add('dc-wrong');
+    });
+    const fb=document.getElementById('dc-fb-'+i);
+    if(fb)fb.textContent=(ok?'✓ Correct! ':'✗ ')+p.ex;
+    checkComplete();
+  };
+
+  window.dcAnsFR=function(i){
+    if(window._dcAnswered[i]!==undefined)return;
+    const inp=document.getElementById('dc-fi-'+i);
+    if(!inp)return;
+    const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
+    window._dcAnswered[i]=v;
+    answeredCount++;
+    const p=window._dcProbs[i];
+    const ok=Math.abs(v-p.ans)<=(p.tol||0.1);
+    if(ok)correctCount++;
+    inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
+    const fb=document.getElementById('dc-fb-'+i);
+    if(fb)fb.textContent=(ok?'✓ Correct! ':'✗ Correct answer: '+p.ans+'. ')+p.ex;
+    checkComplete();
+  };
+}
+
+function getWeekStart(){
+  if(typeof Date==='undefined')return'2024-01-01';
+  const d=new Date();d.setDate(d.getDate()-d.getDay());
+  return d.toISOString().slice(0,10);
+}
+
+function getWeeklyGoals(){
+  const weekStart=getWeekStart();
+  let stored={};
+  if(typeof localStorage!=='undefined'){try{stored=JSON.parse(localStorage.getItem('sh-weekly')||'{}')||{};}catch{stored={};}}
+  if(stored.weekStart!==weekStart){
+    const streak=getStreakData();
+    const xp=getXPData();
+    const pace=Math.max(1,Math.min(5,Math.floor((xp.total||0)/200)+1));
+    stored.weekStart=weekStart;
+    stored.goals=[
+      {id:'problems',target:pace*5,label:'Answer '+pace*5+' problems',current:0},
+      {id:'streak',target:Math.min(7,pace+2),label:'Maintain a '+Math.min(7,pace+2)+'-day streak',current:streak.current||0},
+      {id:'review',target:pace*2,label:'Complete '+pace*2+' review sessions',current:0},
+    ];
+    stored.completed=false;
+    if(typeof localStorage!=='undefined')localStorage.setItem('sh-weekly',JSON.stringify(stored));
+  }
+  return stored;
+}
+
+function updateWeeklyProgress(goalId,increment){
+  if(typeof localStorage==='undefined')return;
+  const data=getWeeklyGoals();
+  const goal=(data.goals||[]).find(g=>g.id===goalId);
+  if(!goal)return;
+  goal.current+=increment;
+  const allMet=data.goals.every(g=>g.current>=g.target);
+  if(allMet&&!data.completed){
+    data.completed=true;
+    awardXP(50,'weekly-goals-'+data.weekStart);
+    showToast('All weekly goals complete! +50 XP 🎯');
+  }
+  localStorage.setItem('sh-weekly',JSON.stringify(data));
+  buildWeeklyGoals();
+}
+
+function buildWeeklyGoals(){
+  if(typeof document==='undefined')return;
+  const panel=document.getElementById('weeklyGoals');
+  if(!panel)return;
+  const data=getWeeklyGoals();
+  const goals=data.goals||[];
+  if(!goals.length){panel.style.display='none';return;}
+  panel.style.display='';
+  let html='';
+  goals.forEach(g=>{
+    const pct=Math.min(100,Math.round(g.current/g.target*100));
+    const done=g.current>=g.target;
+    html+='<div class="wg-item"><div class="wg-label">'+(done?'✅ ':'')+g.label+'</div><div class="wg-bar"><div class="wg-fill" style="width:'+pct+'%;"></div></div><div class="wg-count">'+Math.min(g.current,g.target)+' / '+g.target+'</div></div>';
+  });
+  const wgList=document.getElementById('wgList');
+  if(wgList)wgList.innerHTML=html;
+}
+
+function buildHeatmap(){
+  if(typeof document==='undefined')return;
+  const grid=document.getElementById('heatmapGrid');
+  if(!grid)return;
+  const streak=getStreakData();
+  const history=streak.history||[];
+  const today=new Date();
+  let html='';
+  for(let i=89;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const dateStr=d.toISOString().slice(0,10);
+    const active=history.includes(dateStr);
+    const cls=active?'heatmap-active':'heatmap-empty';
+    html+='<div class="heatmap-cell '+cls+'" title="'+dateStr+'"></div>';
+  }
+  grid.innerHTML=html;
+}
+
+function buildAchievementsPage(){
+  if(typeof document==='undefined')return;
+  const statsEl=document.getElementById('achieveStats');
+  const badgeGrid=document.getElementById('achieveBadgeGrid');
+  if(!statsEl||!badgeGrid)return;
+
+  const xp=getXPData();
+  const streak=getStreakData();
+  const summary=getProgressSummary();
+  let totalCorrect=0,totalQuestions=0;
+  for(const u in summary){totalCorrect+=(summary[u].correct||0);totalQuestions+=(summary[u].total||0);}
+
+  statsEl.innerHTML='<div class="achieve-stat-grid">'+
+    '<div class="achieve-stat"><span class="achieve-num">'+(xp.total||0)+'</span><span class="achieve-label">Total XP</span></div>'+
+    '<div class="achieve-stat"><span class="achieve-num">'+(xp.level||1)+'</span><span class="achieve-label">Level</span></div>'+
+    '<div class="achieve-stat"><span class="achieve-num">'+(streak.current||0)+'</span><span class="achieve-label">Current Streak</span></div>'+
+    '<div class="achieve-stat"><span class="achieve-num">'+(streak.longest||0)+'</span><span class="achieve-label">Longest Streak</span></div>'+
+    '<div class="achieve-stat"><span class="achieve-num">'+totalCorrect+'/'+totalQuestions+'</span><span class="achieve-label">Problems Correct</span></div>'+
+    '</div>';
+
+  const earned=getMilestones();
+  const milestones=typeof MILESTONES!=='undefined'?MILESTONES:[];
+  let badgeHtml='';
+  if(!milestones.length){badgeGrid.innerHTML='<p style="color:var(--muted)">No badges yet. Keep practicing!</p>';return;}
+  milestones.forEach(m=>{
+    const done=!!earned[m.id];
+    badgeHtml+='<div class="achieve-badge-card '+(done?'achieved':'locked')+'">'+
+      '<div class="achieve-badge-icon">'+m.icon+'</div>'+
+      '<div class="achieve-badge-name">'+m.name+'</div>'+
+      '<div class="achieve-badge-desc">'+m.desc+'</div>'+
+      (done?'<div class="achieve-badge-earned">Earned ✓</div>':'<div class="achieve-badge-locked">Locked</div>')+
+    '</div>';
+  });
+  badgeGrid.innerHTML=badgeHtml;
 }
 
 let toastTimer=null;
