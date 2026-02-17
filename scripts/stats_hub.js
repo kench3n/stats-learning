@@ -1249,6 +1249,7 @@ function ansMC(id,ch){
   updateWeakSpots();
   refreshGoalProgress();
   updatePracticeNavBadge();
+  checkUnitCompletion(currentUnit);
 }
 
 function ansFR(id){
@@ -1274,6 +1275,7 @@ function ansFR(id){
   updateWeakSpots();
   refreshGoalProgress();
   updatePracticeNavBadge();
+  checkUnitCompletion(currentUnit);
 }
 
 function findProblemById(probId){
@@ -4697,6 +4699,28 @@ function rateProblem(probId,rating){
 }
 
 let toastTimer=null;
+function showConfetti(){
+  if(typeof document==='undefined')return;
+  var colors=['var(--cyan)','var(--amber)','var(--green)','var(--pink)','var(--purple)'];
+  for(var i=0;i<40;i++){
+    var el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText='position:fixed;top:-10px;left:'+(Math.random()*100)+'%;width:8px;height:8px;border-radius:'+(Math.random()>0.5?'50%':'2px')+';background:'+colors[Math.floor(Math.random()*colors.length)]+';animation:confetti-fall '+(1+Math.random())+'s linear forwards;z-index:9999;pointer-events:none;';
+    document.body.appendChild(el);
+    (function(node){setTimeout(function(){if(node.parentNode)node.parentNode.removeChild(node);},2500);})(el);
+  }
+}
+function checkUnitCompletion(unit){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var probs=allProbs[unit]||[];
+  if(!probs.length)return;
+  var allCorrect=probs.every(function(p){return answered[p.id]==='correct'||answered[p.id]===p.ans||(typeof answered[p.id]==='number'&&Math.abs(answered[p.id]-p.ans)<=(p.tol||0.1));});
+  if(!allCorrect)return;
+  var key='sh-confetti-done-'+unit;
+  try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1');}catch(e){return;}
+  showConfetti();
+  showToast('Unit '+unit+' complete! All problems answered correctly! 🎉',3000);
+}
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;
   const toast=document.getElementById('toast');
