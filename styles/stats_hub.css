@@ -566,6 +566,9 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 }
 .pomo-preset.active{border-color:var(--cyan);color:var(--cyan);}
 .pomo-stats{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.pomodoro-history{margin-top:10px;border-top:1px solid var(--border);padding-top:8px;}
+.pomo-history-title{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.pomo-history-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;padding:2px 0;}
 
 /* Keyboard Shortcuts Overlay */
 .shortcuts-overlay{

@@ -2577,10 +2577,42 @@ function pomoComplete(){
     const data=JSON.parse(localStorage.getItem('sh-pomo')||'{}');
     data[today]=(data[today]||0)+1;
     localStorage.setItem('sh-pomo',JSON.stringify(data));
+    // Also save to sh-pomodoro-log
+    var log=[];
+    try{log=JSON.parse(localStorage.getItem('sh-pomodoro-log')||'[]');}catch(e){}
+    log.push({date:today,minutes:Math.round(pomoState.total/60)});
+    if(log.length>50)log=log.slice(-50);
+    localStorage.setItem('sh-pomodoro-log',JSON.stringify(log));
   }
+  buildPomoHistory();
   pomoState.seconds=5*60;
   pomoState.total=5*60;
   updatePomoDisplay();
+}
+
+function buildPomoHistory(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('pomodoroHistory');
+  if(!el)return;
+  var log=[];
+  try{log=JSON.parse(localStorage.getItem('sh-pomodoro-log')||'[]');}catch(e){}
+  if(!log.length){el.innerHTML='';return;}
+  // Group last 5 unique dates
+  var byDate={};
+  log.forEach(function(entry){
+    if(!byDate[entry.date])byDate[entry.date]={count:0,mins:0};
+    byDate[entry.date].count++;
+    byDate[entry.date].mins+=entry.minutes||25;
+  });
+  var dates=Object.keys(byDate).sort().reverse().slice(0,5);
+  var today=todayStr();
+  var html='<div class="pomo-history-title">Recent Sessions</div>';
+  dates.forEach(function(d){
+    var r=byDate[d];
+    var label=d===today?'Today':d;
+    html+='<div class="pomo-history-row"><span>'+label+'</span><span>'+r.count+' session'+(r.count===1?'':'s')+' ('+r.mins+' min)</span></div>';
+  });
+  el.innerHTML=html;
 }
 
 // ===================== THEME TOGGLE =====================
@@ -4402,6 +4434,7 @@ if(typeof document!=='undefined'){
   updateGoalDisplay();
   buildNLPHistory();
   buildPOD();
+  buildPomoHistory();
 }
 if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){
   navigator.serviceWorker.register('./service-worker.js').catch(function(){});
