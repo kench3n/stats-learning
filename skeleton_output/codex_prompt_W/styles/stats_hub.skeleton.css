@@ -1,0 +1,60 @@
+/*
+Skeleton for styles/stats_hub.css
+Source prompt: .tmp_skeleton/codex_prompt_W_with_files.md
+Generated scaffold only. Merge into the real file intentionally.
+*/
+
+/* Section: General */
+/* TODO: add or update selectors for this section */
+
+/* Section: 1a: Chat Panel UI */
+/* TODO: add or update selectors for this section */
+
+/* Section: 1b: Local Knowledge Base */
+/* TODO: add or update selectors for this section */
+
+/* Reference snippet 1 | heading: 1a: Chat Panel UI
+<div class="tutor-panel" id="tutorPanel" style="display:none;">
+  <div class="tutor-header">
+    <span>ðŸ¤– Stats Tutor</span>
+    <button onclick="toggleTutor()" aria-label="Close tutor">âœ•</button>
+  </div>
+  <div class="tutor-messages" id="tutorMessages"></div>
+  <div class="tutor-input-row">
+    <input type="text" id="tutorInput" placeholder="Ask a stats question..." onkeydown="if(event.key==='Enter')sendTutorMessage()">
+    <button onclick="sendTutorMessage()">Send</button>
+  </div>
+</div>
+*/
+
+/* Reference snippet 2 | heading: 1a: Chat Panel UI
+<button class="tutor-toggle" id="tutorToggle" onclick="toggleTutor()" aria-label="Open stats tutor">ðŸ¤–</button>
+*/
+
+/* Reference snippet 3 | heading: 1b: Local Knowledge Base
+const TUTOR_KB=[
+  {keywords:['mean','average'],response:'The mean (average) is calculated by summing all values and dividing by the count: xÌ„ = Î£xáµ¢ / n'},
+  {keywords:['median'],response:'The median is the middle value when data is sorted. For even n, average the two middle values.'},
+  {keywords:['mode'],response:'The mode is the most frequently occurring value in a dataset. A dataset can have multiple modes.'},
+  {keywords:['standard deviation','std dev','stdev'],response:'Standard deviation measures spread: Ïƒ = âˆš(Î£(xáµ¢ - xÌ„)Â² / n). Larger Ïƒ = more spread.'},
+  {keywords:['z-score','z score'],response:'Z-score tells how many standard deviations a value is from the mean: z = (x - Î¼) / Ïƒ'},
+  {keywords:['normal distribution','bell curve'],response:'The normal distribution is symmetric and bell-shaped. ~68% within 1Ïƒ, ~95% within 2Ïƒ, ~99.7% within 3Ïƒ.'},
+  {keywords:['correlation','r value'],response:'Correlation (r) measures linear relationship strength. r = 1 is perfect positive, r = -1 is perfect negative, r = 0 is no linear relationship.'},
+  {keywords:['regression'],response:'Linear regression fits Å· = a + bx to data. Slope b = r(sáµ§/sâ‚“). RÂ² tells proportion of variance explained.'},
+  {keywords:['p-value','p value'],response:'P-value is the probability of observing results at least as extreme as the data, assuming Hâ‚€ is true. Small p (< Î±) â†’ reject Hâ‚€.'},
+  {keywords:['confidence interval','ci'],response:'A confidence interval estimates a parameter: xÌ„ Â± z*(Ïƒ/âˆšn). A 95% CI means 95% of such intervals contain the true parameter.'},
+  {keywords:['hypothesis','h0','h1'],response:'Hâ‚€ (null): no effect/difference. Hâ‚ (alternative): there IS an effect. We test if data provides enough evidence to reject Hâ‚€.'},
+  {keywords:['chi-square','chi square'],response:'Chi-square tests compare observed vs expected frequencies: Ï‡Â² = Î£(O-E)Â²/E. Used for goodness-of-fit and independence tests.'},
+  {keywords:['anova','f-test'],response:'ANOVA compares means across 3+ groups. F = MSB/MSW. Large F â†’ groups differ significantly.'},
+  {keywords:['bayes','posterior','prior'],response:'Bayes\' theorem: P(A|B) = P(B|A)P(A)/P(B). Prior beliefs are updated with data to get posterior probability.'},
+  {keywords:['binomial'],response:'Binomial: P(X=k) = C(n,k)p^k(1-p)^(n-k). Mean = np, SD = âˆš(np(1-p)). Used for fixed n trials with two outcomes.'},
+  {keywords:['clt','central limit'],response:'Central Limit Theorem: for large n, the sampling distribution of xÌ„ is approximately Normal regardless of population shape.'},
+];
+
+function findTutorResponse(query){
+  const q=query.toLowerCase();
+  const match=TUTOR_KB.find(entry=>entry.keywords.some(kw=>q.includes(kw)));
+  if(match)return match.response;
+  return'I\'m not sure about that. Try asking about specific topics like mean, z-score, regression, or p-value. For detailed help, check the formula reference in Practice mode.';
+}
+*/

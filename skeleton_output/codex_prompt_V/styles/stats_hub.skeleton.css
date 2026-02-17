@@ -1,0 +1,53 @@
+/*
+Skeleton for styles/stats_hub.css
+Source prompt: .tmp_skeleton/codex_prompt_V_with_files.md
+Generated scaffold only. Merge into the real file intentionally.
+*/
+
+/* Section: General */
+/* TODO: add or update selectors for this section */
+
+/* Section: 1a: Problem Creator Page */
+/* TODO: add or update selectors for this section */
+
+/* Reference snippet 1 | heading: 1a: Problem Creator Page
+<section id="pg-create" class="page" role="tabpanel" aria-label="Create Problem">
+  <header class="section-header">
+    <p class="section-tag">Create Your Own</p>
+    <h2 class="section-title">Problem <em>Builder</em></h2>
+  </header>
+  <form class="create-form" id="createForm" onsubmit="event.preventDefault();saveCustomProblem();">
+    <label>Unit:
+      <select id="cpUnit"></select>
+    </label>
+    <label>Difficulty:
+      <select id="cpDiff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+    </label>
+    <label>Type:
+      <select id="cpType" onchange="toggleCreateType()"><option value="mc">Multiple Choice</option><option value="fr">Free Response</option></select>
+    </label>
+    <label>Topic: <input type="text" id="cpTopic" required placeholder="e.g., Z-score calculation"></label>
+    <label>Question: <textarea id="cpQuestion" required rows="3" placeholder="Write your question..."></textarea></label>
+    <div id="cpMCFields">
+      <label>Choice A: <input type="text" id="cpA" required></label>
+      <label>Choice B: <input type="text" id="cpB" required></label>
+      <label>Choice C: <input type="text" id="cpC" required></label>
+      <label>Choice D: <input type="text" id="cpD" required></label>
+      <label>Correct Answer:
+        <select id="cpMCAns"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+      </label>
+    </div>
+    <div id="cpFRFields" style="display:none;">
+      <label>Correct Answer (number): <input type="number" id="cpFRAns" step="any"></label>
+      <label>Tolerance: <input type="number" id="cpTol" value="0.1" step="0.01"></label>
+    </div>
+    <label>Explanation: <textarea id="cpExplanation" required rows="2" placeholder="Step-by-step solution..."></textarea></label>
+    <label>Hint (optional): <input type="text" id="cpHint" placeholder="A nudge toward the approach..."></label>
+    <button type="submit" class="create-submit">Save Problem</button>
+  </form>
+  <div class="custom-problems-list">
+    <h3>Your Custom Problems (<span id="cpCount">0</span>)</h3>
+    <div id="cpList"></div>
+  </div>
+</section>
+*/

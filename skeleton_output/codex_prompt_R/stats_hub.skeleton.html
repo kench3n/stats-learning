@@ -1,0 +1,89 @@
+<!-- Skeleton for stats_hub.html -->
+<!-- Source prompt: codex_prompts/codex_prompt_R.md -->
+<!-- Generated scaffold only. Merge into the real file intentionally. -->
+
+<section data-skeleton-task="1">
+  <!-- 2a: Search Bar -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="2">
+  <!-- 3a: Filter Bar -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="3">
+  <!-- 3b: Filter Logic -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="4">
+  <!-- 3c: Filter Styles -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<!-- Reference snippet 1 | heading: 2a: Search Bar -->
+<template data-reference-snippet="1">
+<div class="search-bar" id="searchBar">
+  <input type="text" id="searchInput" placeholder="Search problems..." oninput="searchProblems()" aria-label="Search problems">
+  <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+</div>
+</template>
+
+<!-- Reference snippet 2 | heading: 3a: Filter Bar -->
+<template data-reference-snippet="2">
+<div class="filter-bar" id="filterBar">
+  <button class="filter-chip active" onclick="filterProblems('all')" data-filter="all">All</button>
+  <button class="filter-chip" onclick="filterProblems('unanswered')" data-filter="unanswered">Unanswered</button>
+  <button class="filter-chip" onclick="filterProblems('wrong')" data-filter="wrong">Wrong</button>
+  <button class="filter-chip" onclick="filterProblems('bookmarked')" data-filter="bookmarked">★ Bookmarked</button>
+  <button class="filter-chip" onclick="filterProblems('easy')" data-filter="easy">Easy</button>
+  <button class="filter-chip" onclick="filterProblems('medium')" data-filter="medium">Medium</button>
+  <button class="filter-chip" onclick="filterProblems('hard')" data-filter="hard">Hard</button>
+</div>
+</template>
+
+<!-- Reference snippet 3 | heading: 3b: Filter Logic -->
+<template data-reference-snippet="3">
+function filterProblems(filter){
+  // Update active chip
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.filter-chip[data-filter="'+filter+'"]')?.classList.add('active');
+
+  const bm=getBookmarks();
+  const state=getPracticeState(currentUnit);
+  const ans=state.answered||{};
+
+  document.querySelectorAll('.pc').forEach(el=>{
+    const id=el.id.replace('pc-','');
+    const prob=activeProbs.find(p=>String(p.id)===id);
+    if(!prob){el.style.display='none';return;}
+
+    let show=true;
+    if(filter==='unanswered')show=ans[id]===undefined;
+    else if(filter==='wrong'){
+      if(ans[id]===undefined){show=false;}
+      else if(prob.type==='mc'){show=(+ans[id])!==prob.ans;}
+      else{const v=parseFloat(ans[id]);show=!Number.isFinite(v)||Math.abs(v-prob.ans)>(prob.tol||0.1);}
+    }
+    else if(filter==='bookmarked')show=!!bm[id];
+    else if(filter==='easy')show=prob.diff==='easy';
+    else if(filter==='medium')show=prob.diff==='medium';
+    else if(filter==='hard')show=prob.diff==='hard';
+
+    el.style.display=show?'':'none';
+  });
+}
+</template>
+
+<!-- Reference snippet 4 | heading: 3c: Filter Styles -->
+<template data-reference-snippet="4">
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.filter-chip{
+  padding:6px 12px;border:1px solid var(--border);border-radius:20px;
+  background:transparent;color:var(--muted);font-size:12px;cursor:pointer;
+  font-family:'Space Mono',monospace;transition:all 0.2s;
+}
+.filter-chip:hover{border-color:var(--cyan);color:var(--cyan);}
+.filter-chip.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
+</template>

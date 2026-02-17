@@ -1,0 +1,64 @@
+<!-- Skeleton for stats_hub.html -->
+<!-- Source prompt: codex_prompts/codex_prompt_Q.md -->
+<!-- Generated scaffold only. Merge into the real file intentionally. -->
+
+<section data-skeleton-task="1">
+  <!-- 3a: Add Showcase Nav Button -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="2">
+  <!-- 3b: Achievements Page HTML -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="3">
+  <!-- 3c: Activity Heatmap -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<!-- Reference snippet 1 | heading: 3a: Add Showcase Nav Button -->
+<template data-reference-snippet="1">
+<button class="nav-btn" onclick="goPage('achievements')" data-page="achievements">Achievements</button>
+</template>
+
+<!-- Reference snippet 2 | heading: 3b: Achievements Page HTML -->
+<template data-reference-snippet="2">
+<section id="pg-achievements" class="page" role="tabpanel" aria-label="Achievements">
+  <header class="section-header">
+    <p class="section-tag">Your Progress</p>
+    <h2 class="section-title">Achievement <em>Showcase</em></h2>
+  </header>
+
+  <div class="achieve-stats" id="achieveStats"></div>
+  <div class="achieve-badges" id="achieveBadges">
+    <h3>Badges</h3>
+    <div id="achieveBadgeGrid"></div>
+  </div>
+  <div class="achieve-history" id="achieveHistory">
+    <h3>Activity Heatmap</h3>
+    <div class="heatmap" id="heatmapGrid"></div>
+  </div>
+</section>
+</template>
+
+<!-- Reference snippet 3 | heading: 3c: Activity Heatmap -->
+<template data-reference-snippet="3">
+function buildHeatmap(){
+  const grid=document.getElementById('heatmapGrid');
+  if(!grid)return;
+  const streak=getStreakData();
+  const history=streak.history||[];
+  const today=new Date();
+  let html='';
+
+  for(let i=89;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const dateStr=d.toISOString().slice(0,10);
+    const active=history.includes(dateStr);
+    const cls=active?'heatmap-active':'heatmap-empty';
+    html+=`<div class="heatmap-cell ${cls}" title="${dateStr}"></div>`;
+  }
+  grid.innerHTML=html;
+}
+</template>

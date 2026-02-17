@@ -1,0 +1,53 @@
+<!-- Skeleton for stats_hub.html -->
+<!-- Source prompt: codex_prompts/codex_prompt_Z.md -->
+<!-- Generated scaffold only. Merge into the real file intentionally. -->
+
+<section data-skeleton-task="1">
+  <!-- 2a: Update Home Page Hero -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="2">
+  <!-- 2c: Hero Styles -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="3">
+  <!-- 3a: Automated QA -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<!-- Reference snippet 1 | heading: 2a: Update Home Page Hero -->
+<template data-reference-snippet="1">
+<div class="hero-content">
+  <p class="section-tag">Free · Offline · No Sign-Up</p>
+  <h1 class="hero-title">Stats Learning <em>Hub</em></h1>
+  <p class="hero-desc">Master introductory statistics with interactive visualizers,
+    spaced repetition, and an ADHD-friendly learning system.
+    Built for self-learners and quant finance aspirants.</p>
+  <div class="hero-stats">
+    <span class="hero-stat">14 Units</span>
+    <span class="hero-divider">·</span>
+    <span class="hero-stat">145+ Problems</span>
+    <span class="hero-divider">·</span>
+    <span class="hero-stat">14 Visualizers</span>
+    <span class="hero-divider">·</span>
+    <span class="hero-stat">100% Free</span>
+  </div>
+</div>
+</template>
+
+<!-- Reference snippet 2 | heading: 2c: Hero Styles -->
+<template data-reference-snippet="2">
+.hero-stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+.hero-stat{font-family:'Space Mono',monospace;font-size:13px;color:var(--cyan);}
+.hero-divider{color:var(--muted);}
+</template>
+
+<!-- Reference snippet 3 | heading: 3a: Automated QA -->
+<template data-reference-snippet="3">
+# Run all test suites
+node tests/run_all.js
+node tests/run_extended.js
+node tests/benchmark.js
+</template>

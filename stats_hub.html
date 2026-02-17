@@ -12,6 +12,7 @@
 <body>
 
 <!-- SKIP NAV -->
+<div class="offline-banner" id="offlineBanner" style="display:none;" role="alert">📡 You're offline — progress is saved locally</div>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <noscript>
   <p style="padding:40px;text-align:center;color:#e6e4f0;font-family:sans-serif;">
@@ -393,6 +394,11 @@
   </div>
 </div>
 <script src="scripts/stats_hub.js" defer></script>
+<div class="install-banner" id="installBanner" style="display:none;">
+  <span class="install-text">📱 Install Stats Hub for offline access</span>
+  <button class="install-btn" id="installBtn" onclick="installPWA()">Install</button>
+  <button class="install-dismiss" onclick="dismissInstall()" aria-label="Dismiss">✕</button>
+</div>
 </body>
 </html>
 

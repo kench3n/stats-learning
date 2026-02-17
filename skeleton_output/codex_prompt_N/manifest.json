@@ -1,0 +1,39 @@
+{
+  "prompt": "codex_prompts/codex_prompt_N.md",
+  "generated_at_utc": "2026-02-17T19:56:44.880848+00:00",
+  "file_count": 4,
+  "files": [
+    {
+      "target_file": "manifest.json",
+      "target_exists": true,
+      "skeleton_file": "manifest.skeleton.json",
+      "section_count": 1,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "scripts/stats_hub.js",
+      "target_exists": true,
+      "skeleton_file": "scripts/stats_hub.skeleton.js",
+      "section_count": 4,
+      "snippet_count": 5,
+      "function_stub_count": 2
+    },
+    {
+      "target_file": "stats_hub.html",
+      "target_exists": true,
+      "skeleton_file": "stats_hub.skeleton.html",
+      "section_count": 2,
+      "snippet_count": 2,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "styles/stats_hub.css",
+      "target_exists": true,
+      "skeleton_file": "styles/stats_hub.skeleton.css",
+      "section_count": 3,
+      "snippet_count": 3,
+      "function_stub_count": 0
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "prompt": "codex_prompts/codex_prompt_U.md",
+  "generated_at_utc": "2026-02-17T19:56:45.377241+00:00",
+  "file_count": 1,
+  "files": [
+    {
+      "target_file": "scripts/stats_hub.js",
+      "target_exists": true,
+      "skeleton_file": "scripts/stats_hub.skeleton.js",
+      "section_count": 3,
+      "snippet_count": 3,
+      "function_stub_count": 8
+    }
+  ]
+}

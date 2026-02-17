@@ -1,0 +1,55 @@
+{
+  "prompt": "codex_prompts/codex_prompt_Y.md",
+  "generated_at_utc": "2026-02-17T19:56:45.643632+00:00",
+  "file_count": 6,
+  "files": [
+    {
+      "target_file": "tests/benchmark.js",
+      "target_exists": false,
+      "skeleton_file": "tests/benchmark.skeleton.js",
+      "section_count": 3,
+      "snippet_count": 3,
+      "function_stub_count": 1
+    },
+    {
+      "target_file": "tests/run_all.js",
+      "target_exists": true,
+      "skeleton_file": "tests/run_all.skeleton.js",
+      "section_count": 2,
+      "snippet_count": 2,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "tests/run_extended.js",
+      "target_exists": false,
+      "skeleton_file": "tests/run_extended.skeleton.js",
+      "section_count": 1,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "tests/validate_engagement.js",
+      "target_exists": false,
+      "skeleton_file": "tests/validate_engagement.skeleton.js",
+      "section_count": 1,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "tests/validate_new_units.js",
+      "target_exists": false,
+      "skeleton_file": "tests/validate_new_units.skeleton.js",
+      "section_count": 1,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "tests/validate_ui_features.js",
+      "target_exists": false,
+      "skeleton_file": "tests/validate_ui_features.skeleton.js",
+      "section_count": 1,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    }
+  ]
+}

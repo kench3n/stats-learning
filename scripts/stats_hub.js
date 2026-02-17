@@ -2246,6 +2246,64 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
   });
 }
 
+
+// ===================== PWA INSTALL =====================
+let deferredPrompt=null;
+
+if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    deferredPrompt=e;
+    if(typeof localStorage!=='undefined'&&localStorage.getItem('sh-install-dismissed'))return;
+    const banner=document.getElementById('installBanner');
+    if(banner)banner.style.display='flex';
+  });
+
+  window.addEventListener('appinstalled',function(){
+    const banner=document.getElementById('installBanner');
+    if(banner)banner.style.display='none';
+    deferredPrompt=null;
+    showToast('App installed! Access Stats Hub from your home screen.');
+  });
+
+  window.addEventListener('online',function(){
+    const b=document.getElementById('offlineBanner');
+    if(b)b.style.display='none';
+  });
+
+  window.addEventListener('offline',function(){
+    const b=document.getElementById('offlineBanner');
+    if(b)b.style.display='flex';
+  });
+
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){
+    if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+      document.addEventListener('DOMContentLoaded',function(){
+        const b=document.getElementById('offlineBanner');
+        if(b)b.style.display='flex';
+      });
+    }
+  }
+}
+
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(result){
+    if(result.outcome==='accepted')awardXP(25,'pwa-install');
+    deferredPrompt=null;
+    const banner=document.getElementById('installBanner');
+    if(banner)banner.style.display='none';
+  });
+}
+
+function dismissInstall(){
+  if(typeof document==='undefined')return;
+  const banner=document.getElementById('installBanner');
+  if(banner)banner.style.display='none';
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-install-dismissed','1');
+}
+
 let toastTimer=null;
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;

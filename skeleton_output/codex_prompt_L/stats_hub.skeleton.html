@@ -1,0 +1,65 @@
+<!-- Skeleton for stats_hub.html -->
+<!-- Source prompt: codex_prompts/codex_prompt_L.md -->
+<!-- Generated scaffold only. Merge into the real file intentionally. -->
+
+<section data-skeleton-task="1">
+  <!-- 1a: Timer UI -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="2">
+  <!-- 2a: Theme Toggle Button -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<section data-skeleton-task="3">
+  <!-- 3b: Shortcuts Help Overlay -->
+  <!-- TODO: implement markup updates for this section -->
+</section>
+
+<!-- Reference snippet 1 | heading: 1a: Timer UI -->
+<template data-reference-snippet="1">
+<div class="pomo-widget" id="pomoWidget">
+  <button class="pomo-toggle" id="pomoToggle" onclick="togglePomoPanel()" aria-label="Toggle study timer">⏱</button>
+  <div class="pomo-panel" id="pomoPanel" style="display:none;">
+    <div class="pomo-display" id="pomoDisplay">25:00</div>
+    <div class="pomo-label" id="pomoLabel">Focus Time</div>
+    <div class="pomo-controls">
+      <button onclick="startPomo()" id="pomoStart">Start</button>
+      <button onclick="pausePomo()" id="pomoPause" style="display:none;">Pause</button>
+      <button onclick="resetPomo()" id="pomoReset">Reset</button>
+    </div>
+    <div class="pomo-presets">
+      <button onclick="setPomoTime(15)" class="pomo-preset">15m</button>
+      <button onclick="setPomoTime(25)" class="pomo-preset active">25m</button>
+      <button onclick="setPomoTime(45)" class="pomo-preset">45m</button>
+    </div>
+    <div class="pomo-stats">
+      <span id="pomoSessions">0</span> sessions today
+    </div>
+  </div>
+</div>
+</template>
+
+<!-- Reference snippet 2 | heading: 2a: Theme Toggle Button -->
+<template data-reference-snippet="2">
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light/dark theme">🌙</button>
+</template>
+
+<!-- Reference snippet 3 | heading: 3b: Shortcuts Help Overlay -->
+<template data-reference-snippet="3">
+<div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none;" onclick="toggleShortcutsHelp()">
+  <div class="shortcuts-modal" onclick="event.stopPropagation();">
+    <h3>Keyboard Shortcuts</h3>
+    <div class="shortcut-row"><kbd>1</kbd> Home</div>
+    <div class="shortcut-row"><kbd>2</kbd> Roadmap</div>
+    <div class="shortcut-row"><kbd>3</kbd> Visualizer</div>
+    <div class="shortcut-row"><kbd>4</kbd> Practice</div>
+    <div class="shortcut-row"><kbd>5</kbd> Review</div>
+    <div class="shortcut-row"><kbd>T</kbd> Toggle Timer</div>
+    <div class="shortcut-row"><kbd>D</kbd> Toggle Theme</div>
+    <div class="shortcut-row"><kbd>?</kbd> This Help</div>
+    <button onclick="toggleShortcutsHelp()">Close</button>
+  </div>
+</div>
+</template>

@@ -1,0 +1,31 @@
+{
+  "prompt": "codex_prompts/codex_prompt_Z.md",
+  "generated_at_utc": "2026-02-17T19:56:45.697093+00:00",
+  "file_count": 3,
+  "files": [
+    {
+      "target_file": "CHANGELOG.md",
+      "target_exists": false,
+      "skeleton_file": "CHANGELOG.skeleton.md",
+      "section_count": 2,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "QA_CHECKLIST.md",
+      "target_exists": false,
+      "skeleton_file": "QA_CHECKLIST.skeleton.md",
+      "section_count": 1,
+      "snippet_count": 1,
+      "function_stub_count": 0
+    },
+    {
+      "target_file": "stats_hub.html",
+      "target_exists": true,
+      "skeleton_file": "stats_hub.skeleton.html",
+      "section_count": 3,
+      "snippet_count": 3,
+      "function_stub_count": 0
+    }
+  ]
+}

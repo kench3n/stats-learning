@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(git config:*)",
       "Bash(node:*)",
@@ -13,7 +14,18 @@
       "Bash(done)",
       "WebFetch(domain:claudelog.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(/workspace/.github/workflows/deploy.yml:*)",
+      "Bash(gh api:*)"
     ]
-  }
+  },
+  "enabledPlugins": {
+    "ralph-loop@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "outputStyle": "default",
+  "prefersReducedMotion": true
 }
