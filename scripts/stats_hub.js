@@ -361,7 +361,10 @@ function awardXP(amount,reason){
   if(!Number.isFinite(amount)||amount<=0)return;
   const data=getXPData();
   const oldLevel=data.level||1;
+  const oldTotal=data.total||0;
   data.total=(data.total||0)+amount;
+  const XP_MILESTONES=[100,250,500,1000,2500,5000];
+  XP_MILESTONES.forEach(function(m){if(oldTotal<m&&data.total>=m)showToast('\U0001f3af XP Milestone! You\'ve reached '+m+' XP!');});
   data.level=Math.floor(data.total/XP_PER_LEVEL)+1;
   if(!Array.isArray(data.history))data.history=[];
   data.history.push({date:todayStr(),earned:amount,reason:String(reason||'')});
