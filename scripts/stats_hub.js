@@ -14,6 +14,13 @@ function goPage(id){
   const nextPage=document.getElementById('page-'+id);
   if(!nextPage)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  (function(){
+    var bc=document.getElementById('breadcrumb');if(!bc)return;
+    var names={home:'Home',roadmap:'Roadmap',visualizer:'Visualizer',practice:'Practice',review:'Review',achievements:'Achievements',flashcards:'Flashcards',create:'Create'};
+    var label=names[id]||id;
+    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+currentUnit+(typeof UNIT_META!=='undefined'&&UNIT_META[currentUnit]?' – '+UNIT_META[currentUnit].name:'');
+    bc.innerHTML=label;
+  })();
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   nextPage.classList.add('active');
   const navTabs=document.querySelector('.nav-tabs[role="tablist"]');
@@ -1583,6 +1590,7 @@ function showUnitInfo(){
 function setUnit(n){
   if(!UNIT_META[n])return;
   currentUnit=n;
+  if(typeof document!=='undefined'){var bc=document.getElementById('breadcrumb');if(bc&&bc.textContent.startsWith('Practice')){var unitName=UNIT_META[n]?UNIT_META[n].name:'';bc.innerHTML='Practice <span class="breadcrumb-sep">›</span> Unit '+n+(unitName?' – '+unitName:'');}};
   if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-unit',String(n));}catch(e){};
   const sel=document.getElementById('unitSelect');if(sel)sel.value=String(n);
   const vsel=document.getElementById('vizUnitSelect');if(vsel)vsel.value=String(n);
