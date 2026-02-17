@@ -143,7 +143,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .viz-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:20px;max-width:1100px;margin-left:auto;margin-right:auto;}
 .viz-title{font-family:'Instrument Serif',serif;font-size:22px;margin-bottom:3px;}
 .viz-desc{color:var(--dim);font-size:13px;margin-bottom:20px;font-weight:300;}
-canvas{display:block;width:100%;border-radius:8px;}
+canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1px solid var(--border);}
 .controls{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;align-items:center;}
 .cg{display:flex;flex-direction:column;gap:4px;}
 .cl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
@@ -189,6 +189,7 @@ canvas{display:block;width:100%;border-radius:8px;}
 .unit-selector{
   display:flex;align-items:center;gap:10px;
   max-width:780px;margin:0 auto 18px;padding:0 24px;
+  position:relative;z-index:10;
 }
 .unit-selector select{
   font-family:'DM Sans',sans-serif;font-size:14px;
@@ -199,18 +200,18 @@ canvas{display:block;width:100%;border-radius:8px;}
 .unit-selector select:hover{border-color:var(--border-h);}
 
 .problems{max-width:780px;margin:0 auto;padding:0 24px 100px;}
-.pc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden;transition:border-color 0.3s;}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden;transition:border-color 0.3s;}
 .pc.correct{border-color:rgba(52,211,153,0.35);}.pc.incorrect{border-color:rgba(239,68,68,0.25);}
 .pc-head{padding:20px 22px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .pc-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);background:var(--bg3);padding:3px 9px;border-radius:4px;}
 .pc-diff{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:4px;}
 .d-e{background:rgba(52,211,153,0.1);color:var(--green);}.d-m{background:rgba(245,158,11,0.1);color:var(--amber);}.d-h{background:rgba(244,114,182,0.1);color:var(--pink);}
 .pc-topic{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);margin-left:auto;}
-.pc-body{padding:14px 22px 16px;}
-.pc-q{font-size:14px;line-height:1.7;}
+.pc-body{padding:16px 22px 18px;}
+.pc-q{font-size:15px;line-height:1.75;color:var(--text);}
 .pc-data{font-family:'Space Mono',monospace;font-size:13px;background:var(--bg);padding:9px 14px;border-radius:6px;margin:10px 0;color:var(--cyan);overflow-x:auto;}
-.choices{display:flex;flex-direction:column;gap:7px;padding:0 22px 18px;}
-.ch-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:all 0.2s;font-size:13px;color:var(--text);text-align:left;}
+.choices{display:flex;flex-direction:column;gap:8px;padding:0 22px 20px;}
+.ch-btn{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:all 0.2s;font-size:14px;color:var(--text);text-align:left;}
 .ch-btn:hover{border-color:var(--border-h);background:var(--bg3);}
 .ch-btn .lt{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);min-width:18px;}
 .ch-btn.sel{border-color:var(--cyan);background:rgba(6,182,212,0.05);}
@@ -223,7 +224,7 @@ canvas{display:block;width:100%;border-radius:8px;}
 .fr-row input::placeholder{color:var(--muted);}
 .fr-row button{font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 18px;background:var(--cyan-g);border:1px solid rgba(6,182,212,0.3);color:var(--cyan);border-radius:7px;cursor:pointer;}
 .fb{padding:0 22px 22px;display:none;}.fb.show{display:block;}
-.fb-box{padding:14px 18px;border-radius:7px;font-size:13px;line-height:1.7;}
+.fb-box{padding:16px 20px;border-radius:7px;font-size:14px;line-height:1.75;}
 .fb-ok{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.18);color:var(--green);}
 .fb-no{background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.12);color:#fca5a5;}
 .fb-box strong{color:var(--text);}.fb-box .ex{color:var(--dim);margin-top:4px;display:block;}

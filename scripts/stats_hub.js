@@ -1121,8 +1121,8 @@ function drawRegOut(){
 
   const cv=prepCanvas2('regCanvas',340);if(!cv)return;
   const {ctx,W,H}=cv,x0=24,y0=30;
-  ctx.fillStyle='#101018';ctx.fillRect(8,8,W-16,H-16);
-  ctx.strokeStyle='#2c2c48';ctx.strokeRect(8,8,W-16,H-16);
+  ctx.fillStyle='#181828';ctx.fillRect(8,8,W-16,H-16);
+  ctx.strokeStyle='#3a3a5c';ctx.strokeRect(8,8,W-16,H-16);
   ctx.fillStyle='#e6e4f0';ctx.font='16px DM Sans';ctx.fillText('Linear Regression Output',x0,y0);
   ctx.fillStyle='#8a88a0';ctx.font='12px DM Sans';ctx.fillText(row.name+' (n='+row.n+')',x0,y0+18);
   ctx.strokeStyle='#2c2c48';ctx.beginPath();ctx.moveTo(x0,y0+30);ctx.lineTo(W-24,y0+30);ctx.stroke();
