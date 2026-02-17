@@ -3495,6 +3495,25 @@ function saveDailyChallengeState(state){
   if(typeof localStorage!=='undefined')localStorage.setItem('sh-daily',JSON.stringify(state));
 }
 
+function updateDCStreak(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('dcStreak');if(!el)return;
+  var today=typeof todayStr==='function'?todayStr():new Date().toISOString().slice(0,10);
+  var dcData={count:0,lastDate:''};
+  try{var _d=JSON.parse(localStorage.getItem('sh-dc-streak')||'{}');if(_d&&typeof _d.count==='number')dcData=_d;}catch(e){}
+  var state=typeof getDailyChallengeState==='function'?getDailyChallengeState():{};
+  var doneToday=!!(state.completed&&state.completed[today]);
+  if(doneToday&&dcData.lastDate!==today){
+    dcData.count=(dcData.count||0)+1;dcData.lastDate=today;
+    try{localStorage.setItem('sh-dc-streak',JSON.stringify(dcData));}catch(e){}
+  } else if(!doneToday&&dcData.lastDate&&dcData.lastDate<today){
+    // Check if streak broken (missed a day)
+    var last=new Date(dcData.lastDate),now=new Date(today);
+    var diff=Math.floor((now-last)/(86400000));
+    if(diff>1){dcData.count=0;try{localStorage.setItem('sh-dc-streak',JSON.stringify(dcData));}catch(e){}}
+  }
+  el.textContent='\uD83D\uDD25 '+dcData.count;
+}
 function completeDailyChallenge(){
   const state=getDailyChallengeState();
   const today=todayStr();
@@ -3506,6 +3525,7 @@ function completeDailyChallenge(){
   awardXP(25,'daily-challenge-'+today);
   showToast('Daily Challenge complete! +25 XP 🏅');
   checkMilestones();
+  updateDCStreak();
 }
 
 function toggleCompareMode(){
@@ -3799,6 +3819,7 @@ function buildDailyChallenge(){
   const alreadyDone=!!(state.completed&&state.completed[today]);
   const dcDate=document.getElementById('dcDate');
   if(dcDate)dcDate.textContent=today;
+  updateDCStreak();
   const dcStatus=document.getElementById('dcStatus');
   const dcProblems=document.getElementById('dcProblems');
   if(!dcProblems)return;
