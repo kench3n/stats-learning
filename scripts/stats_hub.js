@@ -1316,6 +1316,7 @@ function showFB(id,ok,ex){
   const s=document.createElement('strong');
   s.textContent=ok?'Correct!':'Not quite.';
   b.appendChild(s);
+  const _ann=document.getElementById('a11yAnnounce');if(_ann)_ann.textContent=ok?'Correct!':'Incorrect. '+ex;
   const unit=allProbs[currentUnit]||[];
   const prob=unit.find(function(p){return String(p.id)===String(id);});
   if(prob&&prob.steps&&prob.steps.length){
@@ -3728,6 +3729,7 @@ function showToast(msg,duration=2000){
   toast.classList.add('toast-visible');
   if(toastTimer)clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>{toast.classList.remove('toast-visible');},duration);
+  const ann=document.getElementById('a11yAnnounce');if(ann)ann.textContent=msg;
 }
 
 function exportProgressJSON(){
