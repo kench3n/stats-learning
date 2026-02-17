@@ -820,6 +820,20 @@ function buildFormulas(unit){
   content.innerHTML=html;
 }
 
+function filterFormulas(query){
+  if(typeof document==='undefined')return;
+  const rows=document.querySelectorAll('.formula-row');
+  const q=(query||'').toLowerCase();
+  rows.forEach(function(row){
+    const name=row.querySelector('.formula-name');
+    const matches=!q||(name&&name.textContent.toLowerCase().indexOf(q)>=0);
+    row.style.display=matches?'':'none';
+  });
+  if(q){
+    const c=document.getElementById('formulaContent');
+    if(c&&c.style.display==='none')toggleFormulas();
+  }
+}
 function toggleFormulas(){
   if(typeof document==='undefined')return;
   const c=document.getElementById('formulaContent');

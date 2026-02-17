@@ -593,6 +593,9 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 
 /* ===================== FORMULA REFERENCE ===================== */
 .formula-panel{margin-bottom:16px;max-width:780px;margin-left:auto;margin-right:auto;padding:0 24px;}
+#formulaSearch{display:block;width:100%;box-sizing:border-box;padding:7px 12px;margin-bottom:6px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:'Space Mono',monospace;}
+#formulaSearch::placeholder{color:var(--muted);}
+#formulaSearch:focus{outline:none;border-color:var(--cyan);}
 .formula-toggle{
   background:var(--bg2);border:1px solid var(--border);border-radius:8px;
   padding:10px 16px;width:100%;text-align:left;cursor:pointer;
