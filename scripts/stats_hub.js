@@ -27,6 +27,17 @@ function goPage(id){
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();},50);}
   if(id==='review')updateReviewBadge();
   if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();}
+  if(id==='practice'&&typeof localStorage!=='undefined'){
+    const savedUnit=parseInt(localStorage.getItem('sh-filter-unit'))||1;
+    const savedDiff=localStorage.getItem('sh-filter-diff')||'all';
+    const savedSearch=localStorage.getItem('sh-filter-search')||'';
+    if(typeof setTimeout!=='undefined'){setTimeout(function(){
+      setUnit(savedUnit);
+      filterProblems(savedDiff);
+      const si=typeof document!=='undefined'?document.getElementById('searchInput'):null;
+      if(si&&savedSearch){si.value=savedSearch;searchProblems();}
+    },10);}
+  }
   if(id==='achievements'){buildHeatmap();buildAchievementsPage();}
   if(id==='flashcards'){initFlashcardsPage();}
   if(id==='create'){initCreatePage();}
@@ -1497,6 +1508,7 @@ function showUnitInfo(){
 function setUnit(n){
   if(!UNIT_META[n])return;
   currentUnit=n;
+  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-unit',String(n));}catch(e){};
   const sel=document.getElementById('unitSelect');if(sel)sel.value=String(n);
   const vsel=document.getElementById('vizUnitSelect');if(vsel)vsel.value=String(n);
   setElText('practiceUnitTag','Unit '+n+' - '+UNIT_META[n].name);
@@ -3503,6 +3515,7 @@ function searchProblems(){
   if(!query){
     document.querySelectorAll('.pc').forEach(el=>el.style.display='');
     setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+    if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-search','');}catch(e){};
     return;
   }
   const results=new Set();
@@ -3517,6 +3530,7 @@ function searchProblems(){
     el.style.display=results.has(id)?'':'none';
   });
   setElText('practiceUnitTag','Search: '+results.size+' result'+(results.size===1?'':'s'));
+  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-search',query);}catch(e){};
 }
 
 function clearSearch(){
@@ -3557,6 +3571,7 @@ function filterProblems(filter){
     else if(filter==='hard')show=prob.diff==='hard';
     el.style.display=show?'':'none';
   });
+  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-diff',filter);}catch(e){};
 }
 
 
