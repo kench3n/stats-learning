@@ -319,6 +319,76 @@ Add tag-based filtering for problems in addition to difficulty and search.
 - Deactivate by clicking again; "All" chip clears all topic filters
 - Save active tags to `sh-active-tags` localStorage
 
+
+### TASK: problem-card-collapse
+Add a collapse/expand toggle on each problem card's header. When collapsed, only the title row is visible.
+- Add a `<button class="card-collapse-btn">▾</button>` to the end of `.pc-head`
+- Clicking toggles `.pc-collapsed` class on the parent `.pc` element
+- In CSS: `.pc.pc-collapsed .pc-body, .pc.pc-collapsed .choices, .pc.pc-collapsed .fr-row, .pc.pc-collapsed .hint-row, .pc.pc-collapsed .fb, .pc.pc-collapsed .note-row, .pc.pc-collapsed .diff-vote-row { display:none; }`
+- Persist collapsed IDs per unit to `sh-collapsed-{unit}` in localStorage
+- Guard with typeof document
+
+### TASK: copy-problem-link
+Add a "Copy Link" button on each problem card that copies a deep link to that problem.
+- Link format: `window.location.origin + window.location.pathname + '#/practice?pid=' + probId`
+- Button: small 🔗 icon in pc-head (after card-collapse-btn)
+- Show toast: "Link copied!" on success
+- Guard with typeof navigator, typeof window
+
+### TASK: problem-stats-tooltip
+When hovering a problem card's difficulty badge, show a tooltip with community-wide stats.
+- Fake "community" stats: e.g., "83% answered correctly (based on 142 attempts)"
+- Use deterministic fake numbers seeded from probId: `attempts = 50 + (probId % 150)`, `rate = 40 + (probId % 50)`
+- Add a `title` attribute to each `.pc-diff` span with this text
+- Also update `.pc-diff` CSS to have `cursor:help`
+
+### TASK: formula-favorites
+Let users mark formula rows as favorites.
+- Add a `<button class="formula-fav-btn">☆</button>` to each `.formula-row`
+- Clicking toggles `★` and saves formula name to `sh-formula-favs` in localStorage
+- Add a "Favorites" filter button above formulas that, when active, shows only favorited rows
+- Style with `.formula-fav-btn`, `.formula-fav-btn.active`
+
+### TASK: practice-timer-summary
+After the practice session timer completes (Pomodoro), show a summary of what was accomplished.
+- In `pomoComplete()`, also read `sessionData.problemsAnswered` and `sessionData.correct`
+- Append to the pomoComplete toast: e.g., "You solved 7 problems (5 correct) in 25 min!"
+- No new UI needed — just enrich the existing toast message
+
+### TASK: breadcrumb-navigation
+Add a breadcrumb/path indicator below the navigation tabs showing the current page and unit.
+- HTML: `<div class="breadcrumb" id="breadcrumb">Home</div>` between nav and content
+- Update in `goPage(id)`: set breadcrumb text to page name
+- For practice page: also show current unit e.g. "Practice > Unit 1: Descriptive Statistics"
+- Style with `.breadcrumb`, `.breadcrumb-sep`
+
+### TASK: problem-comparison-mode
+Add a "Compare Mode" toggle in the Practice page that shows two problems side by side.
+- Button "Compare Mode" in progress-actions area
+- Toggles `.compare-mode` class on `#probContainer`
+- In CSS: `.compare-mode .pc { display:inline-block; width:calc(50% - 10px); vertical-align:top; margin:5px; }`
+- No JS problem logic changes needed — just layout toggle
+
+### TASK: copy-formula-button
+Add a "Copy" button on each formula row to copy the formula text to clipboard.
+- Button: `<button class="formula-copy-btn" title="Copy formula">⎘</button>` after each formula-eq span
+- On click: copy `.formula-eq` text to clipboard, show toast "Formula copied!"
+- Guard with typeof navigator, typeof document
+
+### TASK: note-word-count
+Show live word count below the note input on each problem card.
+- When the note input changes, update a `<span class="note-wc">0 words</span>` below it
+- On input: count words in the note value (split by whitespace), display "N word(s)"
+- CSS: `.note-wc { font-size:10px; color:var(--muted); padding:0 12px 4px; }`
+- Guard with typeof document
+
+### TASK: unit-progress-ring
+On the Home page quick stats row, add a unit completion progress ring (SVG) showing % of units with >=1 answer.
+- Add a small SVG circle (40x40) to the quick-stats-row as a 5th stat
+- Calculate: units_started / MAX_UNIT * 100
+- Use an SVG stroke-dasharray / stroke-dashoffset technique
+- Label: "Units Started" below the ring
+
 ---
 
 ## RULES (ALWAYS)
