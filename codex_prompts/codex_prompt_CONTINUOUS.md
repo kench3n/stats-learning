@@ -165,6 +165,87 @@ Also generate a general "Course Completion" certificate when overall accuracy ac
 
 ---
 
+
+### TASK: keyboard-shortcut-help-panel
+Add a persistent floating help panel showing all keyboard shortcuts, accessible via the ? key.
+- When ? is pressed, toggle a modal/panel showing ALL keyboard shortcuts in a table
+- Include: 1-5 (units), J/K (scroll), T (timer), D (theme), R (review), Escape (close)
+- Style as `.shortcuts-quick-ref` with a styled table: key column | action column
+- Guard with typeof document
+- Update the existing shortcuts overlay to include the new additions from previous tasks
+
+### TASK: pomodoro-session-history
+Track Pomodoro session history in localStorage key `sh-pomodoro-log`.
+- On each timer completion (25-min focus), push `{date: todayStr(), minutes: 25}` to the log
+- Show last 5 sessions in a `.pomodoro-history` div below the timer controls
+- Format: "Today: 2 sessions (50 min)" — group by date
+- Guard with typeof localStorage
+
+### TASK: search-bar-suggestions
+The search bar in the Practice page currently filters problems live. Add 4 shortcut suggestion chips below it.
+- Chips: "Hypothesis Test", "Confidence Interval", "Normal Distribution", "Regression"
+- Clicking a chip sets the search bar value to that term and triggers filtering
+- Style as `.search-chip` buttons with the existing `.filter-chip` look
+- Use the existing search input with id `searchInput`
+
+### TASK: unit-overview-modal
+Clicking the unit selector dropdown label should show a quick modal with a summary of that unit.
+- Add a `.unit-info-btn` (i) button next to the unit selector
+- On click, show a small modal/overlay with: unit name, topic list, problem count, avg difficulty
+- Style with `.unit-info-modal`, `.unit-info-topic-list`
+- Pull data from UNIT_META and allProbs
+- Guard with typeof document
+
+### TASK: flashcard-keyboard-shortcuts
+Add keyboard shortcuts for the Flashcard page when it is active.
+- Space: flip card (toggleFlashcard / flipCard equivalent)
+- ArrowRight: mark as "Know" (the green button click)
+- ArrowLeft: mark as "Unsure" (the red/pink button click)
+- Only active when page-flashcards is the active page
+- Guard with typeof document, check activePage === 'flashcards'
+
+### TASK: print-problem-set
+Add a "Print Problems" button on the Practice page that opens a print-friendly version.
+- Button in progress-actions area: "Print Set"
+- Opens new window with all active problems (filtered/shown ones) in a print-friendly HTML layout
+- No answer key — just the problems, formatted in LaTeX-like style
+- Uses `window.open` with `window.print()` auto-triggered
+- Guard with typeof window
+
+### TASK: difficulty-distribution-chart
+In the Practice page progress panel, add a small bar chart showing difficulty distribution for the current unit.
+- After `buildProgressPanel()`, add a canvas showing % easy / medium / hard for active unit
+- Canvas id: `diffChart`, width 200, height 60
+- Bars colored: green (easy), amber (medium), red (hard)
+- Label with percentages
+- Guard with typeof document
+
+### TASK: review-due-date-display
+On the Flashcard/Review page, show the next due date for each card in the review deck.
+- In `updateReviewBadge()`, for the top 3 due cards, show the problem text snippet and due date
+- Render in `#reviewNextUp` div (add to HTML if not present)
+- Format: "Problem #42 — Due today" or "Due in 2 days"
+- Guard with typeof document
+
+### TASK: notes-export
+Add an "Export Notes" button to the Practice page that exports all saved notes as a text file.
+- In progress-actions: "Export Notes" button
+- Gathers all notes from `sh-notes` localStorage key
+- Formats as plain text: "Problem #ID (Unit N): note text"
+- Downloads as `stats-hub-notes-YYYY-MM-DD.txt`
+- Guard with typeof Blob, typeof document
+
+### TASK: problem-timer
+Add a per-problem timer that shows how long the user has spent on the current problem.
+- Each problem card gets a small timer display: "⏱ 0:00"
+- Timer starts when the card appears in viewport (IntersectionObserver or scroll event)
+- Stops when the user submits an answer (ansMC / ansFR)
+- Just display — no penalty/scoring based on time
+- Element id: `timer-{probId}`, updated with setInterval every second
+- Guard with typeof IntersectionObserver and typeof document
+
+---
+
 ## RULES (ALWAYS)
 - NEVER modify tests/
 - Guard document/window/localStorage/navigator with typeof checks
