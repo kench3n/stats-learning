@@ -384,6 +384,12 @@
   <input type="text" id="searchInput" placeholder="Search problems..." oninput="searchProblems()" aria-label="Search problems">
   <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
 </div>
+<div class="search-suggestions" id="searchSuggestions">
+  <button class="search-chip" onclick="applySearchChip('Hypothesis Test')">Hypothesis Test</button>
+  <button class="search-chip" onclick="applySearchChip('Confidence Interval')">Confidence Interval</button>
+  <button class="search-chip" onclick="applySearchChip('Normal Distribution')">Normal Distribution</button>
+  <button class="search-chip" onclick="applySearchChip('Regression')">Regression</button>
+</div>
 <div class="filter-bar" id="filterBar">
   <button class="filter-chip active" onclick="filterProblems('all')" data-filter="all">All</button>
   <button class="filter-chip" onclick="filterProblems('unanswered')" data-filter="unanswered">Unanswered</button>

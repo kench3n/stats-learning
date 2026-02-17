@@ -3347,6 +3347,11 @@ function clearSearch(){
   searchProblems();
   setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
 }
+function applySearchChip(term){
+  if(typeof document==='undefined')return;
+  const input=document.getElementById('searchInput');
+  if(input){input.value=term;searchProblems();}
+}
 
 function filterProblems(filter){
   if(typeof document==='undefined')return;

@@ -829,6 +829,9 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .search-bar input{flex:1;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Space Mono',monospace;}
 .search-bar input:focus{border-color:var(--cyan);outline:none;}
 .search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;}
+.search-suggestions{display:flex;flex-wrap:wrap;gap:6px;max-width:780px;margin:-4px auto 8px;padding:0 24px;}
+.search-chip{padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
+.search-chip:hover{border-color:var(--cyan);color:var(--cyan);}
 
 .filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;max-width:780px;margin-left:auto;margin-right:auto;padding:0 24px;}
 .filter-chip{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
