@@ -1092,3 +1092,5 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .formula-fav-filter.active,.formula-fav-filter:hover{border-color:var(--amber);color:var(--amber);}
 .prob-link-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 4px;opacity:0.6;transition:opacity 0.2s,color 0.2s;}
 .prob-link-btn:hover{opacity:1;color:var(--cyan);}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@media(prefers-reduced-motion:no-preference){.pc{animation:cardIn 0.2s ease both;}}
