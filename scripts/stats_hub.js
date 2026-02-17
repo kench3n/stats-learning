@@ -1282,11 +1282,36 @@ function showFB(id,ok,ex){
   b.textContent='';
   const s=document.createElement('strong');
   s.textContent=ok?'Correct!':'Not quite.';
-  const sp=document.createElement('span');
-  sp.className='ex';
-  sp.textContent=ex;
   b.appendChild(s);
-  b.appendChild(sp);
+  const unit=allProbs[currentUnit]||[];
+  const prob=unit.find(function(p){return String(p.id)===String(id);});
+  if(prob&&prob.steps&&prob.steps.length){
+    const stepsDiv=document.createElement('div');
+    stepsDiv.className='steps-container';
+    prob.steps.forEach(function(step,i){
+      const d=document.createElement('div');
+      d.className='step hidden';
+      d.id='step-'+id+'-'+i;
+      const num=document.createElement('span');
+      num.className='step-num';
+      num.textContent='Step '+(i+1)+': ';
+      d.appendChild(num);
+      d.appendChild(document.createTextNode(step));
+      stepsDiv.appendChild(d);
+    });
+    const revBtn=document.createElement('button');
+    revBtn.className='step-reveal-btn';
+    revBtn.id='stepBtn-'+id;
+    revBtn.textContent='Show Step 1 →';
+    revBtn.onclick=function(){revealNextStep(String(id),prob.steps.length);};
+    stepsDiv.appendChild(revBtn);
+    b.appendChild(stepsDiv);
+  }else{
+    const sp=document.createElement('span');
+    sp.className='ex';
+    sp.textContent=ex;
+    b.appendChild(sp);
+  }
   pc.classList.add(ok?'correct':'incorrect');
   if(ok){
     spawnConfetti();
@@ -1312,7 +1337,7 @@ function setUnit(n){
 }
 
 allProbs[2]=[
-  {id:101,unit:2,diff:'easy',topic:'Z-score',q:'Compute z for x=78, mu=70, sigma=4.',data:null,type:'fr',ans:2,tol:0.01,ex:'z=(78-70)/4=2.',hint:'Use z = (x − μ) / σ. What are μ and σ here?'},
+  {id:101,unit:2,diff:'easy',topic:'Z-score',q:'Compute z for x=78, mu=70, sigma=4.',data:null,type:'fr',ans:2,tol:0.01,ex:'z=(78-70)/4=2.',hint:'Use z = (x − μ) / σ. What are μ and σ here?',steps:['Identify the values: x = 78, μ = 70, σ = 4','Apply the z-score formula: z = (x − μ) / σ','Substitute: z = (78 − 70) / 4 = 8 / 4','Result: z = 2.0']},
   {id:102,unit:2,diff:'easy',topic:'68-95-99.7',q:'Within 2 SD of the mean is about:',data:null,type:'mc',ans:2,tol:0.01,ch:['50%','68%','95%','99.7%'],ex:'Rule: about 95% is within 2 SD.',hint:'Recall the 68-95-99.7 empirical rule.'},
   {id:103,unit:2,diff:'medium',topic:'Percentile',q:'For z=1.25, enter percentile as a percent.',data:null,type:'fr',ans:89.44,tol:0.2,ex:'P(Z<1.25)=0.8944, so 89.44%.',hint:'Find P(Z < 1.25) using standard normal table.'},
   {id:104,unit:2,diff:'medium',topic:'Relative Position',q:'A: x=82,mu=75,s=5. B: x=88,mu=80,s=4. Who is higher relative to class?',data:null,type:'mc',ans:1,tol:0.01,ch:['A','B','Equal','Cannot compare'],ex:'zA=1.4 and zB=2.0; B is higher.',hint:'Compute z = (x − μ) / σ for each student then compare.'},
@@ -3744,6 +3769,125 @@ function importProgressJSON(file){
   };
   reader.onerror=()=>{showToast('Invalid file format');};
   reader.readAsText(file);
+}
+
+let stepProgress={};
+
+function revealNextStep(probId,total){
+  if(typeof document==='undefined')return;
+  if(!stepProgress[probId])stepProgress[probId]=0;
+  const idx=stepProgress[probId];
+  if(idx>=total)return;
+  const step=document.getElementById('step-'+probId+'-'+idx);
+  if(step)step.classList.remove('hidden');
+  stepProgress[probId]++;
+  const btn=document.getElementById('stepBtn-'+probId);
+  if(stepProgress[probId]>=total){
+    if(btn)btn.style.display='none';
+  }else{
+    if(btn)btn.textContent='Show Step '+(stepProgress[probId]+1)+' →';
+  }
+}
+
+const TUTOR_KB=[
+  {keywords:['mean','average'],response:'The mean (average) is calculated by summing all values and dividing by the count: x̄ = Σxᵢ / n'},
+  {keywords:['median'],response:'The median is the middle value when data is sorted. For even n, average the two middle values.'},
+  {keywords:['mode'],response:'The mode is the most frequently occurring value in a dataset. A dataset can have multiple modes.'},
+  {keywords:['standard deviation','std dev','stdev'],response:'Standard deviation measures spread: σ = √(Σ(xᵢ - x̄)² / n). Larger σ = more spread.'},
+  {keywords:['z-score','z score'],response:'Z-score tells how many standard deviations a value is from the mean: z = (x - μ) / σ'},
+  {keywords:['normal distribution','bell curve'],response:'The normal distribution is symmetric and bell-shaped. ~68% within 1σ, ~95% within 2σ, ~99.7% within 3σ.'},
+  {keywords:['correlation','r value'],response:'Correlation (r) measures linear relationship strength. r = 1 is perfect positive, r = -1 is perfect negative, r = 0 is no linear relationship.'},
+  {keywords:['regression'],response:'Linear regression fits ŷ = a + bx to data. Slope b = r(sᵧ/sₓ). R² tells proportion of variance explained.'},
+  {keywords:['p-value','p value'],response:'P-value is the probability of observing results at least as extreme as the data, assuming H₀ is true. Small p (< α) → reject H₀.'},
+  {keywords:['confidence interval','ci'],response:'A confidence interval estimates a parameter: x̄ ± z*(σ/√n). A 95% CI means 95% of such intervals contain the true parameter.'},
+  {keywords:['hypothesis','h0','h1'],response:'H₀ (null): no effect/difference. H₁ (alternative): there IS an effect. We test if data provides enough evidence to reject H₀.'},
+  {keywords:['chi-square','chi square'],response:'Chi-square tests compare observed vs expected frequencies: χ² = Σ(O-E)²/E. Used for goodness-of-fit and independence tests.'},
+  {keywords:['anova','f-test'],response:'ANOVA compares means across 3+ groups. F = MSB/MSW. Large F → groups differ significantly.'},
+  {keywords:['bayes','posterior','prior'],response:'Bayes’ theorem: P(A|B) = P(B|A)P(A)/P(B). Prior beliefs are updated with data to get posterior probability.'},
+  {keywords:['binomial'],response:'Binomial: P(X=k) = C(n,k)p^k(1-p)^(n-k). Mean = np, SD = √(np(1-p)). Used for fixed n trials with two outcomes.'},
+  {keywords:['clt','central limit'],response:'Central Limit Theorem: for large n, the sampling distribution of x̄ is approximately Normal regardless of population shape.'},
+];
+
+function findTutorResponse(query){
+  const q=query.toLowerCase();
+  const match=TUTOR_KB.find(function(entry){return entry.keywords.some(function(kw){return q.includes(kw);});});
+  if(match)return match.response;
+  return "I'm not sure about that. Try asking about specific topics like mean, z-score, regression, or p-value. For detailed help, check the formula reference in Practice mode.";
+}
+
+function toggleTutor(){
+  if(typeof document==='undefined')return;
+  const panel=document.getElementById('tutorPanel');
+  if(panel)panel.style.display=panel.style.display==='none'?'flex':'none';
+}
+
+function sendTutorMessage(){
+  if(typeof document==='undefined')return;
+  const input=document.getElementById('tutorInput');
+  if(!input||!input.value.trim())return;
+  const query=input.value.trim();
+  input.value='';
+  addTutorMessage(query,'user');
+  const response=findTutorResponse(query);
+  setTimeout(function(){addTutorMessage(response,'tutor');},300+Math.random()*500);
+}
+
+function addTutorMessage(text,sender){
+  if(typeof document==='undefined')return;
+  const container=document.getElementById('tutorMessages');
+  if(!container)return;
+  const msg=document.createElement('div');
+  msg.className='tutor-msg tutor-msg-'+sender;
+  msg.textContent=text;
+  container.appendChild(msg);
+  container.scrollTop=container.scrollHeight;
+}
+
+const NLP_PATTERNS=[
+  {
+    regex:/z.?score.*xs*=?s*([d.]+).*means*=?s*([d.]+).*(?:std|stdev|sigma|sd)s*=?s*([d.]+)/i,
+    solve:function(m){const z=(+m[1]-+m[2])/+m[3];return{answer:'z = ('+m[1]+' − '+m[2]+') / '+m[3]+' = '+z.toFixed(4),steps:['x = '+m[1]+', μ = '+m[2]+', σ = '+m[3],'z = (x − μ) / σ','z = ('+m[1]+' − '+m[2]+') / '+m[3],'z = '+z.toFixed(4)]};},
+  },
+  {
+    regex:/mean.*ofs+([d.,s]+)/i,
+    solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const avg=mean(vals);return{answer:'Mean = '+avg.toFixed(4),steps:['Values: '+vals.join(', '),'Sum = '+vals.reduce(function(a,b){return a+b;},0),'n = '+vals.length,'Mean = Sum / n = '+avg.toFixed(4)]};},
+  },
+  {
+    regex:/(?:standard deviation|stdev|std dev).*ofs+([d.,s]+)/i,
+    solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const sd=stdev(vals);return{answer:'σ = '+sd.toFixed(4),steps:['Values: '+vals.join(', '),'Mean = '+mean(vals).toFixed(4),'σ = √(Σ(xᵢ − x̄)² / n)','σ = '+sd.toFixed(4)]};},
+  },
+  {
+    regex:/median.*ofs+([d.,s]+)/i,
+    solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const med=median(vals);return{answer:'Median = '+med,steps:['Values sorted: '+sorted(vals).join(', '),'n = '+vals.length,'Median = '+med]};},
+  },
+];
+
+function solveNLP(){
+  if(typeof document==='undefined')return;
+  const input=document.getElementById('nlpInput');
+  const result=document.getElementById('nlpResult');
+  if(!input||!result)return;
+  const query=input.value.trim();
+  if(!query)return;
+  for(let i=0;i<NLP_PATTERNS.length;i++){
+    const pattern=NLP_PATTERNS[i];
+    const match=query.match(pattern.regex);
+    if(match){
+      const solution=pattern.solve(match);
+      let html='<div class="nlp-answer">'+solution.answer+'</div>';
+      if(solution.steps){
+        html+='<div class="nlp-steps">';
+        solution.steps.forEach(function(s,j){html+='<div class="step"><span class="step-num">Step '+(j+1)+':</span> '+s+'</div>';});
+        html+='</div>';
+      }
+      result.innerHTML=html;
+      result.style.display='block';
+      awardXP(3,'nlp-solve');
+      return;
+    }
+  }
+  result.innerHTML='<div class="nlp-no-match">I couldn\'t parse that. Try formats like:<br>• "z-score if x=85, mean=70, stdev=5"<br>• "mean of 4, 7, 9, 12, 15"<br>• "standard deviation of 10, 20, 30"</div>';
+  result.style.display='block';
 }
 
 setUnit(1);

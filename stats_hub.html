@@ -356,6 +356,16 @@
   <button class="filter-chip" onclick="filterProblems('medium')" data-filter="medium">Medium</button>
   <button class="filter-chip" onclick="filterProblems('hard')" data-filter="hard">Hard</button>
 </div>
+<div class="nlp-bar" id="nlpBar">
+  <input type="text" id="nlpInput" placeholder="Try: 'What is the z-score if x=85, mean=70, stdev=5?'" onkeydown="if(event.key==='Enter')solveNLP()" aria-label="Natural language problem input">
+  <button onclick="solveNLP()">Solve</button>
+</div>
+<div class="nlp-result" id="nlpResult" style="display:none;"></div>
+<div class="nlp-bar" id="nlpBar">
+  <input type="text" id="nlpInput" placeholder="Try: 'What is the z-score if x=85, mean=70, stdev=5?'" onkeydown="if(event.key==='Enter')solveNLP()" aria-label="Natural language problem input">
+  <button onclick="solveNLP()">Solve</button>
+</div>
+<div class="nlp-result" id="nlpResult" style="display:none;"></div>
 <div class="formula-panel" id="formulaPanel">
   <button class="formula-toggle" id="formulaToggle" onclick="toggleFormulas()" aria-expanded="false">
     📐 Formulas <span id="formulaArrow">▸</span>
@@ -570,6 +580,18 @@
   <button class="install-btn" id="installBtn" onclick="installPWA()">Install</button>
   <button class="install-dismiss" onclick="dismissInstall()" aria-label="Dismiss">✕</button>
 </div>
+<div class="tutor-panel" id="tutorPanel" style="display:none;">
+  <div class="tutor-header">
+    <span>🤖 Stats Tutor</span>
+    <button onclick="toggleTutor()" aria-label="Close tutor">✕</button>
+  </div>
+  <div class="tutor-messages" id="tutorMessages"></div>
+  <div class="tutor-input-row">
+    <input type="text" id="tutorInput" placeholder="Ask a stats question..." onkeydown="if(event.key==='Enter')sendTutorMessage()" aria-label="Tutor input">
+    <button onclick="sendTutorMessage()">Send</button>
+  </div>
+</div>
+<button class="tutor-toggle" id="tutorToggle" onclick="toggleTutor()" aria-label="Open stats tutor">🤖</button>
 </body>
 </html>
 
