@@ -3416,9 +3416,32 @@ function buildHeatmap(){
   grid.innerHTML=html;
 }
 
+function buildLeaderboard(){
+  if(typeof document==='undefined')return;
+  var rows=document.getElementById('leaderboardRows');
+  if(!rows)return;
+  var userXP=0;
+  if(typeof getXPData!=='undefined'){var xd=getXPData();userXP=xd.total||0;}
+  var fakeEntries=[
+    {name:'Alex',xp:4200},
+    {name:'Taylor',xp:3800},
+    {name:'Jordan',xp:3150},
+    {name:'Morgan',xp:2900},
+    {name:'Casey',xp:2400}
+  ];
+  var allEntries=fakeEntries.concat([{name:'You',xp:userXP}]);
+  allEntries.sort(function(a,b){return b.xp-a.xp;});
+  var html='';
+  allEntries.forEach(function(e,i){
+    var isYou=e.name==='You';
+    html+='<div class="leaderboard-row'+(isYou?' leaderboard-you':'')+'"><span class="leaderboard-rank">'+(i+1)+'</span><span class="leaderboard-name">'+e.name+'</span><span class="leaderboard-xp">'+e.xp.toLocaleString()+' XP</span></div>';
+  });
+  rows.innerHTML=html;
+}
 function buildAchievementsPage(){
   if(typeof document==='undefined')return;
   buildCalendar();
+  buildLeaderboard();
   showAnalytics('accuracy',null);
   const statsEl=document.getElementById('achieveStats');
   const badgeGrid=document.getElementById('achieveBadgeGrid');
