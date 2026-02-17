@@ -536,6 +536,78 @@ Show a random motivational statistics/learning quote on the Home page hero.
 - Display as `<blockquote class="motivational-quote">` in the hero section
 - Style: italic, muted color, smaller font
 
+### TASK: keyboard-shortcut-cheatsheet-download
+Add a "Download Cheatsheet" button to the shortcuts overlay that exports all keyboard shortcuts as a plain text file.
+- Button: `<button class="shortcut-dl-btn" onclick="downloadShortcutCheatsheet()">⬇ Download Cheatsheet</button>` inside `.shortcut-overlay`
+- `downloadShortcutCheatsheet()` builds a string of all shortcuts (from hardcoded list), creates a Blob, downloads as `stats-hub-shortcuts.txt`
+- Guard with `typeof Blob`, `typeof document`
+
+### TASK: problem-card-swipe-gesture
+Add left/right swipe gesture support on touch devices for MC problem answer selection.
+- Add `touchstart` / `touchend` listeners on `.pc` elements in `buildProblems()`
+- Swipe right → select first MC answer; swipe left → select last MC answer
+- Only activate if `Math.abs(deltaX) > 60` and `Math.abs(deltaY) < 40`
+- Guard with `typeof document`, only add if MC problem
+
+### TASK: practice-page-progress-summary
+Add a sticky progress summary bar that appears at the top of the screen when scrolling down in practice mode.
+- Show: `N correct / M answered` and a mini progress bar
+- Only show when the main score-bar is scrolled out of view (use IntersectionObserver on score-bar)
+- HTML: `<div class="sticky-progress" id="stickyProgress" style="display:none;">…</div>` — insert before nav
+- CSS: `position:fixed; top:0; left:0; right:0; z-index:200`
+- Update in `ansMC`, `ansFR`, `updateScore`
+
+### TASK: formula-search-highlight
+Highlight the matching search term in formula names and equations when searching.
+- In `filterFormulas(val)`, after filtering, wrap matches with `<mark>` tags
+- Case-insensitive; only highlight when `val.length > 0`
+- CSS: `mark { background: var(--amber); color: var(--bg); border-radius: 2px; padding: 0 2px; }`
+- Guard with typeof document
+
+### TASK: unit-completion-confetti
+When a user answers ALL problems in a unit correctly for the first time, show a confetti burst.
+- Detect in `ansMC` / `ansFR`: if all `answered[id]` === 'correct' for all activeProbs
+- `showConfetti()`: create 40 small colored divs, animate them falling from top using CSS animation `@keyframes confettiFall`
+- Auto-remove after 2 seconds
+- Guard with typeof document; one-time per unit (track in `sh-confetti-done-{unit}`)
+
+### TASK: home-stats-animated-counters
+Animate the quick stats numbers on the Home page when they first render.
+- In `buildQuickStats()`, after setting textContent, use `requestAnimationFrame` to count up from 0
+- Duration: 600ms, easing: linear
+- Guard with `typeof requestAnimationFrame !== 'undefined'`
+- Only animate when switching to home page (track with a flag `_statsAnimated`)
+
+### TASK: problem-card-share-text
+Add a "Share" button on each problem card that copies a formatted problem summary to clipboard.
+- Button `<button class="prob-share-btn" onclick="shareProblem('${p.id}')">Share</button>` in pc-head
+- `shareProblem(id)`: looks up problem, formats as text: `"Stats Hub Problem #N (Unit U): [question]"`, copies to clipboard
+- Guard with `typeof navigator !== 'undefined' && typeof navigator.clipboard !== 'undefined'`
+- CSS: `.prob-share-btn` — small, muted style like prob-link-btn
+
+### TASK: visualizer-unit-info-panel
+Add a collapsible "Unit Info" panel on the visualizer page showing key facts about the currently selected unit.
+- HTML: `<div class="viz-unit-info" id="vizUnitInfo"><button onclick="toggleVizInfo()">ℹ Unit Info ▸</button><div class="viz-unit-info-body" id="vizUnitInfoBody" style="display:none;"></div></div>` — below the dataset selector
+- `buildVizUnitInfo(unit)`: populate with unit name, XP available, # problems, topics covered
+- CSS: `.viz-unit-info`, `.viz-unit-info-body`
+- Call in `setUnit()` when on visualizer page
+
+### TASK: practice-mastery-level-indicator
+Show a mastery level (Novice → Apprentice → Practitioner → Expert → Master) next to the unit filter.
+- Calculate from % correct in the unit: 0-20% Novice, 21-40% Apprentice, 41-60% Practitioner, 61-80% Expert, 81-100% Master
+- HTML: `<span class="mastery-badge" id="masteryBadge">Novice</span>` — placed after sort dropdown
+- `updateMasteryBadge(unit)`: reads practice state for unit, calculates %, sets text and data-level attribute for CSS coloring
+- CSS: `.mastery-badge[data-level="master"]{ color:var(--amber); }` etc.
+- Call in `buildProblems()`, `ansMC()`, `ansFR()`
+
+### TASK: daily-challenge-streak
+Add a "Daily Challenge Streak" counter — separate from the general learning streak.
+- Track in `sh-dc-streak` = `{count, lastDate}` localStorage
+- `updateDCStreak()`: if today !== lastDate, check if `sh-dc-done-{todayStr()}` exists; if so increment count else reset
+- Show `<span class="dc-streak" id="dcStreak">🔥 0</span>` next to the daily challenge header
+- Call `updateDCStreak()` in `buildDailyChallenge()` and in the daily challenge answer handler
+- CSS: `.dc-streak { font-size:13px; color:var(--amber); }`
+
 ---
 
 ## RULES (ALWAYS)
