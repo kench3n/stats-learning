@@ -1317,6 +1317,28 @@ function updateReviewBadge(){
     else if(count>0)desc.textContent='You have '+count+' card'+(count===1?'':'s')+' due for review.';
     else desc.textContent='No cards due right now. Keep practicing and check back tomorrow.';
   }
+
+  // Show next up cards
+  var nextUpEl=document.getElementById('reviewNextUp');
+  if(nextUpEl){
+    var dueIds=getDueCards();
+    var top3=dueIds.slice(0,3);
+    if(!top3.length){nextUpEl.innerHTML='';return;}
+    var today=todayStr();
+    var html='<div class="review-next-title">Up Next</div>';
+    top3.forEach(function(id){
+      var reviewData=getReviewData();
+      var card=reviewData[id];
+      var prob=findProblemById(id);
+      if(!prob)return;
+      var dueDate=card&&card.next?card.next:today;
+      var daysUntil=Math.round((new Date(dueDate)-new Date(today))/(1000*60*60*24));
+      var dueLabel=daysUntil<=0?'Due today':daysUntil===1?'Due tomorrow':'Due in '+daysUntil+' days';
+      var snippet=prob.q.length>60?prob.q.slice(0,60)+'...':prob.q;
+      html+='<div class="review-next-item"><span class="review-next-q">'+snippet+'</span><span class="review-next-due">'+dueLabel+'</span></div>';
+    });
+    nextUpEl.innerHTML=html;
+  }
 }
 
 function updateDailyDigest(){

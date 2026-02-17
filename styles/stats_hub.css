@@ -412,6 +412,12 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .review-stat{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .review-stat-num{font-size:28px;font-weight:700;color:var(--cyan);font-family:'Space Mono',monospace;}
 .review-stat-label{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.review-next-up{max-width:600px;margin:0 auto 16px;padding:0 24px;}
+.review-next-title{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.review-next-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:12px;}
+.review-next-item:last-child{border-bottom:none;}
+.review-next-q{font-size:12px;color:var(--text);flex:1;}
+.review-next-due{font-size:11px;color:var(--cyan);font-family:'Space Mono',monospace;white-space:nowrap;}
 .start-review-btn{
   display:block;margin:32px auto;padding:14px 32px;
   background:var(--cyan);color:var(--bg);border:none;border-radius:8px;
