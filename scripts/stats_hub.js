@@ -1,9 +1,20 @@
 // ===================== NAVIGATION =====================
+function syncTabState(tabBar,activeTab){
+  if(!tabBar)return;
+  tabBar.querySelectorAll('[role="tab"]').forEach(t=>{
+    const on=t===activeTab;
+    t.setAttribute('aria-selected',on?'true':'false');
+    t.setAttribute('tabindex',on?'0':'-1');
+  });
+}
+
 function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  [...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id)?.classList.add('active');
+  const navTabs=document.querySelector('.nav-tabs[role="tablist"]');
+  const activeTab=[...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id);
+  if(activeTab){activeTab.classList.add('active');syncTabState(navTabs,activeTab);}
   window.scrollTo(0,0);
   if(id==='visualizer'){setTimeout(()=>{drawActiveVisualizer();},50);}
 }
@@ -14,11 +25,36 @@ function showSub(prefix,id,btn){
   const tabBar=prefix==='rm'?document.getElementById('roadmapTabs'):document.getElementById('vizTabs');
   tabBar.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  syncTabState(tabBar,btn||null);
   const container=prefix==='rm'?document.getElementById('rm-panels'):document.getElementById('viz-panels');
   container.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById((prefix==='rm'?'rm-':prefix==='viz'?'viz-':'')+id).classList.add('active');
   if(prefix==='viz')setTimeout(()=>{if(id==='hist')drawHist();if(id==='box')drawBox();if(id==='norm')drawNorm();if(id==='comp')drawComp();},30);
 }
+
+// ===================== KEYBOARD NAV =====================
+function handleTabKeyboard(e,tabBar){
+  const tabs=[...tabBar.querySelectorAll('[role="tab"]')];
+  const idx=tabs.indexOf(e.target);
+  if(idx<0)return;
+  let next=-1;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();next=(idx+1)%tabs.length;}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();next=(idx-1+tabs.length)%tabs.length;}
+  else if(e.key==='Home'){e.preventDefault();next=0;}
+  else if(e.key==='End'){e.preventDefault();next=tabs.length-1;}
+  if(next>=0){tabs[next].focus();tabs[next].click();}
+}
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('[role="tablist"]').forEach(tl=>{
+    const active=tl.querySelector('[role="tab"][aria-selected="true"]')||tl.querySelector('[role="tab"]');
+    syncTabState(tl,active||null);
+  });
+  document.addEventListener('keydown',e=>{
+    const tab=e.target&&e.target.closest?e.target.closest('[role="tab"]'):null;
+    const tabList=tab&&tab.closest?tab.closest('[role="tablist"]'):null;
+    if(tab&&tabList)handleTabKeyboard(e,tabList);
+  });
+});}
 
 // ===================== UTILITIES =====================
 function rand(a,b){return a+Math.random()*(b-a)}

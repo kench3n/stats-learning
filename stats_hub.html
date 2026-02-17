@@ -3,91 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; connect-src 'self';">
 <title>Stats Learning Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/stats_hub.css">
 </head>
 <body>
 
+<!-- SKIP NAV -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <!-- TOP NAV -->
-<nav class="top-nav">
+<nav class="top-nav" aria-label="Main navigation">
   <div class="nav-brand">Stats <em>Hub</em></div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="goPage('home')">Home</button>
-    <button class="nav-tab" onclick="goPage('roadmap')">Roadmap</button>
-    <button class="nav-tab" onclick="goPage('visualizer')">Visualizer</button>
-    <button class="nav-tab" onclick="goPage('practice')">Practice</button>
+  <div class="nav-tabs" role="tablist" aria-label="Site sections">
+    <button class="nav-tab active" id="tab-home" role="tab" aria-selected="true" aria-controls="page-home" onclick="goPage('home')">Home</button>
+    <button class="nav-tab" id="tab-roadmap" role="tab" aria-selected="false" aria-controls="page-roadmap" onclick="goPage('roadmap')">Roadmap</button>
+    <button class="nav-tab" id="tab-visualizer" role="tab" aria-selected="false" aria-controls="page-visualizer" onclick="goPage('visualizer')">Visualizer</button>
+    <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" onclick="goPage('practice')">Practice</button>
   </div>
   <div class="nav-right">
-    <div class="progress-pill">Topics: <span id="topicCount">0</span> / <span id="topicTotal">0</span></div>
+    <div class="progress-pill" role="status" aria-live="polite">Topics: <span id="topicCount">0</span> / <span id="topicTotal">0</span></div>
   </div>
 </nav>
 
+<main id="main-content">
+
 <!-- ==================== HOME ==================== -->
-<div class="page active" id="page-home">
-  <div class="hero">
+<section class="page active" id="page-home" role="tabpanel" aria-labelledby="tab-home">
+  <header class="hero">
     <p class="hero-tag">College Intro Statistics</p>
     <h1>Stats Learning <em>Hub</em></h1>
     <p>Your all-in-one tool for learning statistics. Roadmap to track what to learn, interactive visualizations to build intuition, and practice problems to test your understanding.</p>
-  </div>
+  </header>
   <div class="home-cards">
-    <div class="home-card card-roadmap" onclick="goPage('roadmap')">
-      <div class="card-icon">&#x1f5fa;</div>
+    <div class="home-card card-roadmap" onclick="goPage('roadmap')" role="button" tabindex="0" aria-label="Open Quant Roadmap" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('roadmap')}">
+      <div class="card-icon" aria-hidden="true">&#x1f5fa;</div>
       <div class="card-title">Quant Roadmap</div>
       <div class="card-desc">Six pillars across three levels — from algebra and basic probability all the way to stochastic calculus and reinforcement learning. Track your progress with checkboxes.</div>
       <div class="card-meta">6 pillars &middot; 3 levels &middot; 80+ topics</div>
     </div>
-    <div class="home-card card-viz" onclick="goPage('visualizer')">
-      <div class="card-icon">&#x1f4ca;</div>
+    <div class="home-card card-viz" onclick="goPage('visualizer')" role="button" tabindex="0" aria-label="Open Interactive Visualizer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('visualizer')}">
+      <div class="card-icon" aria-hidden="true">&#x1f4ca;</div>
       <div class="card-title">Interactive Visualizer</div>
       <div class="card-desc">Drag sliders and watch distributions change in real time. Z-scores, scatterplots, sampling, Venn diagrams, binomial, CLT, confidence intervals, and more — all interactive.</div>
       <div class="card-meta">14 tools &middot; 11 units &middot; Real-time updates</div>
     </div>
-    <div class="home-card card-practice" onclick="goPage('practice')">
-      <div class="card-icon">&#x270f;</div>
+    <div class="home-card card-practice" onclick="goPage('practice')" role="button" tabindex="0" aria-label="Open Practice Problems" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('practice')}">
+      <div class="card-icon" aria-hidden="true">&#x270f;</div>
       <div class="card-title">Practice Problems</div>
       <div class="card-desc">65 problems across 11 units — from descriptive stats to regression inference. Multiple choice and free response with detailed step-by-step explanations.</div>
       <div class="card-meta">65 problems &middot; 11 units &middot; 3 difficulty levels</div>
     </div>
   </div>
-</div>
+</section>
 
 <!-- ==================== ROADMAP ==================== -->
-<div class="page" id="page-roadmap">
-  <div class="section-header">
+<section class="page" id="page-roadmap" role="tabpanel" aria-labelledby="tab-roadmap">
+  <header class="section-header">
     <p class="section-tag">An improved learning path</p>
-    <div class="section-title">The Quant <em>Roadmap</em></div>
+    <h2 class="section-title">The Quant <em>Roadmap</em></h2>
     <p class="section-desc">Six pillars, three levels. Track your progress as you go.</p>
-  </div>
+  </header>
   <div class="improvements-card">
-    <div class="improvements-title">Improvements over the original</div>
-    <div class="improvement-list">
-      <div class="improvement-item"><span class="marker">+</span> Monte Carlo, numerical methods, market microstructure</div>
-      <div class="improvement-item"><span class="marker">+</span> Data engineering, SQL, real-world pipelines</div>
-      <div class="improvement-item"><span class="marker">+</span> Measure theory bridging to stochastic calculus</div>
-      <div class="improvement-item"><span class="marker">+</span> Timelines and recommended resources per section</div>
-      <div class="improvement-item"><span class="marker">~</span> Rebalanced ML weight; reframed finance critique</div>
-      <div class="improvement-item"><span class="marker">+</span> New 6th pillar: Infrastructure &amp; Systems</div>
-    </div>
+    <h3 class="improvements-title">Improvements over the original</h3>
+    <ul class="improvement-list" role="list">
+      <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> Monte Carlo, numerical methods, market microstructure</li>
+      <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> Data engineering, SQL, real-world pipelines</li>
+      <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> Measure theory bridging to stochastic calculus</li>
+      <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> Timelines and recommended resources per section</li>
+      <li class="improvement-item"><span class="marker" aria-hidden="true">~</span> Rebalanced ML weight; reframed finance critique</li>
+      <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> New 6th pillar: Infrastructure &amp; Systems</li>
+    </ul>
   </div>
-  <div class="sub-tabs" id="roadmapTabs">
-    <button class="sub-tab active" onclick="showSub('rm','l1',this)">Level 1</button>
-    <button class="sub-tab" onclick="showSub('rm','l2',this)">Level 2</button>
-    <button class="sub-tab" onclick="showSub('rm','l3',this)">Level 3</button>
-    <button class="sub-tab" onclick="showSub('rm','roles',this)">Roles</button>
+  <div class="sub-tabs" id="roadmapTabs" role="tablist" aria-label="Roadmap levels">
+    <button class="sub-tab active" id="rm-tab-l1" role="tab" aria-selected="true" aria-controls="rm-l1" onclick="showSub('rm','l1',this)">Level 1</button>
+    <button class="sub-tab" id="rm-tab-l2" role="tab" aria-selected="false" aria-controls="rm-l2" onclick="showSub('rm','l2',this)">Level 2</button>
+    <button class="sub-tab" id="rm-tab-l3" role="tab" aria-selected="false" aria-controls="rm-l3" onclick="showSub('rm','l3',this)">Level 3</button>
+    <button class="sub-tab" id="rm-tab-roles" role="tab" aria-selected="false" aria-controls="rm-roles" onclick="showSub('rm','roles',this)">Roles</button>
   </div>
   <div id="rm-panels"></div>
-</div>
+</section>
 
 <!-- ==================== VISUALIZER ==================== -->
-<div class="page" id="page-visualizer">
-  <div class="section-header">
+<section class="page" id="page-visualizer" role="tabpanel" aria-labelledby="tab-visualizer">
+  <header class="section-header">
     <p class="section-tag" id="vizUnitTag">Unit 1 — Descriptive Statistics</p>
-    <div class="section-title">Interactive <em>Visualizer</em></div>
+    <h2 class="section-title">Interactive <em>Visualizer</em></h2>
     <p class="section-desc">Play with data, build intuition. Everything updates in real time.</p>
-  </div>
+  </header>
   <div class="unit-selector">
-    <label class="cl">UNIT</label>
+    <label class="cl" for="vizUnitSelect">UNIT</label>
     <select id="vizUnitSelect" onchange="setUnit(+this.value)">
       <option value="1">Unit 1: Descriptive Statistics</option>
       <option value="2">Unit 2: Normal Distribution</option>
@@ -102,20 +108,20 @@
       <option value="11">Unit 11: Regression Inference</option>
     </select>
   </div>
-  <div class="sub-tabs" id="vizTabs">
-    <button class="sub-tab active" onclick="showSub('viz','hist',this)">Histogram</button>
-    <button class="sub-tab" onclick="showSub('viz','box',this)">Boxplot</button>
-    <button class="sub-tab" onclick="showSub('viz','norm',this)">Normal Curve</button>
-    <button class="sub-tab" onclick="showSub('viz','comp',this)">Compare</button>
+  <div class="sub-tabs" id="vizTabs" role="tablist" aria-label="Visualizer tools">
+    <button class="sub-tab active" id="viz-tab-hist" role="tab" aria-selected="true" aria-controls="viz-hist" onclick="showSub('viz','hist',this)">Histogram</button>
+    <button class="sub-tab" id="viz-tab-box" role="tab" aria-selected="false" aria-controls="viz-box" onclick="showSub('viz','box',this)">Boxplot</button>
+    <button class="sub-tab" id="viz-tab-norm" role="tab" aria-selected="false" aria-controls="viz-norm" onclick="showSub('viz','norm',this)">Normal Curve</button>
+    <button class="sub-tab" id="viz-tab-comp" role="tab" aria-selected="false" aria-controls="viz-comp" onclick="showSub('viz','comp',this)">Compare</button>
   </div>
   <div id="viz-panels">
     <!-- Histogram -->
-    <div class="sub-panel active" id="viz-hist">
+    <div class="sub-panel active" id="viz-hist" role="tabpanel" aria-labelledby="viz-tab-hist">
       <div class="viz-box">
-        <div class="viz-title">Interactive Histogram</div>
+        <h3 class="viz-title">Interactive Histogram</h3>
         <div class="viz-desc">See how shape, center, and spread change as you modify the data.</div>
-        <canvas id="histCanvas" height="300"></canvas>
-        <div class="stats-row">
+        <canvas id="histCanvas" height="300" aria-label="Histogram visualization" role="img"></canvas>
+        <div class="stats-row" aria-label="Histogram statistics">
           <div class="sc"><div class="sv sv-cyan" id="hMean">—</div><div class="sl">Mean</div></div>
           <div class="sc"><div class="sv sv-amber" id="hMedian">—</div><div class="sl">Median</div></div>
           <div class="sc"><div class="sv sv-pink" id="hMode">—</div><div class="sl">Mode</div></div>
@@ -124,12 +130,12 @@
           <div class="sc"><div class="sv sv-orange" id="hRange">—</div><div class="sl">Range</div></div>
         </div>
         <div class="controls">
-          <div class="cg"><span class="cl">Preset</span><select id="histPreset" onchange="loadPreset()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="left">Left skewed</option><option value="bimodal">Bimodal</option><option value="uniform">Uniform</option></select></div>
-          <div class="cg"><span class="cl">Bins</span><input type="range" id="binSlider" min="3" max="25" value="10" oninput="drawHist()"></div>
-          <div class="cg"><span class="cl">Sample size</span><input type="range" id="sizeSlider" min="20" max="500" value="100" oninput="loadPreset()"></div>
+          <div class="cg"><label class="cl" for="histPreset">Preset</label><select id="histPreset" onchange="loadPreset()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="left">Left skewed</option><option value="bimodal">Bimodal</option><option value="uniform">Uniform</option></select></div>
+          <div class="cg"><label class="cl" for="binSlider">Bins</label><input type="range" id="binSlider" min="3" max="25" value="10" oninput="drawHist()"></div>
+          <div class="cg"><label class="cl" for="sizeSlider">Sample size</label><input type="range" id="sizeSlider" min="20" max="500" value="100" oninput="loadPreset()"></div>
         </div>
         <div class="data-row">
-          <input type="text" id="customData" placeholder="Or enter your own: 2, 5, 7, 3, 9, 12...">
+          <input type="text" id="customData" placeholder="Or enter your own: 2, 5, 7, 3, 9, 12..." aria-label="Custom data input">
           <button class="btn-a" onclick="loadCustom()" style="padding:8px 16px;border-radius:6px;cursor:pointer;border:1px solid rgba(6,182,212,0.3);background:var(--cyan-g);color:var(--cyan);font-size:13px;">Load</button>
         </div>
       </div>
@@ -137,12 +143,12 @@
     </div>
 
     <!-- Boxplot -->
-    <div class="sub-panel" id="viz-box">
+    <div class="sub-panel" id="viz-box" role="tabpanel" aria-labelledby="viz-tab-box">
       <div class="viz-box">
-        <div class="viz-title">Five-Number Summary & Boxplot</div>
+        <h3 class="viz-title">Five-Number Summary & Boxplot</h3>
         <div class="viz-desc">Min, Q1, median, Q3, max. Drag the slider to add outliers.</div>
-        <canvas id="boxCanvas" height="260"></canvas>
-        <div class="stats-row">
+        <canvas id="boxCanvas" height="260" aria-label="Boxplot visualization" role="img"></canvas>
+        <div class="stats-row" aria-label="Boxplot statistics">
           <div class="sc"><div class="sv sv-orange" id="bMin">—</div><div class="sl">Min</div></div>
           <div class="sc"><div class="sv sv-green" id="bQ1">—</div><div class="sl">Q1</div></div>
           <div class="sc"><div class="sv sv-amber" id="bMed">—</div><div class="sl">Median</div></div>
@@ -151,27 +157,27 @@
           <div class="sc"><div class="sv sv-green" id="bIQR">—</div><div class="sl">IQR</div></div>
         </div>
         <div class="controls">
-          <div class="cg"><span class="cl">Dataset</span><select id="boxPreset" onchange="drawBox()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="outliers">Has outliers</option></select></div>
-          <div class="cg"><span class="cl">Add extreme value</span><input type="range" id="outlierSlider" min="0" max="100" value="0" oninput="drawBox()"></div>
+          <div class="cg"><label class="cl" for="boxPreset">Dataset</label><select id="boxPreset" onchange="drawBox()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="outliers">Has outliers</option></select></div>
+          <div class="cg"><label class="cl" for="outlierSlider">Add extreme value</label><input type="range" id="outlierSlider" min="0" max="100" value="0" oninput="drawBox()"></div>
         </div>
-        <div class="legend"><div class="leg-i"><div class="leg-d" style="background:var(--cyan)"></div>Box (Q1–Q3)</div><div class="leg-i"><div class="leg-d" style="background:var(--amber)"></div>Median</div><div class="leg-i"><div class="leg-d" style="background:var(--dim)"></div>Whiskers</div><div class="leg-i"><div class="leg-d" style="background:var(--pink);border-radius:50%"></div>Outliers</div></div>
+        <div class="legend"><div class="leg-i"><div class="leg-d" style="background:var(--cyan)" aria-hidden="true"></div>Box (Q1–Q3)</div><div class="leg-i"><div class="leg-d" style="background:var(--amber)" aria-hidden="true"></div>Median</div><div class="leg-i"><div class="leg-d" style="background:var(--dim)" aria-hidden="true"></div>Whiskers</div><div class="leg-i"><div class="leg-d" style="background:var(--pink);border-radius:50%" aria-hidden="true"></div>Outliers</div></div>
       </div>
       <div class="explain"><h3>How to read a boxplot</h3><p>The box spans Q1 to Q3 (middle 50%). Whiskers extend to the furthest non-outlier point. An outlier is anything beyond 1.5×IQR from the box edges.</p><div class="formula">IQR = Q3 − Q1 &nbsp;&nbsp; Outlier if x &lt; Q1 − 1.5·IQR or x &gt; Q3 + 1.5·IQR</div></div>
     </div>
 
     <!-- Normal -->
-    <div class="sub-panel" id="viz-norm">
+    <div class="sub-panel" id="viz-norm" role="tabpanel" aria-labelledby="viz-tab-norm">
       <div class="viz-box">
-        <div class="viz-title">The Normal Distribution</div>
+        <h3 class="viz-title">The Normal Distribution</h3>
         <div class="viz-desc">Adjust μ and σ. The shaded regions show the 68-95-99.7 rule.</div>
-        <canvas id="normCanvas" height="340"></canvas>
+        <canvas id="normCanvas" height="340" aria-label="Normal distribution visualization" role="img"></canvas>
         <div class="controls">
-          <div class="cg"><span class="cl">μ (mean) <span class="sv-val" id="muVal">0</span></span><input type="range" id="muSlider" min="-4" max="4" value="0" step="0.1" oninput="drawNorm()"></div>
-          <div class="cg"><span class="cl">σ (std dev) <span class="sv-val" id="sigVal">1</span></span><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" oninput="drawNorm()"></div>
-          <div class="cg"><span class="cl">Region</span><select id="normRegion" onchange="drawNorm()"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option></select></div>
-          <div class="cg" id="zGrp" style="display:none"><span class="cl">z <span class="sv-val" id="zVal">1.96</span></span><input type="range" id="zSlider" min="0" max="4" value="1.96" step="0.01" oninput="drawNorm()"></div>
+          <div class="cg"><label class="cl" for="muSlider">μ (mean) <span class="sv-val" id="muVal">0</span></label><input type="range" id="muSlider" min="-4" max="4" value="0" step="0.1" oninput="drawNorm()"></div>
+          <div class="cg"><label class="cl" for="sigSlider">σ (std dev) <span class="sv-val" id="sigVal">1</span></label><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" oninput="drawNorm()"></div>
+          <div class="cg"><label class="cl" for="normRegion">Region</label><select id="normRegion" onchange="drawNorm()"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option></select></div>
+          <div class="cg" id="zGrp" style="display:none"><label class="cl" for="zSlider">z <span class="sv-val" id="zVal">1.96</span></label><input type="range" id="zSlider" min="0" max="4" value="1.96" step="0.01" oninput="drawNorm()"></div>
         </div>
-        <div class="stats-row" style="margin-top:14px">
+        <div class="stats-row" style="margin-top:14px" aria-label="Normal distribution statistics">
           <div class="sc"><div class="sv sv-cyan" id="nArea">68.3%</div><div class="sl">Shaded area</div></div>
           <div class="sc"><div class="sv sv-amber" id="nLeft">—</div><div class="sl">Left bound</div></div>
           <div class="sc"><div class="sv sv-purple" id="nRight">—</div><div class="sl">Right bound</div></div>
@@ -181,34 +187,34 @@
     </div>
 
     <!-- Compare -->
-    <div class="sub-panel" id="viz-comp">
+    <div class="sub-panel" id="viz-comp" role="tabpanel" aria-labelledby="viz-tab-comp">
       <div class="viz-box">
-        <div class="viz-title">Compare Two Distributions</div>
+        <h3 class="viz-title">Compare Two Distributions</h3>
         <div class="viz-desc">Same mean, different spread? Same spread, different center? See how they're independent.</div>
-        <canvas id="compCanvas" height="320"></canvas>
+        <canvas id="compCanvas" height="320" aria-label="Distribution comparison visualization" role="img"></canvas>
         <div class="controls">
-          <div class="cg"><span class="cl">A: μ <span class="sv-val" id="muA">0</span></span><input type="range" id="muAS" min="-4" max="4" value="0" step="0.1" oninput="drawComp()"></div>
-          <div class="cg"><span class="cl">A: σ <span class="sv-val" id="sigA">1</span></span><input type="range" id="sigAS" min="0.3" max="3" value="1" step="0.1" oninput="drawComp()"></div>
-          <div class="cg"><span class="cl">B: μ <span class="sv-val" id="muB">2</span></span><input type="range" id="muBS" min="-4" max="4" value="2" step="0.1" oninput="drawComp()"></div>
-          <div class="cg"><span class="cl">B: σ <span class="sv-val" id="sigB">0.7</span></span><input type="range" id="sigBS" min="0.3" max="3" value="0.7" step="0.1" oninput="drawComp()"></div>
+          <div class="cg"><label class="cl" for="muAS">A: μ <span class="sv-val" id="muA">0</span></label><input type="range" id="muAS" min="-4" max="4" value="0" step="0.1" oninput="drawComp()"></div>
+          <div class="cg"><label class="cl" for="sigAS">A: σ <span class="sv-val" id="sigA">1</span></label><input type="range" id="sigAS" min="0.3" max="3" value="1" step="0.1" oninput="drawComp()"></div>
+          <div class="cg"><label class="cl" for="muBS">B: μ <span class="sv-val" id="muB">2</span></label><input type="range" id="muBS" min="-4" max="4" value="2" step="0.1" oninput="drawComp()"></div>
+          <div class="cg"><label class="cl" for="sigBS">B: σ <span class="sv-val" id="sigB">0.7</span></label><input type="range" id="sigBS" min="0.3" max="3" value="0.7" step="0.1" oninput="drawComp()"></div>
         </div>
-        <div class="legend" style="margin-top:14px"><div class="leg-i"><div class="leg-d" style="background:var(--cyan)"></div>Distribution A</div><div class="leg-i"><div class="leg-d" style="background:var(--pink)"></div>Distribution B</div></div>
+        <div class="legend" style="margin-top:14px"><div class="leg-i"><div class="leg-d" style="background:var(--cyan)" aria-hidden="true"></div>Distribution A</div><div class="leg-i"><div class="leg-d" style="background:var(--pink)" aria-hidden="true"></div>Distribution B</div></div>
       </div>
       <div class="explain"><h3>Center vs. Spread</h3><p>Set both σ equal and slide the means apart — that's pure location shift. Then set means equal and change σ — that's pure scale change. These are the two fundamental properties of any distribution.</p></div>
     </div>
   </div>
-  <div id="viz-dynamic" style="display:none"></div>
-</div>
+  <div id="viz-dynamic" style="display:none" role="tabpanel" aria-live="polite"></div>
+</section>
 
 <!-- ==================== PRACTICE ==================== -->
-<div class="page" id="page-practice">
-  <div class="section-header">
+<section class="page" id="page-practice" role="tabpanel" aria-labelledby="tab-practice">
+  <header class="section-header">
     <p class="section-tag" id="practiceUnitTag">Unit 1 — Descriptive Statistics</p>
-    <div class="section-title">Practice <em>Problems</em></div>
+    <h2 class="section-title">Practice <em>Problems</em></h2>
     <p class="section-desc">15 problems from easy to hard. Work them by hand, then check.</p>
-  </div>
+  </header>
   <div class="unit-selector">
-    <label class="cl">UNIT</label>
+    <label class="cl" for="unitSelect">UNIT</label>
     <select id="unitSelect" onchange="setUnit(+this.value)">
       <option value="1">Unit 1: Descriptive Statistics</option>
       <option value="2">Unit 2: Normal Distribution</option>
@@ -223,25 +229,21 @@
       <option value="11">Unit 11: Regression Inference</option>
     </select>
   </div>
-  <div class="score-bar">
-    <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+  <div class="score-bar" role="status" aria-live="polite">
+    <div class="score-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="score-fill" id="scoreFill"></div></div>
     <div class="score-text" id="scoreText">0 / 15</div>
   </div>
-  <div class="problems" id="probContainer"></div>
-</div>
+  <div class="problems" id="probContainer" aria-label="Practice problems"></div>
+</section>
+
+</main>
 
 <!-- BOTTOM BAR -->
-<div class="bottom-bar">
-  <div class="bp-track"><div class="bp-fill" id="bpFill"></div></div>
+<footer class="bottom-bar" role="status" aria-live="polite" aria-label="Overall progress">
+  <div class="bp-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="bp-fill" id="bpFill"></div></div>
   <div class="bp-text" id="bpText">0 / 0 topics</div>
-</div>
+</footer>
 
 <script src="scripts/stats_hub.js" defer></script>
 </body>
 </html>
-
-
-
-
-
-
