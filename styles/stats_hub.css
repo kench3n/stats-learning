@@ -1059,6 +1059,14 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .viz-history-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;}
 .viz-history-chip{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:11px;padding:3px 10px;cursor:pointer;transition:border-color 0.2s,color 0.2s;}
 .viz-history-chip:hover{border-color:var(--cyan);color:var(--cyan);}
+.viz-unit-info{max-width:1100px;margin:0 auto 10px;padding:0 24px;}
+.viz-unit-info-toggle{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:4px 12px;}
+.viz-unit-info-toggle:hover{border-color:var(--cyan);color:var(--cyan);}
+.viz-unit-info-body{background:var(--bg2);border:1px solid var(--border);border-radius:0 6px 6px 6px;padding:10px 14px;margin-top:4px;font-size:13px;}
+.vui-name{font-weight:600;color:var(--text);margin-bottom:8px;}
+.vui-row{display:flex;gap:12px;margin-bottom:4px;}
+.vui-label{color:var(--muted);min-width:110px;}
+.vui-val{color:var(--cyan);}
 .leaderboard-widget{margin:16px 0;}
 .leaderboard-row{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:6px;margin-bottom:4px;background:var(--bg2);border:1px solid var(--border);}
 .leaderboard-row.leaderboard-you{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 8%,var(--bg2));}

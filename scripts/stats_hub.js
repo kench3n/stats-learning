@@ -32,7 +32,7 @@ function goPage(id){
     history.pushState({page:id},'','#/'+id);
   }
   _goPageSkipPush=false;
-  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();},50);}
+  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);},50);}
   if(id==='review')updateReviewBadge();
   if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
@@ -1732,7 +1732,7 @@ function setUnit(n){
   buildProblems(n);
   buildFormulas(n);
   buildVizForUnit(n);
-  if(isVizPageActive()){drawActiveVisualizer();_recordVizHistory(n);buildVizHistory();}
+  if(isVizPageActive()){drawActiveVisualizer();_recordVizHistory(n);buildVizHistory();buildVizUnitInfo(n);}
   filterProblems('all');
   drawDiffChart();
 }
@@ -1957,6 +1957,27 @@ function _recordVizHistory(unit){
     if(hist.length>5)hist=hist.slice(0,5);
     localStorage.setItem('sh-viz-history',JSON.stringify(hist));
   }catch(e){}
+}
+function toggleVizInfo(){
+  if(typeof document==='undefined')return;
+  var body=document.getElementById('vizUnitInfoBody');
+  var btn=document.querySelector('.viz-unit-info-toggle');
+  if(!body)return;
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  if(btn)btn.textContent=(open?'\u2139 Unit Info \u25B6':'\u2139 Unit Info \u25BC');
+}
+function buildVizUnitInfo(unit){
+  if(typeof document==='undefined')return;
+  var body=document.getElementById('vizUnitInfoBody');if(!body)return;
+  var name=typeof UNIT_META!=='undefined'&&UNIT_META[unit]?UNIT_META[unit].name:'';
+  var probs=allProbs[unit]||[];
+  var topics=[...new Set(probs.map(function(p){return p.topic;}))].slice(0,6);
+  var xpAvail=probs.reduce(function(sum,p){return sum+(p.diff==='easy'?XP_TABLE.easy:p.diff==='medium'?XP_TABLE.medium:XP_TABLE.hard);},0);
+  body.innerHTML='<div class="vui-name">Unit '+unit+': '+name+'</div>'
+    +'<div class="vui-row"><span class="vui-label">Problems:</span><span class="vui-val">'+probs.length+'</span></div>'
+    +'<div class="vui-row"><span class="vui-label">XP Available:</span><span class="vui-val">'+xpAvail+'</span></div>'
+    +'<div class="vui-row"><span class="vui-label">Topics:</span><span class="vui-val">'+topics.join(', ')+'</span></div>';
 }
 function buildVizHistory(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
