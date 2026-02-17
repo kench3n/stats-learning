@@ -389,6 +389,85 @@ On the Home page quick stats row, add a unit completion progress ring (SVG) show
 - Use an SVG stroke-dasharray / stroke-dashoffset technique
 - Label: "Units Started" below the ring
 
+
+### TASK: problem-count-badge
+Add a small badge on the Practice nav tab showing the number of unanswered problems in the current unit.
+- Count unanswered: `activeProbs.length - Object.keys(answered).length`
+- Show as a small `<span class="nav-badge" id="practiceNavBadge">N</span>` inside the Practice tab button
+- Update when `buildProblems()` is called and when a problem is answered
+- Style with `.nav-badge{...}` — small red/cyan number badge
+- Guard with typeof document
+
+### TASK: streak-freeze
+Add a "Streak Freeze" item to the Achievements page. If the user has >= 100 XP, they can activate one.
+- Show a card: "Streak Freeze — Use 100 XP to protect your streak for 1 day"
+- Button "Activate Freeze" — deducts 100 XP from `sh-xp`, saves `sh-streak-freeze` = todayStr()
+- On next streak calculation, if today is missed but `sh-streak-freeze` matches yesterday, don't break streak
+- Show "Freeze Active" text if freeze is for today
+- Guard with typeof localStorage
+
+### TASK: dark-mode-reading-palette
+When dark mode is active, add a "Reading Palette" button that further dims backgrounds for better reading.
+- Toggle button near the theme toggle: "📖 Reading Mode"
+- Toggles `.reading-mode` class on `document.body`
+- In CSS: `.reading-mode { --bg: #050508; --bg2: #0a0a0f; --fg: #d0d0d8; }`
+- Store reading mode state in `sh-reading-mode` localStorage
+- Guard with typeof document, typeof localStorage
+
+### TASK: jump-to-problem
+Add a "Jump to Problem" input in the Practice page header area.
+- Small `<input type="number" id="jumpInput" placeholder="Go to #...">` with a button "Go"
+- On submit: find the problem with matching ID in `activeProbs` or across all units, scroll it into view
+- If not in current unit, switch to that unit first
+- Style with `.jump-bar`, `.jump-input`, `.jump-btn`
+- Guard with typeof document
+
+### TASK: problems-answered-today
+On the Home page quick stats row, add a 6th stat: "Answered Today" showing problems answered today.
+- Use `sh-activity` localStorage key (already tracks correct answers per day)
+- Show today's count (from `todayStr()`)
+- Add a `.quick-stat-item` with id `qsToday`
+
+### TASK: formula-panel-resize
+Make the formula panel resizable using a drag handle.
+- Add a `<div class="formula-resize-handle" id="formulaResizeHandle"></div>` at the bottom of `.formula-content`
+- On mousedown, listen for mousemove to adjust `.formula-content` max-height
+- Min height: 100px, max height: 600px
+- Save current height to `sh-formula-height` localStorage
+- Restore on load in `buildFormulas()`
+- Guard with typeof document, typeof window
+
+### TASK: home-recent-activity
+Add a "Recent Activity" section on the Home page below the quick stats row.
+- Show last 5 problems answered (from practice state across all units)
+- Display: problem id, unit, correct/wrong, time (use `sh-activity` date)
+- Track which problem IDs were answered today by storing in `sh-today-activity` = `[{id, unit, ok}]`
+- Update `sh-today-activity` in `ansMC` and `ansFR`
+- Render in `#recentActivity` div on Home page
+
+### TASK: focus-mode-improvements
+When focus mode is active (if it exists), hide the breadcrumb, quick stats row, and nav badges.
+- Check if focus mode exists by looking for `.focus-mode` class on body or a `focusMode` variable
+- If focus mode is active: add `.focus-mode-hidden` CSS class to `#breadcrumb` and `#quickStatsRow`
+- In CSS: `.focus-mode-hidden { display:none!important; }`
+- When focus mode exits, remove the class
+
+### TASK: problem-card-animation
+Add a subtle entrance animation when problem cards are rendered.
+- In CSS: `@keyframes cardIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`
+- Apply to `.pc { animation: cardIn 0.2s ease; }`
+- Apply `animation-delay` based on card index: `${p_idx * 0.03}s`
+- Update `buildProblems` to pass index to the delay style attribute
+- Guard with `@media (prefers-reduced-motion: reduce)` in CSS
+
+### TASK: answer-distribution-chart
+After a problem is answered correctly (MC type), show a bar in the feedback indicating how many users chose each option.
+- Generate fake distributions seeded by `probId`: e.g., `[ans_pct, rand1, rand2, rand3]`
+- Show a mini `<div class="ans-dist">` with 4 small bars after the feedback text
+- Total should sum to 100%
+- The correct answer bar is cyan, others are muted
+- Style with `.ans-dist`, `.ans-dist-bar`, `.ans-dist-label`
+
 ---
 
 ## RULES (ALWAYS)
