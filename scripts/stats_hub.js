@@ -3931,6 +3931,22 @@ function printProblemSet(){
   var win=window.open('','_blank');
   if(win){win.document.write(html);win.document.close();}
 }
+function exportBookmarks(){
+  if(typeof localStorage==='undefined'||typeof document==='undefined')return;
+  var bm={};
+  try{bm=JSON.parse(localStorage.getItem('sh-bookmarks')||'{}');}catch(e){}
+  var ids=Object.keys(bm).filter(function(k){return bm[k];});
+  var data={bookmarks:ids,exportDate:typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10)};
+  var json=JSON.stringify(data,null,2);
+  if(typeof Blob==='undefined'){showToast('Export not supported in this environment.');return;}
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='stats-hub-bookmarks-'+data.exportDate+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Bookmarks exported ('+ids.length+' problems).');
+}
 function exportNotes(){
   if(typeof document==='undefined'||typeof Blob==='undefined')return;
   var notes=getNotes();
