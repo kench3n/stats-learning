@@ -1098,6 +1098,7 @@ buildProblems=function(unit=currentUnit){
       });
     }catch(e){}
   }
+  updatePracticeNavBadge();
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
   if(typeof localStorage!=='undefined'){try{var collSet=new Set(JSON.parse(localStorage.getItem('sh-collapsed-'+unit)||'[]'));collSet.forEach(function(cid){var card=document.getElementById('pc-'+cid);if(card){card.classList.add('pc-collapsed');var btn=card.querySelector('.card-collapse-btn');if(btn)btn.textContent='▸';}});}catch(e){}}
@@ -1181,6 +1182,7 @@ function ansMC(id,ch){
   updateReviewBadge();
   updateWeakSpots();
   refreshGoalProgress();
+  updatePracticeNavBadge();
 }
 
 function ansFR(id){
@@ -1203,6 +1205,7 @@ function ansFR(id){
   updateReviewBadge();
   updateWeakSpots();
   refreshGoalProgress();
+  updatePracticeNavBadge();
 }
 
 function findProblemById(probId){
@@ -3323,6 +3326,17 @@ function toggleCompareMode(){
   container.classList.toggle('compare-mode');
   var active=container.classList.contains('compare-mode');
   if(btn)btn.textContent=active?'Exit Compare':'Compare Mode';
+}
+function updatePracticeNavBadge(){
+  if(typeof document==='undefined')return;
+  var badge=document.getElementById('practiceNavBadge');
+  if(!badge)return;
+  var unanswered=0;
+  if(typeof activeProbs!=='undefined'&&typeof answered!=='undefined'){
+    unanswered=activeProbs.filter(function(p){return answered[p.id]===undefined;}).length;
+  }
+  if(unanswered>0){badge.textContent=unanswered;badge.style.display='';}
+  else{badge.style.display='none';}
 }
 function jumpToProblem(){
   if(typeof document==='undefined')return;
