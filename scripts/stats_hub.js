@@ -9,14 +9,18 @@ function syncTabState(tabBar,activeTab){
 }
 
 function goPage(id){
+  if(typeof document==='undefined')return;
+  const nextPage=document.getElementById('page-'+id);
+  if(!nextPage)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  nextPage.classList.add('active');
   const navTabs=document.querySelector('.nav-tabs[role="tablist"]');
-  const activeTab=[...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id);
+  const activeTab=document.getElementById('tab-'+id)||[...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id);
   if(activeTab){activeTab.classList.add('active');syncTabState(navTabs,activeTab);}
-  window.scrollTo(0,0);
-  if(id==='visualizer'){setTimeout(()=>{drawActiveVisualizer();},50);}
+  if(typeof window!=='undefined'&&typeof window.scrollTo==='function')window.scrollTo(0,0);
+  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();},50);}
+  if(id==='review')updateReviewBadge();
 }
 function showSub(prefix,id,btn){
   if(prefix==='viz'&&currentUnit!==1)return;
@@ -88,52 +92,349 @@ function debounce(fn,ms){
   };
 }
 
+const XP_TABLE={easy:5,medium:10,hard:20,wrong:1,topic:3};
+const XP_PER_LEVEL=50;
+const MILESTONES=[
+  {id:'first-correct',name:'First Blood',desc:'Answer your first problem correctly',icon:'⚡',check:d=>d.totalCorrect>=1},
+  {id:'streak-3',name:'On a Roll',desc:'3-day study streak',icon:'🔥',check:d=>d.streak>=3},
+  {id:'streak-7',name:'Week Warrior',desc:'7-day study streak',icon:'💪',check:d=>d.streak>=7},
+  {id:'streak-30',name:'Monthly Master',desc:'30-day study streak',icon:'👑',check:d=>d.streak>=30},
+  {id:'unit-complete',name:'Unit Clear',desc:'Complete all problems in any unit',icon:'✅',check:d=>d.unitsComplete>=1},
+  {id:'all-units',name:'Full Sweep',desc:'Complete all 11 units',icon:'🏆',check:d=>d.unitsComplete>=11},
+  {id:'xp-100',name:'Centurion',desc:'Earn 100 XP',icon:'💯',check:d=>d.xp>=100},
+  {id:'xp-500',name:'Scholar',desc:'Earn 500 XP',icon:'📚',check:d=>d.xp>=500},
+  {id:'xp-1000',name:'Expert',desc:'Earn 1000 XP',icon:'🎓',check:d=>d.xp>=1000},
+  {id:'topics-10',name:'Pathfinder',desc:'Check 10 roadmap topics',icon:'🗺️',check:d=>d.topicsChecked>=10},
+  {id:'topics-50',name:'Navigator',desc:'Check 50 roadmap topics',icon:'🧭',check:d=>d.topicsChecked>=50},
+  {id:'perfect-unit',name:'Flawless',desc:'100% correct on any unit',icon:'💎',check:d=>d.perfectUnits>=1},
+  {id:'review-10',name:'Reviewer',desc:'Complete 10 review sessions',icon:'\ud83d\udd04',check:d=>d.reviewSessions>=10},
+  {id:'review-50',name:'Memory Master',desc:'Complete 50 review sessions',icon:'\ud83e\udde0',check:d=>d.reviewSessions>=50},
+  {id:'mastered-10',name:'Retention',desc:'Master 10 cards (30+ day interval)',icon:'\ud83c\udfc5',check:d=>d.mastered>=10}
+];
+
+function todayStr(){return new Date().toISOString().slice(0,10)}
+
+function addDays(dateStr,days){
+  const d=new Date(dateStr);
+  if(Number.isNaN(d.getTime()))return todayStr();
+  d.setDate(d.getDate()+(Number.isFinite(+days)?Math.trunc(+days):0));
+  return d.toISOString().slice(0,10);
+}
+
+function getReviewData(){
+  if(typeof localStorage==='undefined')return{};
+  try{
+    const data=JSON.parse(localStorage.getItem('sh-review')||'{}');
+    return data&&typeof data==='object'&&!Array.isArray(data)?data:{};
+  }catch{return{};}
+}
+
+function saveReviewData(data){
+  if(typeof localStorage==='undefined')return;
+  const safe=data&&typeof data==='object'&&!Array.isArray(data)?data:{};
+  localStorage.setItem('sh-review',JSON.stringify(safe));
+}
+
+function getReviewMeta(){
+  const fallback={sessions:0};
+  if(typeof localStorage==='undefined')return fallback;
+  try{
+    const meta=JSON.parse(localStorage.getItem('sh-review-meta')||'{"sessions":0}')||{};
+    return {sessions:Number.isFinite(+meta.sessions)?+meta.sessions:0};
+  }catch{return fallback;}
+}
+
+function saveReviewMeta(meta){
+  if(typeof localStorage==='undefined')return;
+  const sessions=meta&&Number.isFinite(+meta.sessions)?+meta.sessions:0;
+  localStorage.setItem('sh-review-meta',JSON.stringify({sessions}));
+}
+
+function addToReview(probId,wasCorrect){
+  const key=String(probId);
+  if(!key)return;
+  const data=getReviewData();
+  const today=todayStr();
+  if(!data[key]){
+    data[key]={
+      next:wasCorrect?addDays(today,3):addDays(today,1),
+      interval:wasCorrect?3:1,
+      ease:2.5,
+      reps:wasCorrect?1:0,
+      lastResult:wasCorrect?'correct':'wrong'
+    };
+    saveReviewData(data);
+  }
+}
+
+function getDueCards(){
+  const data=getReviewData();
+  const today=todayStr();
+  const due=[];
+  for(const id in data){
+    const card=data[id];
+    if(!card||typeof card!=='object')continue;
+    const next=typeof card.next==='string'?card.next:'9999-12-31';
+    if(next<=today)due.push(id);
+  }
+  due.sort((a,b)=>{
+    const da=data[a]||{},db=data[b]||{};
+    if(da.lastResult==='wrong'&&db.lastResult!=='wrong')return -1;
+    if(db.lastResult==='wrong'&&da.lastResult!=='wrong')return 1;
+    const nextA=typeof da.next==='string'?da.next:'9999-12-31';
+    const nextB=typeof db.next==='string'?db.next:'9999-12-31';
+    if(nextA===nextB)return 0;
+    return nextA<nextB?-1:1;
+  });
+  return due;
+}
+
+function reviewAnswer(probId,wasCorrect){
+  const key=String(probId);
+  const data=getReviewData();
+  const card=data[key];
+  if(!card||typeof card!=='object')return;
+
+  const currentInterval=Math.max(1,Math.round(Number.isFinite(+card.interval)?+card.interval:1));
+  const currentEase=Number.isFinite(+card.ease)?+card.ease:2.5;
+  const currentReps=Number.isFinite(+card.reps)?+card.reps:0;
+  card.interval=currentInterval;
+  card.ease=currentEase;
+  card.reps=currentReps;
+
+  if(wasCorrect){
+    card.reps++;
+    card.ease=Math.min(3.0,card.ease+0.1);
+    card.interval=Math.round(card.interval*card.ease);
+    card.lastResult='correct';
+  }else{
+    card.reps=0;
+    card.ease=Math.max(1.3,card.ease-0.2);
+    card.interval=1;
+    card.lastResult='wrong';
+  }
+  card.next=addDays(todayStr(),card.interval);
+  saveReviewData(data);
+}
+
+function getStreakData(){
+  const fallback={current:0,longest:0,lastDate:'',history:[]};
+  if(typeof localStorage==='undefined')return fallback;
+  try{
+    const data=JSON.parse(localStorage.getItem('sh-streak')||'{}')||{};
+    return {
+      current:Number.isFinite(+data.current)?+data.current:0,
+      longest:Number.isFinite(+data.longest)?+data.longest:0,
+      lastDate:typeof data.lastDate==='string'?data.lastDate:'',
+      history:Array.isArray(data.history)?data.history:[]
+    };
+  }catch{return fallback;}
+}
+
+function saveStreakData(data){
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-streak',JSON.stringify(data));
+}
+
+function getXPData(){
+  const fallback={total:0,level:1,history:[]};
+  if(typeof localStorage==='undefined')return fallback;
+  try{
+    const data=JSON.parse(localStorage.getItem('sh-xp')||'{"total":0,"level":1,"history":[]}')||fallback;
+    return {
+      total:Number.isFinite(+data.total)?+data.total:0,
+      level:Number.isFinite(+data.level)&&+data.level>0?+data.level:1,
+      history:Array.isArray(data.history)?data.history:[]
+    };
+  }catch{return fallback;}
+}
+
+function saveXPData(data){
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-xp',JSON.stringify(data));
+}
+
+function getMilestones(){
+  if(typeof localStorage==='undefined')return{};
+  try{return JSON.parse(localStorage.getItem('sh-milestones')||'{}')||{};}catch{return{};}
+}
+
+function saveMilestones(data){
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-milestones',JSON.stringify(data));
+}
+
+function updateStreakDisplay(){
+  if(typeof document==='undefined')return;
+  const data=getStreakData();
+  const el=document.getElementById('streakCount');
+  if(el)el.textContent=String(data.current||0);
+  const icon=document.getElementById('streakIcon');
+  if(icon){
+    if((data.current||0)>=7)icon.style.filter='hue-rotate(-10deg) brightness(1.3)';
+    else if((data.current||0)>=3)icon.style.filter='';
+    else icon.style.filter='grayscale(0.5)';
+  }
+}
+
+function updateXPDisplay(){
+  if(typeof document==='undefined')return;
+  const data=getXPData();
+  const el=document.getElementById('xpTotal');
+  if(el)el.textContent=data.total+' XP';
+  const lv=document.getElementById('xpLevel');
+  if(lv)lv.textContent='Lv '+data.level;
+  const bar=document.getElementById('xpBarFill');
+  if(bar){
+    const progress=(data.total%XP_PER_LEVEL)/XP_PER_LEVEL*100;
+    bar.style.width=progress+'%';
+  }
+}
+
+function showXPPopup(text){
+  if(typeof document==='undefined')return;
+  const popup=document.createElement('div');
+  popup.className='xp-popup';
+  popup.textContent=text;
+  document.body.appendChild(popup);
+  requestAnimationFrame(()=>{popup.classList.add('xp-popup-show');});
+  setTimeout(()=>{popup.remove();},1200);
+}
+
+function recordActivity(){
+  const data=getStreakData();
+  const today=todayStr();
+  if(data.lastDate===today){
+    updateStreakDisplay();
+    return data;
+  }
+
+  const yesterday=new Date();
+  yesterday.setDate(yesterday.getDate()-1);
+  const yesterdayStr=yesterday.toISOString().slice(0,10);
+
+  if(data.lastDate===yesterdayStr)data.current=(data.current||0)+1;
+  else if(data.lastDate&&data.lastDate!==today)data.current=1;
+  else data.current=1;
+
+  data.longest=Math.max(data.longest||0,data.current);
+  data.lastDate=today;
+
+  if(!Array.isArray(data.history))data.history=[];
+  if(!data.history.includes(today))data.history.push(today);
+  if(data.history.length>30)data.history=data.history.slice(-30);
+
+  saveStreakData(data);
+  updateStreakDisplay();
+  awardXP(data.current*2,'streak-'+today);
+  checkMilestones();
+  return data;
+}
+
+function awardXP(amount,reason){
+  if(!Number.isFinite(amount)||amount<=0)return;
+  const data=getXPData();
+  const oldLevel=data.level||1;
+  data.total=(data.total||0)+amount;
+  data.level=Math.floor(data.total/XP_PER_LEVEL)+1;
+  if(!Array.isArray(data.history))data.history=[];
+  data.history.push({date:todayStr(),earned:amount,reason:String(reason||'')});
+  if(data.history.length>100)data.history=data.history.slice(-100);
+  saveXPData(data);
+  updateXPDisplay();
+  showXPPopup('+'+amount+' XP');
+  if(data.level>oldLevel)showToast('Level Up! You are now Level '+data.level+' 🎉');
+  checkMilestones();
+}
+
+function updateMilestoneDisplay(){
+  if(typeof document==='undefined')return;
+  const grid=document.getElementById('milestoneGrid');
+  if(!grid)return;
+  const earned=getMilestones();
+  let html='';
+  MILESTONES.forEach(m=>{
+    const unlocked=!!earned[m.id];
+    html+=`<div class="milestone-badge ${unlocked?'unlocked':'locked'}" title="${m.name}: ${m.desc}"><span class="badge-icon">${unlocked?m.icon:'🔒'}</span><span class="badge-name">${m.name}</span></div>`;
+  });
+  grid.innerHTML=html;
+}
+
+function checkMilestones(){
+  if(typeof document==='undefined')return;
+  const earned=getMilestones();
+  const streak=getStreakData();
+  const xpData=getXPData();
+  const summary=getProgressSummary();
+
+  let totalCorrect=0,unitsComplete=0,perfectUnits=0;
+  for(let u=1;u<=11;u++){
+    const r=summary[u]||{total:0,correct:0};
+    totalCorrect+=r.correct;
+    if(r.total>0&&r.correct===r.total){unitsComplete++;perfectUnits++;}
+    else if(r.total>0&&r.correct>=r.total*0.6)unitsComplete++;
+  }
+  const topicsChecked=document.querySelectorAll('.ti.chk,.ti.done').length||0;
+  const reviewMeta=getReviewMeta();
+  const reviewData=getReviewData();
+  const mastered=Object.values(reviewData).filter(c=>c&&Number.isFinite(+c.interval)&&+c.interval>=30).length;
+  const ctx={totalCorrect,streak:streak.current||0,unitsComplete,perfectUnits,xp:xpData.total||0,topicsChecked,reviewSessions:reviewMeta.sessions||0,mastered};
+
+  let newBadge=false;
+  MILESTONES.forEach(m=>{
+    if(!earned[m.id]&&m.check(ctx)){
+      earned[m.id]=todayStr();
+      newBadge=true;
+      showToast(m.icon+' Badge Earned: '+m.name+' — '+m.desc);
+    }
+  });
+  if(newBadge)saveMilestones(earned);
+  updateMilestoneDisplay();
+}
+
 // ===================== ROADMAP DATA =====================
 const RM={l1:[
 {p:"math",icon:"∑",time:"8–12 wk",name:"Mathematics",goal:"Establish and solve deterministic problems with algebra",topics:[
 {n:"Solving linear and quadratic equations"},{n:"Functions and their graphs"},{n:"Polynomials and rational functions"},{n:"Exponents and logarithms"},{n:"Coordinate geometry"},{n:"Basic proofs and mathematical reasoning"}],
-res:[{t:"Book",n:"Stewart — Precalculus"},{t:"Course",n:"Khan Academy — Algebra I & II"}]},
+res:[{t:"Book",n:"Stewart — Precalculus",url:"https://www.amazon.com/dp/1305071751"},{t:"Course",n:"Khan Academy — Algebra I & II",url:"https://www.khanacademy.org/math/algebra"}]},
 {p:"stats",icon:"μ",time:"8–12 wk",name:"Probability & Statistics",goal:"Model fixed randomness — dice rolls, coin flips, basic distributions",topics:[
 {n:"Mean, median, mode, range"},{n:"Variance and standard deviation"},{n:"Sample spaces and events"},{n:"Conditional probability"},{n:"Combinatorics (permutations & combinations)"},{n:"Set theory basics"},{n:"Common distributions (normal, binomial, Poisson)",tag:"new"},{n:"Hypothesis testing & confidence intervals",tag:"new"}],
-res:[{t:"Book",n:"Devore — Probability and Statistics"},{t:"Course",n:"MIT 18.05 (OCW)"},{t:"Course",n:"Khan Academy — Statistics"}]},
+res:[{t:"Book",n:"Devore — Probability and Statistics",url:"https://www.amazon.com/dp/1305251806"},{t:"Course",n:"MIT 18.05 (OCW)",url:"https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2014/"},{t:"Course",n:"Khan Academy — Statistics",url:"https://www.khanacademy.org/math/statistics-probability"}]},
 {p:"cs",icon:"{ }",time:"10–16 wk",name:"Computer Science",goal:"Write working programs, understand data structures & complexity",topics:[
 {n:"Python fundamentals (or C++)"},{n:"Data structures: arrays, linked lists, hash maps, trees"},{n:"Sorting algorithms (merge, quick, heap)"},{n:"Time/space complexity (Big-O)"},{n:"CLI & Git"},{n:"SQL and relational databases",tag:"new"},{n:"Data wrangling (pandas, numpy)",tag:"new"}],
-res:[{t:"Course",n:"MIT 6.0001 (OCW)"},{t:"Book",n:"CLRS — Intro to Algorithms"}]},
+res:[{t:"Course",n:"MIT 6.0001 (OCW)",url:"https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/"},{t:"Book",n:"CLRS — Intro to Algorithms",url:"https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/"}]},
 {p:"finance",icon:"$",time:"6–10 wk",name:"Finance & Economics",goal:"Understand financial news — interest rates, monetary vs. fiscal policy",topics:[
 {n:"Market and macroeconomic basics"},{n:"Stocks, bonds, fixed income fundamentals"},{n:"Time value of money (PV, FV, NPV)"},{n:"Supply and demand, equilibrium"},{n:"GDP"},{n:"Monetary vs. fiscal policy"},{n:"Inflation and real vs. nominal values"},{n:"Market microstructure basics (bid-ask, order books)",tag:"new"}],
-res:[{t:"Book",n:"Bodie, Kane, Marcus — Investments"},{t:"Course",n:"Yale ECON 252 (Shiller, Coursera)"}]}
+res:[{t:"Book",n:"Bodie, Kane, Marcus — Investments",url:"https://www.mheducation.com/highered/product/investments-bodie-kane-marcus/M9781260013979.html"},{t:"Course",n:"Yale ECON 252 (Shiller, Coursera)",url:"https://www.coursera.org/learn/financial-markets-global"}]}
 ],l2:[
 {p:"math",icon:"∑",time:"12–16 wk",name:"Calculus & Linear Algebra",goal:"Solve problems with calculus; understand high-dimensional space",topics:[
 {n:"Limits, derivatives, and integrals"},{n:"Optimization (minima/maxima)"},{n:"Multivariate calculus (partial derivatives, gradients)"},{n:"Vectors, matrices, matrix operations"},{n:"Eigenvalues and eigenvectors"},{n:"Solving systems of linear equations"},{n:"Numerical methods (root-finding, interpolation)",tag:"new"}],
-res:[{t:"Book",n:"Stewart — Calculus"},{t:"Book",n:"Strang — Linear Algebra"},{t:"Video",n:"3Blue1Brown — Essence of Linear Algebra"}]},
+res:[{t:"Book",n:"Stewart — Calculus",url:"https://www.cengage.com/c/calculus-8e-stewart/9781285741550/"},{t:"Book",n:"Strang — Linear Algebra",url:"https://math.mit.edu/~gs/linearalgebra/"},{t:"Video",n:"3Blue1Brown — Essence of Linear Algebra",url:"https://www.3blue1brown.com/topics/linear-algebra"}]},
 {p:"stats",icon:"μ",time:"12–16 wk",name:"Time Series & Regression",goal:"Understand real-world modeling assumptions; basic stats often beat ML",topics:[
 {n:"Linear regression (OLS, assumptions, diagnostics)"},{n:"AR and MA models"},{n:"ARMA / ARIMA / GARCH"},{n:"Stationarity and unit root tests"},{n:"Monte Carlo simulation",tag:"new"},{n:"Maximum likelihood estimation",tag:"new"},{n:"Probability distributions and inference"}],
-res:[{t:"Book",n:"Hamilton — Time Series Analysis"},{t:"Book",n:"Tsay — Analysis of Financial Time Series"}]},
+res:[{t:"Book",n:"Hamilton — Time Series Analysis",url:"https://press.princeton.edu/books/paperback/9780691042893/time-series-analysis"},{t:"Book",n:"Tsay — Analysis of Financial Time Series",url:"https://www.wiley.com/en-us/Analysis+of+Financial+Time+Series%2C+3rd+Edition-p-9781118017098"}]},
 {p:"cs",icon:"{ }",time:"10–14 wk",name:"Advanced CS & Data Engineering",goal:"Algorithms, search procedures, reliable data pipelines",topics:[
 {n:"Advanced data structures (graphs, heaps, tries)"},{n:"Dynamic programming"},{n:"OOP and functional patterns"},{n:"APIs, networking, HTTP"},{n:"Data pipelines and ETL",tag:"new"},{n:"Advanced SQL (window functions, CTEs)",tag:"new"},{n:"Testing and version control"}],
-res:[{t:"Book",n:"Skiena — Algorithm Design Manual"},{t:"Practice",n:"LeetCode Medium/Hard + HackerRank SQL"}]},
+res:[{t:"Book",n:"Skiena — Algorithm Design Manual",url:"https://www.springer.com/gp/book/9783030542559"},{t:"Practice",n:"LeetCode Medium/Hard + HackerRank SQL",url:"https://leetcode.com/problemset/"}]},
 {p:"ml",icon:"◎",time:"10–14 wk",name:"Machine Learning",goal:"Full model pipeline; know when ML actually beats simpler methods",topics:[
 {n:"Supervised vs. unsupervised learning"},{n:"Bias-variance tradeoff",tag:"key"},{n:"Cross-validation and evaluation metrics"},{n:"Linear & logistic regression (as ML)"},{n:"Trees, random forests, gradient boosting"},{n:"SVM and k-nearest neighbors"},{n:"Intro to neural networks"},{n:"When NOT to use ML (baselines first)",tag:"new"}],
-res:[{t:"Book",n:"Hastie — Elements of Statistical Learning"},{t:"Course",n:"Stanford CS229 (Andrew Ng)"}]},
+res:[{t:"Book",n:"Hastie — Elements of Statistical Learning",url:"https://hastie.su.domains/ElemStatLearn/"},{t:"Course",n:"Stanford CS229 (Andrew Ng)",url:"https://cs229.stanford.edu/"}]},
 {p:"finance",icon:"$",time:"8–12 wk",name:"Financial Theory & Instruments",goal:"Understand models deeply — then identify where they break down",topics:[
 {n:"Options, futures, swaps"},{n:"Fixed income: yield, duration, convexity"},{n:"FX markets"},{n:"CAPM — learn it, then learn its limits"},{n:"EMH — weak, semi-strong, strong forms"},{n:"Alpha: why it exists and where to find it"},{n:"DCF valuation and risk management"},{n:"Order book dynamics, slippage, market impact",tag:"new"},{n:"Portfolio optimization (mean-variance, Sharpe)",tag:"new"}],
-res:[{t:"Book",n:"Hull — Options, Futures, and Other Derivatives"},{t:"Book",n:"de Prado — Advances in Financial ML"}]}
+res:[{t:"Book",n:"Hull — Options, Futures, and Other Derivatives",url:"https://www.pearson.com/en-us/subject-catalog/p/options-futures-and-other-derivatives/P200000003977/9780134472089"},{t:"Book",n:"de Prado — Advances in Financial ML",url:"https://www.wiley.com/en-us/Advances+in+Financial+Machine+Learning-p-9781119482086"}]}
 ],l3:[
 {p:"math",icon:"∑",time:"16–24 wk",name:"Stochastic Calculus & Advanced Math",goal:"Apply stochastic calculus to pricing; understand financial mathematics",topics:[
 {n:"Measure theory and real analysis",tag:"new"},{n:"Measure-theoretic probability",tag:"new"},{n:"Martingales, filtrations, conditional expectation"},{n:"Brownian motion and stochastic processes"},{n:"Itô calculus and SDEs"},{n:"Solving the Black-Scholes PDE"},{n:"Finite difference methods for PDEs",tag:"new"},{n:"Monte Carlo methods for pricing",tag:"new"}],
-res:[{t:"Book",n:"Shreve — Stochastic Calculus for Finance I & II"},{t:"Course",n:"MIT 18.S096 (OCW)"}]},
+res:[{t:"Book",n:"Shreve — Stochastic Calculus for Finance I & II",url:"https://press.princeton.edu/books/hardcover/9780387401003/stochastic-calculus-for-finance-i"},{t:"Course",n:"MIT 18.S096 (OCW)",url:"https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/"}]},
 {p:"stats",icon:"μ",time:"12–16 wk",name:"Advanced Statistics & Inference",goal:"Handle non-standard data, robust estimation, Bayesian reasoning",topics:[
 {n:"Bayesian inference (prior, likelihood, posterior)"},{n:"Nonparametric methods"},{n:"Robust statistics (outliers, non-normal data)"},{n:"Causal inference"},{n:"Extreme value theory",tag:"new"},{n:"Copulas and dependence modeling",tag:"new"},{n:"Change-point detection and regime switching",tag:"new"}],
-res:[{t:"Book",n:"Gelman — Bayesian Data Analysis"},{t:"Book",n:"Embrechts — Modelling Extremal Events"}]},
+res:[{t:"Book",n:"Gelman — Bayesian Data Analysis",url:"https://www.taylorfrancis.com/books/mono/10.1201/b16018/bayesian-data-analysis-andrew-gelman-john-carlin-hal-stern-david-dunson-akki-vehtari-donald-rubin"},{t:"Book",n:"Embrechts — Modelling Extremal Events",url:"https://link.springer.com/book/10.1007/978-3-642-33483-2"}]},
 {p:"ml",icon:"◎",time:"12–16 wk",name:"ML for Finance & Advanced Methods",goal:"Apply ML rigorously to time series; avoid the traps that ruin financial ML",topics:[
 {n:"Feature engineering for finance"},{n:"Walk-forward validation & backtesting",tag:"key"},{n:"Avoiding lookahead bias",tag:"key"},{n:"Deep learning: RNNs, LSTMs"},{n:"Reinforcement learning (policy search, Q-learning)"},{n:"Combining alpha signals"},{n:"Transformer models for financial data",tag:"new"}],
-res:[{t:"Book",n:"de Prado — Advances in Financial ML"},{t:"Book",n:"Goodfellow — Deep Learning"}]},
+res:[{t:"Book",n:"de Prado — Advances in Financial ML",url:"https://www.wiley.com/en-us/Advances+in+Financial+Machine+Learning-p-9781119482086"},{t:"Book",n:"Goodfellow — Deep Learning",url:"https://www.deeplearningbook.org/"}]},
 {p:"finance",icon:"$",time:"10–14 wk",name:"Advanced Finance & Behavioral",goal:"Bridge theory to practice — form model-informed views on markets",topics:[
 {n:"Behavioral finance and advanced risk mgmt"},{n:"Cognitive biases and market anomalies"},{n:"Exotic option pricing",tag:"new"},{n:"Tail risk and black swan events"},{n:"Factor models (Fama-French)",tag:"new"},{n:"Risk measures (VaR, CVaR, drawdown)",tag:"new"}],
-res:[{t:"Book",n:"Taleb — Dynamic Hedging"},{t:"Book",n:"Ang — Asset Management"}]},
+res:[{t:"Book",n:"Taleb — Dynamic Hedging",url:"https://www.wiley.com/en-us/Dynamic+Hedging%3A+Managing+Vanilla+and+Exotic+Options-p-9780471152804"},{t:"Book",n:"Ang — Asset Management",url:"https://global.oup.com/academic/product/asset-management-9780199959327"}]},
 {p:"infra",icon:"⚡",time:"10–14 wk",name:"Infrastructure & Systems",goal:"Build production-grade: low-latency execution, distributed computing",topics:[
 {n:"Numerical optimization (gradient descent, Newton)"},{n:"Low-latency architecture"},{n:"Concurrency and parallelism"},{n:"Distributed systems (microservices, MQ)"},{n:"Cloud computing (AWS/GCP)",tag:"new"},{n:"Execution systems & smart order routing",tag:"new"},{n:"Monitoring, logging, reliability",tag:"new"}],
-res:[{t:"Book",n:"Kleppmann — Designing Data-Intensive Applications"}]}
+res:[{t:"Book",n:"Kleppmann — Designing Data-Intensive Applications",url:"https://dataintensive.net/"}]}
 ]};
 
 const roles=[
@@ -158,7 +459,13 @@ function buildRoadmap(){
         html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}</div>`;
       });
       html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)">Resources ↓</button></div><div class="res-panel">`;
-      (c.res||[]).forEach(r=>{html+=`<div class="res-item"><div class="res-type">${r.t}</div><div class="res-name">${r.n}</div></div>`;});
+      (c.res||[]).forEach(r=>{
+        if(r.url){
+          html+=`<div class="res-item"><div class="res-type">${r.t}</div><a class="res-link" href="${r.url}" target="_blank" rel="noopener noreferrer">${r.n} ↗</a></div>`;
+        }else{
+          html+=`<div class="res-item"><div class="res-type">${r.t}</div><div class="res-name">${r.n}</div></div>`;
+        }
+      });
       html+=`</div></div>`;
     });
     html+=`</div></div>`;
@@ -176,10 +483,36 @@ function buildRoadmap(){
   updateTopicProgress();
 }
 
-function getTopicState(){try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
-function saveTopicState(s){localStorage.setItem('sh-topics',JSON.stringify(s))}
-function toggleTopic(el){el.classList.toggle('chk');el.setAttribute('aria-checked',el.classList.contains('chk')?'true':'false');const n=el.querySelector('.tn').textContent;const s=getTopicState();s[n]=el.classList.contains('chk');saveTopicState(s);updateTopicProgress();}
-function restoreTopics(){const s=getTopicState();document.querySelectorAll('.ti').forEach(el=>{const n=el.querySelector('.tn').textContent;if(s[n]){el.classList.add('chk');el.setAttribute('aria-checked','true');}else el.setAttribute('aria-checked','false');});}
+function getTopicState(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
+function saveTopicState(s){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topics',JSON.stringify(s))}
+function toggleTopic(el){
+  const checked=el.classList.toggle('chk');
+  el.classList.toggle('done',checked);
+  el.setAttribute('aria-checked',checked?'true':'false');
+  const n=el.querySelector('.tn').textContent;
+  const s=getTopicState();
+  s[n]=checked;
+  saveTopicState(s);
+  updateTopicProgress();
+  if(checked){
+    awardXP(XP_TABLE.topic,'topic');
+    recordActivity();
+  }
+}
+function restoreTopics(){
+  const s=getTopicState();
+  document.querySelectorAll('.ti').forEach(el=>{
+    const n=el.querySelector('.tn').textContent;
+    if(s[n]){
+      el.classList.add('chk');
+      el.classList.add('done');
+      el.setAttribute('aria-checked','true');
+    }else{
+      el.classList.remove('done');
+      el.setAttribute('aria-checked','false');
+    }
+  });
+}
 function toggleRes(btn){const p=btn.closest('.pillar-card').querySelector('.res-panel');p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'Resources ↑':'Resources ↓';}
 function updateTopicProgress(){
   const total=document.querySelectorAll('.ti').length;
@@ -286,6 +619,10 @@ let answered={},pScore=0;
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('DOMContentLoaded',()=>{
     buildRoadmap();buildProblems();loadPreset();
+    updateStreakDisplay();
+    updateXPDisplay();
+    updateMilestoneDisplay();
+    checkMilestones();
   });
 }
 
@@ -308,6 +645,9 @@ let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
 let currentUnit=1;
 let activeProbs=allProbs[1];
 let vizDrawn={};
+let reviewQueue=[];
+let reviewIndex=0;
+let reviewSessionCorrect=0;
 
 function setElText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
 function setAllScores(){
@@ -317,8 +657,13 @@ function setAllScores(){
   if(scoreText)scoreText.textContent=pScore+' / '+n+' correct';
   if(scoreFill)scoreFill.style.width=(activeProbs.length?n/activeProbs.length*100:0)+'%';
 }
-function getPracticeState(unit){try{return JSON.parse(localStorage.getItem('sh-practice-'+unit)||'{}')}catch{return{}}}
-function savePracticeState(unit,state){localStorage.setItem('sh-practice-'+unit,JSON.stringify(state))}
+function getPracticeState(unit){
+  if(typeof localStorage==='undefined')return{};
+  try{return JSON.parse(localStorage.getItem('sh-practice-'+unit)||'{}')}catch{return{}}
+}
+function savePracticeState(unit,state){
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-practice-'+unit,JSON.stringify(state));
+}
 function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typeof document!=='undefined')buildProgressPanel();}
 
 buildProblems=function(unit=currentUnit){
@@ -362,7 +707,14 @@ function ansMC(id,ch){
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
-  showFB(id,ok,p.ex);persistPracticeState();setAllScores();
+  showFB(id,ok,p.ex);
+  addToReview(p.id,ok);
+  persistPracticeState();
+  const diff=p.diff||'medium';
+  awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
+  recordActivity();
+  setAllScores();
+  updateReviewBadge();
 }
 
 function ansFR(id){
@@ -372,7 +724,217 @@ function ansFR(id){
   const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
   answered[id]=v;const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
   inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
-  showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);persistPracticeState();setAllScores();
+  showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);
+  addToReview(p.id,ok);
+  persistPracticeState();
+  const diff=p.diff||'medium';
+  awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
+  recordActivity();
+  setAllScores();
+  updateReviewBadge();
+}
+
+function findProblemById(probId){
+  const key=String(probId);
+  for(let u=1;u<=11;u++){
+    const prob=(allProbs[u]||[]).find(p=>String(p.id)===key);
+    if(prob)return prob;
+  }
+  return null;
+}
+
+function startReview(){
+  if(typeof document==='undefined')return;
+  const dueIds=getDueCards();
+  if(dueIds.length===0){
+    showToast('No cards due for review! Come back tomorrow.');
+    updateReviewBadge();
+    return;
+  }
+
+  reviewQueue=dueIds.slice(0,10);
+  reviewIndex=0;
+  reviewSessionCorrect=0;
+
+  const btn=document.getElementById('startReviewBtn');
+  const card=document.getElementById('reviewCard');
+  if(btn)btn.style.display='none';
+  if(card)card.style.display='block';
+  showReviewCard();
+}
+
+function showReviewCard(){
+  if(typeof document==='undefined')return;
+  if(reviewIndex>=reviewQueue.length){endReview();return;}
+
+  const probId=reviewQueue[reviewIndex];
+  const prob=findProblemById(probId);
+  if(!prob){reviewIndex++;showReviewCard();return;}
+
+  const progress=document.getElementById('reviewProgress');
+  if(progress)progress.textContent=(reviewIndex+1)+' / '+reviewQueue.length;
+
+  const card=document.getElementById('reviewCardInner');
+  if(!card)return;
+
+  const pid=String(prob.id);
+  let html='<div class="review-q">'+prob.q+'</div>';
+  if(prob.data)html+='<div class="review-data">'+prob.data+'</div>';
+
+  if(prob.type==='mc'){
+    html+='<div class="choices">';
+    const labels='ABCD';
+    (prob.ch||[]).forEach((ch,j)=>{
+      html+=`<div class="ch-btn" role="button" tabindex="0" onclick="reviewMC('${pid}',${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();reviewMC('${pid}',${j})}" id="rv-${pid}-${j}"><span class="lt">${labels[j]||''}</span><span>${ch}</span></div>`;
+    });
+    html+='</div>';
+  }else{
+    html+=`<div class="fr-row"><input type="text" id="rv-fi-${pid}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')reviewFR('${pid}')"><button onclick="reviewFR('${pid}')">Check</button></div>`;
+  }
+
+  html+=`<div class="fb" id="rv-fb-${pid}"><div class="fb-box" id="rv-fbx-${pid}"></div></div>`;
+  card.innerHTML=html;
+}
+
+function reviewMC(probId,chosen){
+  if(typeof document==='undefined')return;
+  if(reviewIndex>=reviewQueue.length)return;
+
+  const activeId=String(reviewQueue[reviewIndex]);
+  if(String(probId)!==activeId)return;
+  const prob=findProblemById(activeId);
+  if(!prob||prob.type!=='mc')return;
+
+  const ok=chosen===prob.ans;
+  if(ok)reviewSessionCorrect++;
+
+  (prob.ch||[]).forEach((_,j)=>{
+    const el=document.getElementById('rv-'+activeId+'-'+j);
+    if(!el)return;
+    el.classList.add('dis');
+    el.setAttribute('aria-disabled','true');
+    if(j===prob.ans)el.classList.add('right');
+    else if(j===chosen&&!ok)el.classList.add('wrong');
+  });
+
+  const fb=document.getElementById('rv-fb-'+activeId);
+  const fbx=document.getElementById('rv-fbx-'+activeId);
+  if(fb)fb.classList.add('show');
+  if(fbx){
+    fbx.className='fb-box '+(ok?'fb-ok':'fb-no');
+    fbx.textContent='';
+    const strong=document.createElement('strong');
+    strong.textContent=ok?'Correct!':'Not quite.';
+    const ex=document.createElement('span');
+    ex.className='ex';
+    ex.textContent=prob.ex;
+    fbx.appendChild(strong);
+    fbx.appendChild(ex);
+  }
+
+  reviewAnswer(activeId,ok);
+  const diff=prob.diff||'medium';
+  awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,activeId+'-review');
+  recordActivity();
+  updateReviewBadge();
+
+  if(typeof setTimeout==='function')setTimeout(()=>{reviewIndex++;showReviewCard();},ok?1500:3000);
+  else{reviewIndex++;showReviewCard();}
+}
+
+function reviewFR(probId){
+  if(typeof document==='undefined')return;
+  if(reviewIndex>=reviewQueue.length)return;
+
+  const activeId=String(reviewQueue[reviewIndex]);
+  if(String(probId)!==activeId)return;
+  const prob=findProblemById(activeId);
+  if(!prob||prob.type!=='fr')return;
+
+  const inp=document.getElementById('rv-fi-'+activeId);
+  if(!inp)return;
+  const v=parseFloat(inp.value);
+  if(!Number.isFinite(v))return;
+
+  const ok=Math.abs(v-prob.ans)<=(prob.tol||0.1);
+  if(ok)reviewSessionCorrect++;
+
+  inp.disabled=true;
+  inp.style.borderColor=ok?'var(--green)':'var(--red)';
+  const btn=inp.parentElement?inp.parentElement.querySelector('button'):null;
+  if(btn)btn.disabled=true;
+
+  const fb=document.getElementById('rv-fb-'+activeId);
+  const fbx=document.getElementById('rv-fbx-'+activeId);
+  if(fb)fb.classList.add('show');
+  if(fbx){
+    fbx.className='fb-box '+(ok?'fb-ok':'fb-no');
+    fbx.textContent='';
+    const strong=document.createElement('strong');
+    strong.textContent=ok?'Correct!':'Not quite.';
+    const ex=document.createElement('span');
+    ex.className='ex';
+    ex.textContent=ok?prob.ex:'Correct answer: '+prob.ans+'. '+prob.ex;
+    fbx.appendChild(strong);
+    fbx.appendChild(ex);
+  }
+
+  reviewAnswer(activeId,ok);
+  const diff=prob.diff||'medium';
+  awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,activeId+'-review');
+  recordActivity();
+  updateReviewBadge();
+
+  if(typeof setTimeout==='function')setTimeout(()=>{reviewIndex++;showReviewCard();},ok?1500:3000);
+  else{reviewIndex++;showReviewCard();}
+}
+
+function endReview(){
+  if(typeof document==='undefined')return;
+  const card=document.getElementById('reviewCard');
+  if(card)card.style.display='none';
+  const btn=document.getElementById('startReviewBtn');
+  if(btn){btn.style.display='';btn.textContent='Start Another Session';}
+
+  const total=reviewQueue.length;
+  const pct=total?Math.round(reviewSessionCorrect/total*100):0;
+  showToast('Session complete! '+reviewSessionCorrect+'/'+total+' correct ('+pct+'%)');
+
+  const meta=getReviewMeta();
+  meta.sessions=(meta.sessions||0)+1;
+  saveReviewMeta(meta);
+
+  awardXP(10,'review-session-'+meta.sessions);
+  checkMilestones();
+  updateReviewBadge();
+
+  reviewQueue=[];
+  reviewIndex=0;
+  reviewSessionCorrect=0;
+}
+
+function updateReviewBadge(){
+  if(typeof document==='undefined')return;
+  const count=getDueCards().length;
+  const badge=document.getElementById('reviewBadge');
+  if(badge){
+    badge.textContent=String(count);
+    badge.style.display=count>0?'inline-block':'none';
+  }
+
+  const data=getReviewData();
+  const total=Object.keys(data).length;
+  const mastered=Object.values(data).filter(c=>c&&Number.isFinite(+c.interval)&&+c.interval>=30).length;
+  setElText('reviewDueCount',count);
+  setElText('reviewTotalCount',total);
+  setElText('reviewMasteredCount',mastered);
+
+  const desc=document.getElementById('reviewDesc');
+  if(desc){
+    if(total===0)desc.textContent='Answer practice problems to build your review deck.';
+    else if(count>0)desc.textContent='You have '+count+' card'+(count===1?'':'s')+' due for review.';
+    else desc.textContent='No cards due right now. Keep practicing and check back tomorrow.';
+  }
 }
 
 function showFB(id,ok,ex){
@@ -1311,6 +1873,7 @@ function buildProgressPanel(){
     html+=`<div class="progress-cell ${cls}"><div class="progress-cell-label">Unit ${unit}</div><div class="progress-cell-score">${row.correct} / ${row.total}</div></div>`;
   }
   grid.innerHTML=html;
+  updateMilestoneDisplay();
 }
 
 function toggleProgressPanel(){
@@ -1332,6 +1895,7 @@ function resetUnit(unit){
   pScore=0;
   buildProblems(currentUnit);
   buildProgressPanel();
+  updateReviewBadge();
 }
 
 function resetAllProgress(){
@@ -1340,12 +1904,21 @@ function resetAllProgress(){
   if(typeof localStorage!=='undefined'){
     for(let i=1;i<=11;i++)localStorage.removeItem('sh-practice-'+i);
     localStorage.removeItem('sh-topics');
+    localStorage.removeItem('sh-streak');
+    localStorage.removeItem('sh-xp');
+    localStorage.removeItem('sh-milestones');
+    localStorage.removeItem('sh-review');
+    localStorage.removeItem('sh-review-meta');
   }
   answered={};
   pScore=0;
   buildProblems(currentUnit);
   buildRoadmap();
   buildProgressPanel();
+  updateStreakDisplay();
+  updateXPDisplay();
+  updateMilestoneDisplay();
+  updateReviewBadge();
 }
 
 let toastTimer=null;
@@ -1362,7 +1935,7 @@ function showToast(msg,duration=2000){
 function exportProgressJSON(){
   if(typeof document==='undefined')return;
   if(typeof localStorage==='undefined')return;
-  const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null};
+  const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null,streak:getStreakData(),xp:getXPData(),milestones:getMilestones(),review:getReviewData(),reviewMeta:getReviewMeta()};
   for(let unit=1;unit<=11;unit++){
     try{payload.practice[unit]=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'null');}
     catch{payload.practice[unit]=null;}
@@ -1449,10 +2022,30 @@ function importProgressJSON(file){
         if(data.topics&&typeof data.topics==='object'&&!Array.isArray(data.topics)){
           localStorage.setItem('sh-topics',JSON.stringify(data.topics));
         }
+        if(data.streak&&typeof data.streak==='object'&&!Array.isArray(data.streak)){
+          localStorage.setItem('sh-streak',JSON.stringify(data.streak));
+        }
+        if(data.xp&&typeof data.xp==='object'&&!Array.isArray(data.xp)){
+          localStorage.setItem('sh-xp',JSON.stringify(data.xp));
+        }
+        if(data.milestones&&typeof data.milestones==='object'&&!Array.isArray(data.milestones)){
+          localStorage.setItem('sh-milestones',JSON.stringify(data.milestones));
+        }
+        if(data.review&&typeof data.review==='object'&&!Array.isArray(data.review)){
+          localStorage.setItem('sh-review',JSON.stringify(data.review));
+        }
+        if(data.reviewMeta&&typeof data.reviewMeta==='object'&&!Array.isArray(data.reviewMeta)){
+          localStorage.setItem('sh-review-meta',JSON.stringify(data.reviewMeta));
+        }
       }
       buildProblems(currentUnit);
       buildRoadmap();
       buildProgressPanel();
+      updateStreakDisplay();
+      updateXPDisplay();
+      updateMilestoneDisplay();
+      updateReviewBadge();
+      checkMilestones();
       showToast('Imported successfully!');
     }catch{
       showToast('Invalid file format');
@@ -1466,7 +2059,14 @@ function importProgressJSON(file){
 }
 
 setUnit(1);
-if(typeof document!=='undefined')buildProgressPanel();
+if(typeof document!=='undefined'){
+  buildProgressPanel();
+  updateStreakDisplay();
+  updateXPDisplay();
+  updateMilestoneDisplay();
+  updateReviewBadge();
+  checkMilestones();
+}
 if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){
   navigator.serviceWorker.register('/service-worker.js').catch(function(){});
 }

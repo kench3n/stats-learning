@@ -27,9 +27,21 @@
     <button class="nav-tab" id="tab-roadmap" role="tab" aria-selected="false" aria-controls="page-roadmap" onclick="goPage('roadmap')">Roadmap</button>
     <button class="nav-tab" id="tab-visualizer" role="tab" aria-selected="false" aria-controls="page-visualizer" onclick="goPage('visualizer')">Visualizer</button>
     <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" onclick="goPage('practice')">Practice</button>
+    <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" onclick="goPage('review')">Review <span class="review-badge" id="reviewBadge" style="display:none;">0</span></button>
   </div>
   <div class="nav-right">
     <div class="progress-pill" role="status" aria-live="polite">Topics: <span id="topicCount">0</span> / <span id="topicTotal">0</span></div>
+    <div class="nav-pill" id="streakPill" aria-label="Study streak">
+      <span id="streakIcon">🔥</span>
+      <span id="streakCount">0</span> day streak
+    </div>
+    <div class="nav-pill" id="xpPill" aria-label="Experience points">
+      <span class="xp-level" id="xpLevel">Lv 1</span>
+      <div class="xp-bar-mini">
+        <div class="xp-bar-fill" id="xpBarFill"></div>
+      </div>
+      <span class="xp-total" id="xpTotal">0 XP</span>
+    </div>
   </div>
 </nav>
 
@@ -230,6 +242,10 @@
       </label>
       <button class="reset-btn" onclick="resetAllProgress()">Reset All Progress</button>
     </div>
+    <div class="milestone-shelf" id="milestoneShelf">
+      <h3 class="milestone-title">Badges</h3>
+      <div class="milestone-grid" id="milestoneGrid"></div>
+    </div>
   </div>
   <div class="unit-selector">
     <label class="cl" for="unitSelect">UNIT</label>
@@ -253,6 +269,43 @@
     <button class="reset-btn reset-unit-btn" onclick="resetUnit(currentUnit)">Reset Unit</button>
   </div>
   <div class="problems" id="probContainer" aria-label="Practice problems"></div>
+</section>
+
+<!-- ==================== REVIEW ==================== -->
+<section class="page" id="page-review" role="tabpanel" aria-labelledby="tab-review">
+  <header class="section-header">
+    <p class="section-tag">Spaced Repetition</p>
+    <h2 class="section-title">Review <em>Session</em></h2>
+    <p class="section-desc" id="reviewDesc">Problems due for review will appear here.</p>
+  </header>
+
+  <div class="review-stats" id="reviewStats">
+    <div class="review-stat">
+      <span class="review-stat-num" id="reviewDueCount">0</span>
+      <span class="review-stat-label">Due Today</span>
+    </div>
+    <div class="review-stat">
+      <span class="review-stat-num" id="reviewTotalCount">0</span>
+      <span class="review-stat-label">In Deck</span>
+    </div>
+    <div class="review-stat">
+      <span class="review-stat-num" id="reviewMasteredCount">0</span>
+      <span class="review-stat-label">Mastered</span>
+    </div>
+  </div>
+
+  <div id="reviewContainer">
+    <button class="start-review-btn" id="startReviewBtn" onclick="startReview()">
+      Start Review Session
+    </button>
+  </div>
+
+  <div id="reviewCard" style="display:none;">
+    <div class="review-card-inner" id="reviewCardInner"></div>
+    <div class="review-progress">
+      <span id="reviewProgress">0 / 0</span>
+    </div>
+  </div>
 </section>
 
 <textarea id="shareOutput" aria-hidden="true" style="position:absolute;left:-9999px;top:0;"></textarea>

@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(git config:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git commit:*)",
+      "Bash(start \"\" \"C:/Users/links/Desktop/stats_learning/stats_hub.html\")",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(wc:*)",
+      "Bash(wsl --list:*)",
+      "Bash(ls:*)",
+      "Bash(done)",
+      "WebFetch(domain:claudelog.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl:*)"
     ]
   }
 }
