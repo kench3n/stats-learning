@@ -924,14 +924,26 @@ function initFormulaResize(){
   });
 }
 
+function _highlightText(text,q){
+  if(!q)return text;
+  var esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return text.replace(new RegExp('('+esc+')','gi'),'<mark>$1</mark>');
+}
 function filterFormulas(query){
   if(typeof document==='undefined')return;
   const rows=document.querySelectorAll('.formula-row');
-  const q=(query||'').toLowerCase();
+  const q=(query||'').toLowerCase().trim();
   rows.forEach(function(row){
-    const name=row.querySelector('.formula-name');
-    const matches=!q||(name&&name.textContent.toLowerCase().indexOf(q)>=0);
+    const nameEl=row.querySelector('.formula-name');
+    const eqEl=row.querySelector('.formula-eq');
+    const rawName=nameEl?nameEl.getAttribute('data-raw')||nameEl.textContent:'';
+    const rawEq=eqEl?eqEl.getAttribute('data-raw')||eqEl.textContent:'';
+    if(nameEl&&!nameEl.getAttribute('data-raw'))nameEl.setAttribute('data-raw',nameEl.textContent);
+    if(eqEl&&!eqEl.getAttribute('data-raw'))eqEl.setAttribute('data-raw',eqEl.textContent);
+    const matches=!q||(rawName.toLowerCase().indexOf(q)>=0)||(rawEq.toLowerCase().indexOf(q)>=0);
     row.style.display=matches?'':'none';
+    if(matches&&nameEl)nameEl.innerHTML=q?_highlightText(rawName,q):rawName;
+    if(matches&&eqEl)eqEl.innerHTML=q?_highlightText(rawEq,q):rawEq;
   });
   if(q){
     const c=document.getElementById('formulaContent');
