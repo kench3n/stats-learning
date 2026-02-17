@@ -2661,8 +2661,8 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
       const sess=document.getElementById('sessionOverlay');if(sess&&sess.style.display!=='none')sess.style.display='none';
       if(document.body.classList.contains('focus-mode'))document.body.classList.remove('focus-mode');
     }
-    else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcNext();}
-    else if(e.key==='ArrowLeft'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcPrev();}
+    else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();fcMark(true);}else{window.scrollBy(0,100);}}
+    else if(e.key==='ArrowLeft'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();fcMark(false);}}
     else if(e.key===' '){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();flipCard();}}
     else if(e.key==='j'||e.key==='J'){
       // Scroll to next problem card
