@@ -2534,6 +2534,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='3'){goPage('visualizer');}
     else if(e.key==='4'){goPage('practice');}
     else if(e.key==='5'){goPage('review');}
+    else if(e.key==='r'||e.key==='R'){goPage('review');}
     else if(e.key==='t'||e.key==='T'){togglePomoPanel();}
     else if(e.key==='d'||e.key==='D'){toggleTheme();}
     else if(e.key==='?'){toggleShortcutsHelp();}
