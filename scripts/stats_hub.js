@@ -840,6 +840,33 @@ function copyFormula(btn){
     showToast('Formula: '+text);
   }
 }
+function toggleFormulaFav(btn){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var row=btn.closest('.formula-row');
+  if(!row)return;
+  var name=row.querySelector('.formula-name');
+  if(!name)return;
+  var n=name.textContent;
+  var favs=[];
+  try{var _fp2=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp2))favs=_fp2;}catch(e){}
+  var idx=favs.indexOf(n);
+  if(idx>=0){favs.splice(idx,1);btn.textContent='☆';btn.classList.remove('active');}
+  else{favs.push(n);btn.textContent='★';btn.classList.add('active');}
+  try{localStorage.setItem('sh-formula-favs',JSON.stringify(favs));}catch(e){}
+}
+function toggleFormulaFavFilter(btn){
+  if(typeof document==='undefined')return;
+  btn.classList.toggle('active');
+  var active=btn.classList.contains('active');
+  btn.textContent=active?'★ Favorites':'☆ Favorites';
+  var favs=[];
+  if(typeof localStorage!=='undefined'){try{var _fp3=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp3))favs=_fp3;}catch(e){}}
+  document.querySelectorAll('.formula-row').forEach(function(row){
+    if(!active){row.style.display='';return;}
+    var name=row.querySelector('.formula-name');
+    row.style.display=(name&&favs.indexOf(name.textContent)>=0)?'':'none';
+  });
+}
 function buildFormulas(unit){
   if(typeof document==='undefined')return;
   const content=document.getElementById('formulaContent');
@@ -848,7 +875,8 @@ function buildFormulas(unit){
   if(!formulas.length){content.innerHTML='';return;}
   let html='';
   formulas.forEach(f=>{
-    html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button></div>`;
+    var favs2=[];if(typeof localStorage!=='undefined'){try{var _fp=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp))favs2=_fp;}catch(e){}}const isFav=favs2.indexOf(f.name)>=0;
+html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button></div>`;
   });
   content.innerHTML=html;
 }

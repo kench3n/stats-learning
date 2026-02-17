@@ -1086,3 +1086,7 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .progress-ring-bg{stroke:var(--bg3);}
 .progress-ring-fill{stroke:var(--cyan);transition:stroke-dashoffset 0.5s ease;}
 .progress-ring-text{font-size:12px;font-weight:700;fill:var(--cyan);}
+.formula-fav-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);padding:0 4px;transition:color 0.2s;}
+.formula-fav-btn.active,.formula-fav-btn:hover{color:var(--amber);}
+.formula-fav-filter{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:3px 10px;transition:border-color 0.2s,color 0.2s;}
+.formula-fav-filter.active,.formula-fav-filter:hover{border-color:var(--amber);color:var(--amber);}
