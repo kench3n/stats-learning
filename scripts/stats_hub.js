@@ -79,6 +79,14 @@ function comb(n,k){
   for(let i=0;i<k;i++)c=c*(n-i)/(i+1);
   return c;
 }
+function debounce(fn,ms){
+  let t;
+  return function(){
+    if(typeof setTimeout!=='function'){fn();return;}
+    if(typeof clearTimeout==='function'&&t)clearTimeout(t);
+    t=setTimeout(fn,ms);
+  };
+}
 
 // ===================== ROADMAP DATA =====================
 const RM={l1:[
@@ -315,8 +323,12 @@ function updatePScore(){
 }
 
 // ===================== INIT =====================
-buildRoadmap();buildProblems();loadPreset();
-window.addEventListener('resize',()=>{drawHist();drawBox();drawNorm();drawComp();});
+buildProblems();
+if(typeof requestAnimationFrame!=='undefined'){
+  requestAnimationFrame(function(){buildRoadmap();loadPreset();});
+}else{
+  buildRoadmap();loadPreset();
+}
 
 // ===================== PHASE 1 CORE =====================
 const UNIT_META={
@@ -347,7 +359,7 @@ function setAllScores(){
 }
 function getPracticeState(unit){try{return JSON.parse(localStorage.getItem('sh-practice-'+unit)||'{}')}catch{return{}}}
 function savePracticeState(unit,state){localStorage.setItem('sh-practice-'+unit,JSON.stringify(state))}
-function persistPracticeState(){savePracticeState(currentUnit,{answered})}
+function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typeof document!=='undefined')buildProgressPanel();}
 
 buildProblems=function(unit=currentUnit){
   activeProbs=allProbs[unit]||[];
@@ -555,15 +567,26 @@ allProbs[11]=[
   {id:1010,unit:11,diff:'hard',topic:'SE Meaning',q:'Two models have the same slope b1=1.8. Model A has SE=0.9, Model B has SE=0.3. Which has stronger evidence against H0:beta1=0?',data:null,type:'mc',ans:1,tol:0.01,ch:['Model A, because larger SE is better','Model B, because smaller SE gives larger |t|','They are equal since slopes match','Cannot compare without intercept'],ex:'t=b1/SE, so Model B has much larger t and stronger evidence.'}
 ];
 
+const _canvasCache={};
 function prepCanvas2(id,h){
   const c=document.getElementById(id);
   if(!c||!c.getContext)return null;
   const ctx=c.getContext('2d');
   const dpr=window.devicePixelRatio||1;
   const W=c.clientWidth||c.offsetWidth||800;
-  c.width=Math.max(1,Math.round(W*dpr));
-  c.height=Math.max(1,Math.round(h*dpr));
+  const newW=Math.max(1,Math.round(W*dpr));
+  const newH=Math.max(1,Math.round(h*dpr));
+  const cacheKey=id;
+  if(_canvasCache[cacheKey]&&_canvasCache[cacheKey].w===newW&&_canvasCache[cacheKey].h===newH){
+    if(typeof ctx.setTransform==='function')ctx.setTransform(dpr,0,0,dpr,0,0);
+    else ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,W,h);
+    return {c,ctx,W,H:h};
+  }
+  c.width=newW;
+  c.height=newH;
   c.style.height=h+'px';
+  _canvasCache[cacheKey]={w:newW,h:newH};
   if(typeof ctx.setTransform==='function')ctx.setTransform(dpr,0,0,dpr,0,0);
   else ctx.scale(dpr,dpr);
   ctx.clearRect(0,0,W,h);
@@ -635,6 +658,10 @@ function buildVizForUnit(unit=currentUnit){
 }
 
 function drawActiveVisualizer(){
+  if(typeof document!=='undefined'){
+    const vizPage=document.getElementById('page-visualizer');
+    if(vizPage&&!vizPage.classList.contains('active'))return;
+  }
   if(currentUnit===1){drawHist();drawBox();drawNorm();drawComp();return;}
   const v=allViz[currentUnit];if(v&&typeof v.draw==='function')v.draw();
 }
@@ -1254,5 +1281,207 @@ function drawRegOut(){
   }
 }
 
+function getProgressSummary(){
+  const summary={};
+  for(let unit=1;unit<=11;unit++){
+    const probs=allProbs[unit]||[];
+    let stored={};
+    if(typeof localStorage!=='undefined'){
+      try{stored=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'{}')||{};}catch{stored={};}
+    }
+    const saved=stored.answered&&typeof stored.answered==='object'?stored.answered:{};
+    const attempted=Object.keys(saved).length;
+    let correct=0;
+    probs.forEach(prob=>{
+      const raw=saved[prob.id];
+      if(raw===undefined)return;
+      if(prob.type==='mc'){
+        if(raw===prob.ans)correct++;
+      }else{
+        const v=parseFloat(raw);
+        if(Number.isFinite(v)&&Math.abs(v-prob.ans)<=(prob.tol||0.1))correct++;
+      }
+    });
+    summary[unit]={total:probs.length,attempted,correct};
+  }
+  return summary;
+}
+
+function buildProgressPanel(){
+  if(typeof document==='undefined')return;
+  const grid=document.getElementById('progressGrid');
+  if(!grid)return;
+  const summary=getProgressSummary();
+  let html='';
+  for(let unit=1;unit<=11;unit++){
+    const row=summary[unit]||{total:0,attempted:0,correct:0};
+    let cls='progress-cell-empty';
+    if(row.total>0&&row.attempted>0){
+      const pct=(row.correct/row.total)*100;
+      if(pct>=80)cls='progress-cell-green';
+      else if(pct>=40)cls='progress-cell-amber';
+      else cls='progress-cell-red';
+    }
+    html+=`<div class="progress-cell ${cls}"><div class="progress-cell-label">Unit ${unit}</div><div class="progress-cell-score">${row.correct} / ${row.total}</div></div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function toggleProgressPanel(){
+  if(typeof document==='undefined')return;
+  const panel=document.getElementById('progressPanel');
+  const btn=document.getElementById('progressToggle');
+  if(!panel||!btn)return;
+  panel.classList.toggle('collapsed');
+  const expanded=!panel.classList.contains('collapsed');
+  btn.setAttribute('aria-expanded',expanded?'true':'false');
+  btn.textContent='Progress Overview '+(expanded?'\u25BE':'\u25B8');
+}
+
+function resetUnit(unit){
+  if(typeof document==='undefined')return;
+  if(typeof confirm==='function'&&!confirm('Reset all progress for Unit '+unit+'?'))return;
+  if(typeof localStorage!=='undefined')localStorage.removeItem('sh-practice-'+unit);
+  answered={};
+  pScore=0;
+  buildProblems(currentUnit);
+  buildProgressPanel();
+}
+
+function resetAllProgress(){
+  if(typeof document==='undefined')return;
+  if(typeof confirm==='function'&&!confirm('Reset ALL progress? This cannot be undone.'))return;
+  if(typeof localStorage!=='undefined'){
+    for(let i=1;i<=11;i++)localStorage.removeItem('sh-practice-'+i);
+    localStorage.removeItem('sh-topics');
+  }
+  answered={};
+  pScore=0;
+  buildProblems(currentUnit);
+  buildRoadmap();
+  buildProgressPanel();
+}
+
+let toastTimer=null;
+function showToast(msg,duration=2000){
+  if(typeof document==='undefined')return;
+  const toast=document.getElementById('toast');
+  if(!toast)return;
+  toast.textContent=msg;
+  toast.classList.add('toast-visible');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{toast.classList.remove('toast-visible');},duration);
+}
+
+function exportProgressJSON(){
+  if(typeof document==='undefined')return;
+  if(typeof localStorage==='undefined')return;
+  const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null};
+  for(let unit=1;unit<=11;unit++){
+    try{payload.practice[unit]=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'null');}
+    catch{payload.practice[unit]=null;}
+  }
+  try{payload.topics=JSON.parse(localStorage.getItem('sh-topics')||'null');}
+  catch{payload.topics=null;}
+  const json=JSON.stringify(payload,null,2);
+  if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){
+    showToast('Export unavailable');
+    return;
+  }
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='stats-hub-progress.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Exported!');
+}
+
+async function copyProgressSummary(){
+  if(typeof document==='undefined')return;
+  const summary=getProgressSummary();
+  const divider='\u2500'.repeat(29);
+  const lines=['Stats Learning Hub \u2014 Progress',divider];
+  let totalCorrect=0,totalQuestions=0;
+  for(let unit=1;unit<=11;unit++){
+    const row=summary[unit]||{total:0,correct:0};
+    const pct=row.total?Math.round((row.correct/row.total)*100):0;
+    lines.push('Unit '+String(unit).padStart(2,' ')+': '+row.correct+'/'+row.total+' correct ('+pct+'%)');
+    totalCorrect+=row.correct;
+    totalQuestions+=row.total;
+  }
+  let topics={};
+  if(typeof localStorage!=='undefined'){
+    try{topics=JSON.parse(localStorage.getItem('sh-topics')||'{}')||{};}catch{topics={};}
+  }
+  const topicKeys=Object.keys(topics);
+  const checked=topicKeys.filter(k=>!!topics[k]).length;
+  const totalPct=totalQuestions?Math.round((totalCorrect/totalQuestions)*100):0;
+  lines.push(divider);
+  lines.push('Roadmap: '+checked+'/'+topicKeys.length+' topics checked');
+  lines.push(divider);
+  lines.push('Total:   '+totalCorrect+'/'+totalQuestions+' correct ('+totalPct+'%)');
+  const text=lines.join('\n');
+
+  let copied=false;
+  try{
+    if(typeof navigator!=='undefined'&&navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
+      await navigator.clipboard.writeText(text);
+      copied=true;
+    }
+  }catch{}
+
+  if(!copied){
+    const out=document.getElementById('shareOutput');
+    if(out){
+      out.value=text;
+      out.focus();
+      out.select();
+      try{copied=document.execCommand('copy');}catch{copied=false;}
+    }
+  }
+  showToast(copied?'Copied to clipboard!':'Unable to copy');
+}
+
+function importProgressJSON(file){
+  if(typeof document==='undefined'||!file)return;
+  if(typeof FileReader==='undefined'){showToast('Import unavailable');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const text=e&&e.target&&typeof e.target.result==='string'?e.target.result:'';
+      const data=JSON.parse(text);
+      if(!data||typeof data.practice!=='object'||Array.isArray(data.practice))throw new Error('invalid');
+      if(typeof localStorage!=='undefined'){
+        Object.keys(data.practice).forEach(unit=>{
+          const val=data.practice[unit];
+          if(val!==null)localStorage.setItem('sh-practice-'+unit,JSON.stringify(val));
+        });
+        if(data.topics&&typeof data.topics==='object'&&!Array.isArray(data.topics)){
+          localStorage.setItem('sh-topics',JSON.stringify(data.topics));
+        }
+      }
+      buildProblems(currentUnit);
+      buildRoadmap();
+      buildProgressPanel();
+      showToast('Imported successfully!');
+    }catch{
+      showToast('Invalid file format');
+    }finally{
+      const input=document.getElementById('importFile');
+      if(input)input.value='';
+    }
+  };
+  reader.onerror=()=>{showToast('Invalid file format');};
+  reader.readAsText(file);
+}
+
 setUnit(1);
-window.addEventListener('resize',()=>{drawActiveVisualizer();});
+if(typeof document!=='undefined')buildProgressPanel();
+if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
+  window.addEventListener('resize',debounce(function(){drawActiveVisualizer();},150));
+}
+
