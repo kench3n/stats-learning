@@ -24,7 +24,7 @@ function goPage(id){
     history.pushState({page:id},'','#/'+id);
   }
   _goPageSkipPush=false;
-  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();},50);}
+  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();},50);}
   if(id==='review')updateReviewBadge();
   if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
@@ -1516,7 +1516,7 @@ function setUnit(n){
   buildProblems(n);
   buildFormulas(n);
   buildVizForUnit(n);
-  if(isVizPageActive())drawActiveVisualizer();
+  if(isVizPageActive()){drawActiveVisualizer();_recordVizHistory(n);buildVizHistory();}
   filterProblems('all');
   drawDiffChart();
 }
@@ -1732,6 +1732,31 @@ function prepCanvas2(id,h){
   return {c,ctx,W,H:h};
 }
 
+function _recordVizHistory(unit){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var hist=JSON.parse(localStorage.getItem('sh-viz-history')||'[]');
+    hist=hist.filter(function(u){return u!==unit;});
+    hist.unshift(unit);
+    if(hist.length>5)hist=hist.slice(0,5);
+    localStorage.setItem('sh-viz-history',JSON.stringify(hist));
+  }catch(e){}
+}
+function buildVizHistory(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var row=document.getElementById('vizHistoryRow');
+  if(!row)return;
+  var hist=[];
+  try{hist=JSON.parse(localStorage.getItem('sh-viz-history')||'[]');}catch(e){}
+  if(!hist.length){row.style.display='none';return;}
+  row.style.display='flex';
+  var html='<span class="viz-history-label">Recently:</span>';
+  hist.forEach(function(u){
+    var name=typeof UNIT_META!=='undefined'&&UNIT_META[u]?UNIT_META[u].name:'Unit '+u;
+    html+='<button class="viz-history-chip" onclick="setUnit('+u+')">Unit '+u+': '+name+'</button>';
+  });
+  row.innerHTML=html;
+}
 function copyVizLink(){
   if(typeof navigator==='undefined'||typeof navigator.clipboard==='undefined'){return;}
   var href=(typeof window!=='undefined'&&window.location)?window.location.href:'';

@@ -1046,3 +1046,7 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .quick-stat-item{display:flex;flex-direction:column;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 20px;min-width:90px;}
 .quick-stat-value{font-size:24px;font-weight:700;color:var(--cyan);line-height:1;}
 .quick-stat-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}
+.viz-history-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0 4px;margin-bottom:6px;}
+.viz-history-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;}
+.viz-history-chip{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:11px;padding:3px 10px;cursor:pointer;transition:border-color 0.2s,color 0.2s;}
+.viz-history-chip:hover{border-color:var(--cyan);color:var(--cyan);}
