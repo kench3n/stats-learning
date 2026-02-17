@@ -3297,6 +3297,27 @@ function updateBookmarkUI(probId){
   btn.classList.toggle('bookmarked',!!bm[probId]);
 }
 
+function exportNotes(){
+  if(typeof document==='undefined'||typeof Blob==='undefined')return;
+  var notes=getNotes();
+  var keys=Object.keys(notes);
+  if(!keys.length){showToast('No notes to export.');return;}
+  var lines=['Stats Learning Hub — Notes Export','Exported: '+new Date().toISOString(),'',''];
+  keys.forEach(function(id){
+    var note=notes[id];
+    if(!note)return;
+    // Find unit for this problem
+    var unit='?';
+    for(var u in allProbs){var found=(allProbs[u]||[]).find(function(p){return String(p.id)===String(id);});if(found){unit=u;break;}}
+    lines.push('Problem #'+id+' (Unit '+unit+'): '+note);
+  });
+  var text=lines.join('\n');
+  var blob=new Blob([text],{type:'text/plain'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='stats-hub-notes-'+todayStr()+'.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  showToast('Notes exported!');
+}
 function getNotes(){
   if(typeof localStorage==='undefined')return{};
   try{return JSON.parse(localStorage.getItem('sh-notes')||'{}')||{};}catch{return{};}
