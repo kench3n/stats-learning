@@ -1081,3 +1081,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .compare-mode{display:flex;flex-wrap:wrap;gap:10px;}
 .compare-mode .pc{display:inline-block;width:calc(50% - 5px);vertical-align:top;box-sizing:border-box;}
 @media(max-width:640px){.compare-mode .pc{width:100%;}}
+.quick-stat-ring-item{padding:8px 16px;}
+.progress-ring{display:block;margin:0 auto;}
+.progress-ring-bg{stroke:var(--bg3);}
+.progress-ring-fill{stroke:var(--cyan);transition:stroke-dashoffset 0.5s ease;}
+.progress-ring-text{font-size:12px;font-weight:700;fill:var(--cyan);}

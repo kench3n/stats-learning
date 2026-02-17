@@ -3381,6 +3381,21 @@ function buildQuickStats(){
   el('qsCorrect',totalCorrect);
   el('qsAccuracy',acc+'%');
   el('qsStreak',streak);
+  var unitsStarted=0;
+  if(typeof allProbs!=='undefined'&&typeof getPracticeState!=='undefined'){
+    for(var u2=1;u2<=MAX_UNIT;u2++){
+      var st2=getPracticeState(u2);var an2=st2.answered&&typeof st2.answered==='object'?st2.answered:{};
+      if(Object.keys(an2).length>0)unitsStarted++;
+    }
+  }
+  var ringFill=document.getElementById('qsRingFill');
+  var ringText=document.getElementById('qsRingText');
+  if(ringFill&&typeof MAX_UNIT!=='undefined'){
+    var circumference=113.1;
+    var pctRing=MAX_UNIT>0?unitsStarted/MAX_UNIT:0;
+    ringFill.style.strokeDashoffset=circumference*(1-pctRing);
+  }
+  if(ringText)ringText.textContent=unitsStarted;
 }
 function buildPOD(){
   if(typeof document==='undefined')return;

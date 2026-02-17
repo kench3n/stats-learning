@@ -66,6 +66,14 @@
     <div class="quick-stat-item"><span class="quick-stat-value" id="qsCorrect">0</span><span class="quick-stat-label">Correct</span></div>
     <div class="quick-stat-item"><span class="quick-stat-value" id="qsAccuracy">0%</span><span class="quick-stat-label">Accuracy</span></div>
     <div class="quick-stat-item"><span class="quick-stat-value" id="qsStreak">0</span><span class="quick-stat-label">Day Streak</span></div>
+    <div class="quick-stat-item quick-stat-ring-item">
+      <svg class="progress-ring" width="44" height="44" viewBox="0 0 44 44" aria-label="Units started progress ring">
+        <circle class="progress-ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
+        <circle class="progress-ring-fill" id="qsRingFill" cx="22" cy="22" r="18" fill="none" stroke-width="4" stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
+        <text class="progress-ring-text" x="22" y="26" text-anchor="middle" id="qsRingText">0</text>
+      </svg>
+      <span class="quick-stat-label">Units Started</span>
+    </div>
   </div>
   <div class="daily-digest" id="dailyDigest" style="display:none;">
     <div class="digest-row">
