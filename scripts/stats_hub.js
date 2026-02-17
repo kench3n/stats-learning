@@ -3197,6 +3197,18 @@ function buildAchievementsPage(){
     '</div>';
   });
   badgeGrid.innerHTML=badgeHtml;
+
+  // General completion certificate
+  var gcArea=document.getElementById('generalCertArea');
+  if(gcArea){
+    var overallAcc=totalQuestions>0?totalCorrect/totalQuestions:0;
+    var unitsCompleted=Object.keys(summary).filter(function(u){var r=summary[u];return r&&r.total>0;}).length;
+    if(overallAcc>=0.70){
+      gcArea.innerHTML='<button class="cert-btn" onclick="generateGeneralCertificate('+Math.round(overallAcc*100)+','+unitsCompleted+')">🎓 Generate Certificate</button>';
+    } else {
+      gcArea.innerHTML='<p style="font-size:12px;color:var(--muted);font-family:Space Mono,monospace;">'+(Math.round(overallAcc*100))+'% overall &mdash; reach 70% to unlock completion certificate</p>';
+    }
+  }
 }
 
 
@@ -4081,6 +4093,19 @@ function updateGoalDisplay(){
   }
 }
 
+function generateGeneralCertificate(accuracyPct,unitsCompleted){
+  if(typeof window==='undefined')return;
+  var name=window.prompt('Enter your name for the certificate:','Student');
+  if(!name)return;
+  var today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  var xp=getXPData();
+  var streak=getStreakData();
+  var certHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Course Completion Certificate</title><style>body{font-family:Georgia,serif;text-align:center;padding:60px;background:#fffef5;color:#1a1a2e;}.cert{border:4px double #1a1a2e;padding:60px;max-width:700px;margin:0 auto;}h1{font-size:30px;margin-bottom:8px;letter-spacing:2px;}.subtitle{font-size:13px;color:#666;letter-spacing:4px;text-transform:uppercase;margin-bottom:40px;}.name{font-size:28px;font-style:italic;margin:20px 0;color:#0095a3;font-family:Georgia,serif;}.stats{display:flex;justify-content:center;gap:40px;margin:30px 0;font-size:14px;color:#666;}.date{margin-top:40px;font-size:14px;color:#666;}.seal{font-size:52px;margin:20px 0;}</style></head><body><div class="cert"><div class="seal">🎓</div><h1>Certificate of Completion</h1><div class="subtitle">Stats Learning Hub &mdash; Course Completion</div><p>This certifies that</p><div class="name">'+name+'</div><p>has successfully completed the Statistics Learning Hub curriculum</p><div class="stats"><span>Overall Accuracy: '+accuracyPct+'%</span><span>Units Completed: '+unitsCompleted+'</span><span>Level: '+xp.level+'</span><span>XP: '+xp.total+'</span></div><div class="date">'+today+'</div></div><script>window.onload=function(){window.print();}<\/script></body></html>';
+  var win=window.open('','_blank');
+  if(win){win.document.write(certHtml);win.document.close();}
+  awardXP(100,'general-certificate');
+  showToast('Certificate generated! 🎓');
+}
 function generateCertificate(){
   if(typeof window==='undefined')return;
   const data=getActivePath();
