@@ -1090,3 +1090,5 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .formula-fav-btn.active,.formula-fav-btn:hover{color:var(--amber);}
 .formula-fav-filter{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:3px 10px;transition:border-color 0.2s,color 0.2s;}
 .formula-fav-filter.active,.formula-fav-filter:hover{border-color:var(--amber);color:var(--amber);}
+.prob-link-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 4px;opacity:0.6;transition:opacity 0.2s,color 0.2s;}
+.prob-link-btn:hover{opacity:1;color:var(--cyan);}
