@@ -4064,6 +4064,40 @@ const NLP_PATTERNS=[
     regex:/median.*of\s+([\d.,\s]+)/i,
     solve:function(m){const vals=m[1].split(/[,\s]+/).map(Number).filter(function(v){return !isNaN(v);});const med=median(vals);return{answer:'Median = '+med,steps:['Values sorted: '+sorted(vals).join(', '),'n = '+vals.length,'Median = '+med]};},
   },
+  {
+    regex:/(?:probability|P)\s*[((]\s*(?:A\s*(?:and|&|\u2229)\s*B|B\s*(?:and|&|\u2229)\s*A)\s*[))]\s*[=:]?\s*([\d.]+)\s*(?:and|,|\*)\s*([\d.]+)/i,
+    solve:function(m){const pA=+m[1],pB=+m[2],pAB=(pA*pB);return{answer:'P(A and B) = '+pA+' × '+pB+' = '+pAB.toFixed(4)+' (if independent)',steps:['P(A) = '+pA+', P(B) = '+pB,'If A and B are independent: P(A ∩ B) = P(A) × P(B)','P(A and B) = '+pA+' × '+pB+' = '+pAB.toFixed(4),'Note: only valid if A and B are independent events']};},
+  },
+  {
+    regex:/binomial\s+n\s*=\s*([\d]+)\s+p\s*=\s*([\d.]+)\s+k\s*=\s*([\d]+)/i,
+    solve:function(m){
+      const n=+m[1],p=+m[2],k=+m[3];
+      const c=comb(n,k);
+      const prob=c*Math.pow(p,k)*Math.pow(1-p,n-k);
+      return{answer:'P(X='+k+') = '+prob.toFixed(6),steps:['n = '+n+', p = '+p+', k = '+k,'C(n,k) = C('+n+','+k+') = '+c,'P(X=k) = C(n,k) × pᵏ × (1−p)ⁿ⁻ᵏ','= '+c+' × '+p+'ᵏ × '+(1-p)+'ⁿ⁻ᵏ = '+prob.toFixed(6)]};
+    },
+  },
+  {
+    regex:/(?:95%?|99%?|90%?)\s*CI\s+(?:for\s+)?p\s*=\s*([\d.]+)\s+n\s*=\s*([\d]+)/i,
+    solve:function(m){
+      const p=+m[1],n=+m[2];
+      const raw=m[0].match(/(\d+)%/);
+      const conf=raw?+raw[1]:95;
+      const z=conf===99?2.576:conf===90?1.645:1.96;
+      const me=z*Math.sqrt(p*(1-p)/n);
+      const lo=(p-me).toFixed(4),hi=(p+me).toFixed(4);
+      return{answer:'CI: ('+lo+', '+hi+')',steps:['p̂ = '+p+', n = '+n+', z* = '+z+' for '+conf+'% confidence','SE = √(p̂(1−p̂)/n) = √('+p+'*'+(1-p)+'/'+n+') = '+Math.sqrt(p*(1-p)/n).toFixed(4),'ME = z* × SE = '+z+' × '+Math.sqrt(p*(1-p)/n).toFixed(4)+' = '+me.toFixed(4),'CI = p̂ ± ME = '+p+' ± '+me.toFixed(4),'Interval: ('+lo+', '+hi+')']};
+    },
+  },
+  {
+    regex:/sample\s*size\s+(?:for\s+)?ME\s*=\s*([\d.]+)\s+p\s*=\s*([\d.]+)/i,
+    solve:function(m){
+      const me=+m[1],p=+m[2];
+      const z=1.96;
+      const n=Math.ceil(Math.pow(z/me,2)*p*(1-p));
+      return{answer:'n = '+n,steps:['ME = '+me+', p̂ = '+p+', z* = 1.96 (95%)','Formula: n = (z*/ME)² × p̂(1−p̂)','n = ('+z+'/'+me+')² × '+p+' × '+(1-p),'n = '+Math.pow(z/me,2).toFixed(2)+' × '+( p*(1-p)).toFixed(4),'Round up: n = '+n]};
+    },
+  },
 ];
 
 function solveNLP(){
