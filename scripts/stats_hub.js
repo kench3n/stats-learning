@@ -2348,6 +2348,16 @@ function buildProgressPanel(){
   grid.innerHTML=html;
   updateMilestoneDisplay();
   updateWeakSpots();
+  // Restore collapsed state
+  if(typeof document!=='undefined'&&typeof localStorage!=='undefined'){
+    var _pp=document.getElementById('progressPanel');
+    var _pb=document.getElementById('progressToggle');
+    if(_pp&&_pb&&typeof _pb.setAttribute==='function'){
+      var _isC=localStorage.getItem('sh-progress-collapsed')==='1';
+      if(_isC){_pp.classList.add('collapsed');_pb.setAttribute('aria-expanded','false');_pb.textContent='Progress Overview \u25B8';}
+      else{_pp.classList.remove('collapsed');_pb.setAttribute('aria-expanded','true');_pb.textContent='Progress Overview \u25BE';}
+    }
+  }
 }
 
 function toggleProgressPanel(){
@@ -2359,6 +2369,7 @@ function toggleProgressPanel(){
   const expanded=!panel.classList.contains('collapsed');
   btn.setAttribute('aria-expanded',expanded?'true':'false');
   btn.textContent='Progress Overview '+(expanded?'\u25BE':'\u25B8');
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-progress-collapsed',expanded?'0':'1');
 }
 
 function resetUnit(unit){
