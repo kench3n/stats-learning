@@ -172,6 +172,22 @@
       <option value="11">Unit 11: Regression Inference</option>
     </select>
   </div>
+  <div class="dataset-selector">
+    <label class="cl" for="datasetSelect">DATASET</label>
+    <select id="datasetSelect" onchange="loadDataset(this.value)">
+      <option value="">Default (synthetic)</option>
+      <option value="iris">Iris Flowers (sepal length)</option>
+      <option value="grades">Exam Scores</option>
+      <option value="housing">Home Prices (sqft)</option>
+      <option value="custom">Upload CSV...</option>
+    </select>
+    <div class="data-stats" id="dataStats" style="display:none;">
+      <span class="data-stat">n=<span id="dsN">0</span></span>
+      <span class="data-stat">x̄=<span id="dsMean">0</span></span>
+      <span class="data-stat">s=<span id="dsStdev">0</span></span>
+      <span class="data-stat">med=<span id="dsMedian">0</span></span>
+    </div>
+  </div>
   <div class="sub-tabs" id="vizTabs" role="tablist" aria-label="Visualizer tools">
     <button class="sub-tab active" id="viz-tab-hist" role="tab" aria-selected="true" aria-controls="viz-hist" onclick="showSub('viz','hist',this)">Histogram</button>
     <button class="sub-tab" id="viz-tab-box" role="tab" aria-selected="false" aria-controls="viz-box" onclick="showSub('viz','box',this)">Boxplot</button>

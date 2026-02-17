@@ -604,6 +604,119 @@ function drawComp(){
 // ===================== PRACTICE =====================
 
 // ===================== FORMULA REFERENCE =====================
+
+// ===================== PHASE 17: REAL DATASETS =====================
+let activeDataset=null;
+
+const DATASETS={
+  iris:{
+    name:'Iris Flower Measurements',
+    desc:'Classic iris dataset — sepal length in cm',
+    col:'sepal_length',
+    data:[5.1,4.9,4.7,4.6,5.0,5.4,4.6,5.0,4.4,4.9,5.4,4.8,4.8,4.3,5.8,5.7,5.4,5.1,5.7,5.1,
+          5.4,5.1,4.6,5.1,4.8,5.0,5.0,5.2,5.2,4.7,4.8,5.4,5.2,5.5,4.9,5.0,5.5,4.9,4.4,5.1,
+          5.0,4.5,4.4,5.0,5.1,4.8,5.1,4.6,5.3,5.0,7.0,6.4,6.9,5.5,6.5,5.7,6.3,4.9,6.6,5.2]
+  },
+  grades:{
+    name:'Student Exam Scores',
+    desc:'Simulated exam scores out of 100',
+    col:'score',
+    data:[72,85,91,63,78,88,74,69,95,82,71,79,87,66,93,76,84,70,88,73,
+          65,90,81,77,68,86,92,75,83,71,89,67,94,80,74,85,70,78,96,62,
+          87,73,81,69,88,76,91,64,83,79,72,86,75,93,68,84,77,89,71,90]
+  },
+  housing:{
+    name:'Home Prices (sample)',
+    desc:'Home square footage',
+    col:'sqft',
+    data:[1200,1850,2100,950,1650,2400,1100,1750,2050,1400,1600,2200,
+          1300,1900,2350,1050,1500,2000,1250,1700,2300,1150,1800,2150,
+          1350,1950,1450,2050,1100,1700,2250,1600,1400,1850,2100,950,
+          1550,2000,1200,1750,2400,1300,1650,1950,1100,2050,1500,1800]
+  }
+};
+
+function loadDataset(key){
+  if(typeof document==='undefined')return;
+  if(key==='custom'){triggerCSVUpload();const sel=document.getElementById('datasetSelect');if(sel)sel.value='';return;}
+  if(!key){resetToDefaultData();return;}
+  const ds=DATASETS[key];
+  if(!ds)return;
+  activeDataset=ds.data.filter(v=>Number.isFinite(v));
+  if(typeof histData!=='undefined')histData=activeDataset;
+  updateDataStats();
+  drawHist();drawBox();drawNorm();
+}
+
+function resetToDefaultData(){
+  activeDataset=null;
+  const dataStats=document.getElementById('dataStats');
+  if(dataStats)dataStats.style.display='none';
+  if(typeof document!=='undefined'){
+    const preset=document.getElementById('histPreset');
+    const sizeSlider=document.getElementById('sizeSlider');
+    if(preset&&sizeSlider){
+      if(typeof histData!=='undefined')histData=genData(preset.value,+sizeSlider.value);
+      drawHist();drawBox();drawNorm();
+    }
+  }
+}
+
+function updateDataStats(){
+  if(typeof document==='undefined')return;
+  const panel=document.getElementById('dataStats');
+  if(!panel||!activeDataset||!activeDataset.length)return;
+  panel.style.display='';
+  const n=activeDataset.length;
+  const m=mean(activeDataset);const sd=stdev(activeDataset);const med=median(activeDataset);
+  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setEl('dsN',n);setEl('dsMean',m.toFixed(2));setEl('dsStdev',sd.toFixed(2));setEl('dsMedian',med.toFixed(2));
+}
+
+function triggerCSVUpload(){
+  if(typeof document==='undefined'||typeof FileReader==='undefined')return;
+  const input=document.createElement('input');
+  input.type='file';input.accept='.csv,.tsv,.txt';
+  input.onchange=function(e){
+    const file=e&&e.target&&e.target.files?e.target.files[0]:null;
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const text=ev&&ev.target&&typeof ev.target.result==='string'?ev.target.result:'';
+      const parsed=parseCSV(text);
+      if(parsed)loadCustomData(parsed);
+    };
+    reader.readAsText(file);
+  };
+  if(typeof input.click==='function')input.click();
+}
+
+function parseCSV(text){
+  const lines=text.trim().split('\n').filter(l=>l.trim());
+  if(lines.length<2){showToast('CSV needs at least a header and one data row.');return null;}
+  const delim=lines[0].includes('\t')?'\t':',';
+  const headers=lines[0].split(delim).map(h=>h.trim().replace(/^"|"$/g,''));
+  const data=[];
+  for(let i=1;i<lines.length;i++){
+    const vals=lines[i].split(delim).map(v=>v.trim().replace(/^"|"$/g,''));
+    if(vals.length!==headers.length)continue;
+    const row=vals.map(v=>{const n=parseFloat(v);return isNaN(n)?v:n;});
+    data.push(row);
+  }
+  return{headers,data};
+}
+
+function loadCustomData(parsed){
+  if(!parsed||!parsed.data||!parsed.headers)return;
+  const numericIdx=parsed.headers.map((_,i)=>i).filter(i=>typeof (parsed.data[0]||[])[i]==='number');
+  if(!numericIdx.length){showToast('No numeric columns found in CSV.');return;}
+  activeDataset=parsed.data.map(row=>row[numericIdx[0]]).filter(v=>Number.isFinite(v));
+  if(typeof histData!=='undefined')histData=activeDataset;
+  showToast('Loaded '+activeDataset.length+' values from "'+parsed.headers[numericIdx[0]]+'"');
+  updateDataStats();
+  drawHist();drawBox();drawNorm();
+}
+
 const FORMULAS={
   1:[
     {name:'Mean',formula:'x̄ = Σxᵢ / n'},

@@ -874,3 +874,9 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .builder-slots{display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:var(--bg);border:1px dashed var(--border);border-radius:8px;}
 .builder-slot{padding:4px 10px;background:var(--bg2);border:1px solid var(--amber);border-radius:4px;font-family:'Space Mono',monospace;font-size:14px;color:var(--amber);}
 .builder-status{margin:10px 0;font-size:13px;font-family:'Space Mono',monospace;color:var(--muted);}
+
+/* ===== PHASE 17: DATASETS, CSV UPLOAD ===== */
+.dataset-selector{padding:0 0 12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.dataset-selector select{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;}
+.data-stats{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--cyan);font-family:'Space Mono',monospace;}
+.data-stat{background:var(--bg2);padding:4px 8px;border-radius:4px;border:1px solid var(--border);}
