@@ -3324,6 +3324,30 @@ function toggleCompareMode(){
   var active=container.classList.contains('compare-mode');
   if(btn)btn.textContent=active?'Exit Compare':'Compare Mode';
 }
+function jumpToProblem(){
+  if(typeof document==='undefined')return;
+  var input=document.getElementById('jumpInput');
+  if(!input)return;
+  var pid=parseInt(input.value);
+  if(!pid)return;
+  // Search in activeProbs first
+  var found=false;
+  if(typeof activeProbs!=='undefined'){
+    var local=activeProbs.find(function(p){return p.id===pid;});
+    if(local){
+      var el=document.getElementById('pc-'+pid);
+      if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--cyan)';setTimeout(function(){el.style.outline='';},1500);found=true;}
+    }
+  }
+  if(!found&&typeof allProbs!=='undefined'){
+    for(var u in allProbs){
+      var p2=(allProbs[u]||[]).find(function(p){return p.id===pid;});
+      if(p2){setUnit(+u);if(typeof setTimeout!=='undefined'){setTimeout(function(_pid){return function(){var el2=document.getElementById('pc-'+_pid);if(el2){el2.scrollIntoView({behavior:'smooth',block:'center'});el2.style.outline='2px solid var(--cyan)';setTimeout(function(){el2.style.outline='';},1500);}};}(pid),400);}found=true;break;}
+    }
+  }
+  if(!found)showToast('Problem #'+pid+' not found.');
+  input.value='';
+}
 function copyProblemLink(probId){
   if(typeof window==='undefined'||typeof navigator==='undefined')return;
   var url=(window.location.origin||'')+(window.location.pathname||'')+'#/practice?pid='+probId;

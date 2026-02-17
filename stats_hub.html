@@ -412,6 +412,10 @@
     </select>
     <button class="unit-info-btn" onclick="showUnitInfo()" title="Unit overview" aria-label="Unit overview">i</button>
   </div>
+  <div class="jump-bar">
+    <input type="number" id="jumpInput" class="jump-input" placeholder="Go to #..." min="1" aria-label="Jump to problem by ID" onkeydown="if(event.key==='Enter')jumpToProblem()">
+    <button class="jump-btn" onclick="jumpToProblem()">Go</button>
+  </div>
   <div class="score-bar" role="status" aria-live="polite">
     <div class="score-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="score-fill" id="scoreFill"></div></div>
     <div class="score-text" id="scoreText">0 / 15</div>

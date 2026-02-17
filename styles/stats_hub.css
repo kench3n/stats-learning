@@ -1094,3 +1094,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .prob-link-btn:hover{opacity:1;color:var(--cyan);}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @media(prefers-reduced-motion:no-preference){.pc{animation:cardIn 0.2s ease both;}}
+.jump-bar{display:flex;align-items:center;gap:6px;padding:6px 0 4px;}
+.jump-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:13px;padding:4px 10px;width:120px;}
+.jump-input:focus{outline:2px solid var(--cyan);border-color:var(--cyan);}
+.jump-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);cursor:pointer;font-size:13px;padding:4px 12px;transition:border-color 0.2s;}
+.jump-btn:hover{border-color:var(--cyan);}
