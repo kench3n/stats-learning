@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 1 — Practice Problems</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0c14;--bg2:#111119;--bg3:#181824;--border:#1e1e30;--border-h:#2e2e48;
+  --text:#e4e2ee;--dim:#8a88a0;--muted:#555568;
+  --cyan:#06b6d4;--amber:#f59e0b;--pink:#f472b6;--green:#34d399;--purple:#a78bfa;--red:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+
+.header{text-align:center;padding:60px 20px 20px;}
+.header .tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.header h1{font-family:'Instrument Serif',serif;font-size:clamp(36px,5vw,52px);font-weight:400;letter-spacing:-1px;margin-bottom:8px;}
+.header h1 em{font-style:italic;color:var(--amber);}
+.header p{color:var(--dim);font-size:15px;max-width:520px;margin:0 auto;font-weight:300;}
+
+.score-bar{display:flex;align-items:center;gap:16px;max-width:800px;margin:20px auto;padding:0 24px;}
+.score-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width 0.5s;}
+.score-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+
+.problems{max-width:800px;margin:0 auto;padding:24px 24px 100px;}
+
+.problem-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;overflow:hidden;transition:border-color 0.3s;}
+.problem-card.correct{border-color:rgba(52,211,153,0.4);}
+.problem-card.incorrect{border-color:rgba(239,68,68,0.3);}
+
+.problem-header{padding:24px 24px 0;display:flex;align-items:center;gap:12px;}
+.problem-num{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--muted);background:var(--bg3);padding:4px 10px;border-radius:4px;}
+.problem-diff{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.diff-easy{background:rgba(52,211,153,0.12);color:var(--green);}
+.diff-med{background:rgba(245,158,11,0.12);color:var(--amber);}
+.diff-hard{background:rgba(244,114,182,0.12);color:var(--pink);}
+.problem-topic{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);margin-left:auto;}
+
+.problem-body{padding:16px 24px 20px;}
+.problem-q{font-size:15px;line-height:1.7;margin-bottom:4px;}
+.problem-data{font-family:'Space Mono',monospace;font-size:13px;background:var(--bg);padding:10px 16px;border-radius:6px;margin:12px 0;color:var(--cyan);overflow-x:auto;}
+
+.choices{display:flex;flex-direction:column;gap:8px;padding:0 24px 20px;}
+.choice-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:14px;color:var(--text);text-align:left;}
+.choice-btn:hover{border-color:var(--border-h);background:var(--bg3);}
+.choice-btn .letter{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);min-width:20px;}
+.choice-btn.selected{border-color:var(--cyan);background:rgba(6,182,212,0.06);}
+.choice-btn.right{border-color:var(--green);background:rgba(52,211,153,0.08);}
+.choice-btn.right .letter{color:var(--green);}
+.choice-btn.wrong{border-color:var(--red);background:rgba(239,68,68,0.06);opacity:0.6;}
+.choice-btn.wrong .letter{color:var(--red);}
+.choice-btn.disabled{pointer-events:none;}
+
+/* Free response */
+.fr-row{display:flex;gap:12px;padding:0 24px 20px;align-items:flex-end;}
+.fr-row input{flex:1;font-family:'Space Mono',monospace;font-size:14px;padding:10px 16px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;transition:border-color 0.2s;}
+.fr-row input:focus{outline:none;border-color:var(--cyan);}
+.fr-row input::placeholder{color:var(--muted);}
+.fr-row button{font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 20px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);color:var(--cyan);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.fr-row button:hover{background:rgba(6,182,212,0.18);}
+
+.feedback{padding:0 24px 24px;display:none;}
+.feedback.show{display:block;}
+.feedback-box{padding:16px 20px;border-radius:8px;font-size:13px;line-height:1.7;}
+.feedback-correct{background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);color:var(--green);}
+.feedback-incorrect{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);color:#fca5a5;}
+.feedback-box strong{color:var(--text);}
+.feedback-box .explain{color:var(--dim);margin-top:6px;display:block;}
+
+@media(max-width:600px){.problem-header{flex-wrap:wrap;}.problem-topic{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="tag">Unit 1 — Descriptive Statistics</p>
+  <h1>Practice <em>Problems</em></h1>
+  <p>15 problems covering center, spread, shape, and interpretation. Work them by hand first, then check your answer.</p>
+</div>
+<div class="score-bar">
+  <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+  <div class="score-text" id="scoreText">0 / 15</div>
+</div>
+
+<div class="problems" id="problemsContainer"></div>
+
+<script>
+const problems = [
+  // --- EASY: Center ---
+  {
+    id:1, diff:'easy', topic:'Mean',
+    q:'Find the mean of the following dataset:',
+    data:'12, 15, 18, 22, 28, 35',
+    type:'fr', answer:21.67, tolerance:0.1,
+    explain:'Mean = (12+15+18+22+28+35)/6 = 130/6 ≈ 21.67. Add all values and divide by the count.'
+  },
+  {
+    id:2, diff:'easy', topic:'Median',
+    q:'Find the median of this dataset:',
+    data:'3, 7, 8, 12, 14, 18, 21',
+    type:'mc', answer:2,
+    choices:['8','14','12','11'],
+    explain:'With 7 values sorted, the median is the 4th value. Counting: 3, 7, 8, [12], 14, 18, 21. The median is 12.'
+  },
+  {
+    id:3, diff:'easy', topic:'Median (even n)',
+    q:'Find the median of this dataset:',
+    data:'4, 9, 11, 15, 20, 25',
+    type:'fr', answer:13, tolerance:0.1,
+    explain:'With 6 values (even count), the median is the average of the 3rd and 4th values: (11+15)/2 = 13.'
+  },
+  {
+    id:4, diff:'easy', topic:'Mode',
+    q:'What is the mode of this dataset?',
+    data:'5, 8, 8, 12, 15, 8, 20, 12, 8',
+    type:'mc', answer:0,
+    choices:['8','12','10','No mode'],
+    explain:'The value 8 appears 4 times — more than any other value. So the mode is 8.'
+  },
+  // --- EASY: Spread ---
+  {
+    id:5, diff:'easy', topic:'Range',
+    q:'Find the range of this dataset:',
+    data:'14, 22, 8, 35, 19, 27, 11',
+    type:'fr', answer:27, tolerance:0.1,
+    explain:'Range = Max − Min = 35 − 8 = 27.'
+  },
+  // --- MEDIUM: Spread ---
+  {
+    id:6, diff:'medium', topic:'Standard Deviation',
+    q:'Calculate the population standard deviation of this dataset:',
+    data:'4, 8, 6, 5, 3',
+    type:'fr', answer:1.72, tolerance:0.1,
+    explain:'Mean = 26/5 = 5.2. Squared deviations: (4−5.2)²=1.44, (8−5.2)²=7.84, (6−5.2)²=0.64, (5−5.2)²=0.04, (3−5.2)²=4.84. Variance = 14.8/5 = 2.96. SD = √2.96 ≈ 1.72. (Note: if you got ~1.67 you may have rounded differently during intermediate steps — both are acceptable.)'
+  },
+  {
+    id:7, diff:'medium', topic:'IQR',
+    q:'Find the IQR (interquartile range) of this dataset:',
+    data:'2, 5, 7, 10, 12, 15, 18, 20, 25',
+    type:'fr', answer:13, tolerance:1,
+    explain:'Q1 = median of lower half {2,5,7,10} = (5+7)/2 = 6. Q3 = median of upper half {15,18,20,25} = (18+20)/2 = 19. IQR = Q3−Q1 = 19−6 = 13.'
+  },
+  // --- MEDIUM: Shape & Interpretation ---
+  {
+    id:8, diff:'medium', topic:'Skewness',
+    q:'A dataset of employee salaries at a company has a mean of $72,000 and a median of $55,000. What does this tell you about the shape of the distribution?',
+    data:null,
+    type:'mc', answer:1,
+    choices:['Left (negatively) skewed','Right (positively) skewed','Approximately symmetric','Cannot determine'],
+    explain:'When the mean is greater than the median, it indicates the distribution is right (positively) skewed. A few very high salaries pull the mean to the right while the median stays near the center of the data.'
+  },
+  {
+    id:9, diff:'medium', topic:'Outliers',
+    q:'Given the five-number summary: Min=12, Q1=25, Median=32, Q3=41, Max=95. Using the 1.5×IQR rule, is 95 an outlier?',
+    data:null,
+    type:'mc', answer:0,
+    choices:['Yes, 95 is an outlier','No, 95 is not an outlier','Need more information','Only if n > 30'],
+    explain:'IQR = Q3−Q1 = 41−25 = 16. Upper fence = Q3+1.5×IQR = 41+24 = 65. Since 95 > 65, yes — 95 is an outlier.'
+  },
+  {
+    id:10, diff:'medium', topic:'Transformations',
+    q:'Every value in a dataset is multiplied by 3 and then 10 is added. If the original mean was 20 and the original standard deviation was 4, what are the new mean and standard deviation?',
+    data:null,
+    type:'mc', answer:2,
+    choices:['Mean=70, SD=22','Mean=70, SD=4','Mean=70, SD=12','Mean=30, SD=12'],
+    explain:'When you multiply by a constant c: new mean = c×old mean + added constant = 3(20)+10 = 70. New SD = |c|×old SD = 3(4) = 12. Adding a constant shifts the center but does NOT affect spread.'
+  },
+  // --- HARD: Interpretation ---
+  {
+    id:11, diff:'hard', topic:'Resistance',
+    q:'Which measure of center is more resistant to outliers, and why?',
+    data:null,
+    type:'mc', answer:1,
+    choices:['Mean — it uses all data points so it\'s more accurate','Median — it only depends on the middle value(s) so extreme values don\'t affect it','Mode — it ignores numerical values entirely','They are equally resistant'],
+    explain:'The median is resistant because it depends only on the position of the middle value(s). The mean uses every value in its calculation, so a single extreme outlier can dramatically shift it. This is why we often report median income rather than mean income.'
+  },
+  {
+    id:12, diff:'hard', topic:'Interpretation',
+    q:'A student scores 72 on a test. The class mean is 65 with a standard deviation of 10. Another student scores 85 on a different test where the class mean is 78 with standard deviation of 14. Which student performed better relative to their class?',
+    data:null,
+    type:'mc', answer:0,
+    choices:['First student (z = 0.7 vs z = 0.5)','Second student (scored 85 vs 72)','They performed equally','Cannot compare different tests'],
+    explain:'Use z-scores: Student 1: z = (72−65)/10 = 0.70. Student 2: z = (85−78)/14 = 0.50. The first student is 0.7 standard deviations above their class mean, while the second is only 0.5 above. The first student performed better relative to their class.'
+  },
+  {
+    id:13, diff:'hard', topic:'Standard Deviation',
+    q:'Two datasets have the same mean of 50. Dataset A: {48, 49, 50, 51, 52}. Dataset B: {20, 35, 50, 65, 80}. Without calculating, which has the larger standard deviation?',
+    data:null,
+    type:'mc', answer:1,
+    choices:['Dataset A','Dataset B','They are equal','Cannot determine without calculating'],
+    explain:'Dataset B has values much farther from the mean (e.g., 20 and 80 are 30 away from 50). Dataset A has values only 1-2 away from the mean. Since standard deviation measures average distance from the mean, Dataset B has a much larger SD.'
+  },
+  {
+    id:14, diff:'hard', topic:'Choosing Measures',
+    q:'You\'re summarizing home prices in a neighborhood where most homes cost $200K–$400K but three mansions sold for over $2 million. Which summary statistics should you report?',
+    data:null,
+    type:'mc', answer:2,
+    choices:['Mean and standard deviation','Mean and range','Median and IQR','Mode and range'],
+    explain:'With extreme outliers (the mansions), the mean and standard deviation will be heavily inflated. The median and IQR are resistant to outliers and will better represent the "typical" home price. This is why real estate reports almost always use median home price.'
+  },
+  {
+    id:15, diff:'hard', topic:'Distribution Shape',
+    q:'A histogram of test scores shows a peak near 90 with a long tail stretching down toward 40. The mean is 78 and the median is 83. Describe the shape of this distribution.',
+    data:null,
+    type:'mc', answer:0,
+    choices:['Left (negatively) skewed','Right (positively) skewed','Symmetric and bell-shaped','Bimodal'],
+    explain:'The peak is on the right (near 90) with the tail extending to the left (toward 40). This is left (negatively) skewed. Confirmation: mean (78) < median (83), which is the hallmark of left skew — the low scores pull the mean down.'
+  }
+];
+
+let answered = {};
+let score = 0;
+
+function render() {
+  const container = document.getElementById('problemsContainer');
+  container.innerHTML = '';
+  problems.forEach((p,i) => {
+    const card = document.createElement('div');
+    card.className = 'problem-card';
+    card.id = 'card-'+p.id;
+
+    const diffClass = p.diff==='easy'?'diff-easy':p.diff==='medium'?'diff-med':'diff-hard';
+
+    let body = `
+      <div class="problem-header">
+        <span class="problem-num">#${p.id}</span>
+        <span class="problem-diff ${diffClass}">${p.diff}</span>
+        <span class="problem-topic">${p.topic}</span>
+      </div>
+      <div class="problem-body">
+        <div class="problem-q">${p.q}</div>
+        ${p.data ? '<div class="problem-data">'+p.data+'</div>' : ''}
+      </div>`;
+
+    if(p.type==='mc') {
+      body += '<div class="choices" id="choices-'+p.id+'">';
+      const letters = ['A','B','C','D'];
+      p.choices.forEach((c,j) => {
+        body += `<div class="choice-btn" onclick="answerMC(${p.id},${j})" id="choice-${p.id}-${j}">
+          <span class="letter">${letters[j]}</span><span>${c}</span>
+        </div>`;
+      });
+      body += '</div>';
+    } else {
+      body += `<div class="fr-row">
+        <input type="text" id="input-${p.id}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')answerFR(${p.id})">
+        <button onclick="answerFR(${p.id})">Check</button>
+      </div>`;
+    }
+
+    body += `<div class="feedback" id="fb-${p.id}"><div class="feedback-box" id="fbbox-${p.id}"></div></div>`;
+
+    card.innerHTML = body;
+    container.appendChild(card);
+  });
+}
+
+function answerMC(id, chosen) {
+  if(answered[id] !== undefined) return;
+  answered[id] = chosen;
+  const p = problems.find(x=>x.id===id);
+  const correct = chosen === p.answer;
+  if(correct) score++;
+
+  // Style choices
+  p.choices.forEach((_,j) => {
+    const el = document.getElementById('choice-'+id+'-'+j);
+    el.classList.add('disabled');
+    if(j===p.answer) el.classList.add('right');
+    else if(j===chosen && !correct) el.classList.add('wrong');
+  });
+
+  showFeedback(id, correct, p.explain);
+  updateScore();
+}
+
+function answerFR(id) {
+  if(answered[id] !== undefined) return;
+  const p = problems.find(x=>x.id===id);
+  const input = document.getElementById('input-'+id);
+  const val = parseFloat(input.value);
+  if(isNaN(val)) return;
+
+  answered[id] = val;
+  const correct = Math.abs(val - p.answer) <= (p.tolerance||0.1);
+  if(correct) score++;
+
+  input.style.borderColor = correct ? 'var(--green)' : 'var(--red)';
+  input.disabled = true;
+
+  const explain = correct ? p.explain : `The correct answer is ${p.answer}. ${p.explain}`;
+  showFeedback(id, correct, explain);
+  updateScore();
+}
+
+function showFeedback(id, correct, explain) {
+  const fb = document.getElementById('fb-'+id);
+  const box = document.getElementById('fbbox-'+id);
+  const card = document.getElementById('card-'+id);
+  fb.classList.add('show');
+  box.className = 'feedback-box ' + (correct ? 'feedback-correct' : 'feedback-incorrect');
+  box.innerHTML = `<strong>${correct ? '✓ Correct!' : '✗ Not quite.'}</strong><span class="explain">${explain}</span>`;
+  card.classList.add(correct ? 'correct' : 'incorrect');
+}
+
+function updateScore() {
+  const n = Object.keys(answered).length;
+  document.getElementById('scoreText').textContent = score + ' / ' + n + ' correct';
+  document.getElementById('scoreFill').style.width = (n/problems.length*100) + '%';
+}
+
+render();
+</script>
+</body>
+</html>
