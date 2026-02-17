@@ -1162,6 +1162,7 @@ buildProblems=function(unit=currentUnit){
     }catch(e){}
   }
   updatePracticeNavBadge();
+  updateMasteryBadge(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
@@ -1250,6 +1251,7 @@ function ansMC(id,ch){
   refreshGoalProgress();
   updatePracticeNavBadge();
   checkUnitCompletion(currentUnit);
+  updateMasteryBadge(currentUnit);
 }
 
 function ansFR(id){
@@ -1276,6 +1278,7 @@ function ansFR(id){
   refreshGoalProgress();
   updatePracticeNavBadge();
   checkUnitCompletion(currentUnit);
+  updateMasteryBadge(currentUnit);
 }
 
 function findProblemById(probId){
@@ -3524,6 +3527,29 @@ function updatePracticeNavBadge(){
   }
   if(unanswered>0){badge.textContent=unanswered;badge.style.display='';}
   else{badge.style.display='none';}
+}
+function updateMasteryBadge(unit){
+  if(typeof document==='undefined')return;
+  var badge=document.getElementById('masteryBadge');if(!badge)return;
+  var probs=allProbs[unit]||[];if(!probs.length){badge.textContent='Novice';if(typeof badge.setAttribute==='function')badge.setAttribute('data-level','novice');return;}
+  var state=typeof getPracticeState==='function'?getPracticeState(unit):{};
+  var ans=state.answered&&typeof state.answered==='object'?state.answered:{};
+  var correct=0,total=probs.length;
+  probs.forEach(function(p){
+    var a=ans[p.id];
+    if(a===undefined)return;
+    var ok=p.type==='mc'?(+a)===p.ans:Math.abs(parseFloat(a)-p.ans)<=(p.tol||0.1);
+    if(ok)correct++;
+  });
+  var pct=total>0?correct/total*100:0;
+  var level,label;
+  if(pct<=20){level='novice';label='Novice';}
+  else if(pct<=40){level='apprentice';label='Apprentice';}
+  else if(pct<=60){level='practitioner';label='Practitioner';}
+  else if(pct<=80){level='expert';label='Expert';}
+  else{level='master';label='Master';}
+  badge.textContent=label;
+  if(typeof badge.setAttribute==='function')badge.setAttribute('data-level',level);
 }
 function toggleReadingMode(){
   if(typeof document==='undefined')return;
