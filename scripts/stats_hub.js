@@ -3744,6 +3744,39 @@ function buildHeatmap(){
   grid.innerHTML=html;
 }
 
+function activateStreakFreeze(){
+  if(typeof localStorage==='undefined'||typeof document==='undefined')return;
+  var xd=getXPData();
+  if(xd.total<100){showToast('Need at least 100 XP to activate a Streak Freeze.');return;}
+  var today=typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10);
+  try{
+    xd.total-=100;
+    localStorage.setItem('sh-xp',JSON.stringify(xd));
+    localStorage.setItem('sh-streak-freeze',today);
+  }catch(e){}
+  buildStreakFreezeCard();
+  showToast('❄ Streak Freeze activated! Your streak is protected today.');
+  updateXP();
+}
+function buildStreakFreezeCard(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var statusEl=document.getElementById('sfStatus');
+  var btn=document.getElementById('sfBtn');
+  if(!statusEl||!btn)return;
+  var today=typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10);
+  var freeze='';
+  try{freeze=localStorage.getItem('sh-streak-freeze')||'';}catch(e){}
+  var xd=getXPData();
+  if(freeze===today){
+    statusEl.innerHTML='<span class="sf-active">❄ Freeze Active — streak protected today</span>';
+    btn.disabled=true;btn.textContent='Freeze Active';
+  }else{
+    statusEl.innerHTML='';
+    btn.disabled=xd.total<100;
+    btn.textContent='Activate Freeze (100 XP)';
+    if(xd.total<100)btn.title='Need 100 XP (have '+xd.total+')';
+  }
+}
 function buildLeaderboard(){
   if(typeof document==='undefined')return;
   var rows=document.getElementById('leaderboardRows');
@@ -3770,6 +3803,7 @@ function buildAchievementsPage(){
   if(typeof document==='undefined')return;
   buildCalendar();
   buildLeaderboard();
+  buildStreakFreezeCard();
   showAnalytics('accuracy',null);
   const statsEl=document.getElementById('achieveStats');
   const badgeGrid=document.getElementById('achieveBadgeGrid');
