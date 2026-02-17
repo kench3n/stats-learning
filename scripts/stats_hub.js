@@ -28,6 +28,8 @@ function goPage(id){
   if(id==='review')updateReviewBadge();
   if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
+    var savedGoal=localStorage.getItem('sh-session-goal')||'0';
+    if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
     const savedUnit=parseInt(localStorage.getItem('sh-filter-unit'))||1;
     const savedDiff=localStorage.getItem('sh-filter-diff')||'all';
     const savedSearch=localStorage.getItem('sh-filter-search')||'';
@@ -1067,6 +1069,35 @@ buildProblems=function(unit=currentUnit){
   setAllScores();
 }
 
+function updateSessionGoal(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var sel=document.getElementById('sessionGoal');
+  if(!sel)return;
+  var goal=parseInt(sel.value)||0;
+  try{localStorage.setItem('sh-session-goal',String(goal));}catch(e){}
+  refreshGoalProgress();
+}
+function refreshGoalProgress(){
+  if(typeof document==='undefined')return;
+  var progress=document.getElementById('goalProgress');
+  var text=document.getElementById('goalProgressText');
+  if(!progress||!text)return;
+  var goal=0;
+  if(typeof localStorage!=='undefined')try{goal=parseInt(localStorage.getItem('sh-session-goal'))||0;}catch(e){}
+  if(!goal){progress.style.display='none';text.textContent='';return;}
+  var answered=0;
+  if(typeof sessionData!=='undefined')answered=sessionData.problemsAnswered||0;
+  var pct=Math.min(Math.round(answered/goal*100),100);
+  progress.style.display='';
+  progress.max=100;
+  progress.value=pct;
+  text.textContent=answered+' / '+goal;
+  if(answered>=goal&&goal>0&&pct===100){
+    if(typeof showToast!=='undefined'&&!document.getElementById('goalProgress').dataset.toasted){document.getElementById('goalProgress').dataset.toasted='1';showToast('Session goal reached! Great work.');}
+  }else{
+    var pg=document.getElementById('goalProgress');if(pg)pg.dataset.toasted='';
+  }
+}
 function voteDiff(probId,vote){
   if(typeof localStorage==='undefined')return;
   try{
@@ -1098,6 +1129,7 @@ function ansMC(id,ch){
   setAllScores();
   updateReviewBadge();
   updateWeakSpots();
+  refreshGoalProgress();
 }
 
 function ansFR(id){
@@ -1119,6 +1151,7 @@ function ansFR(id){
   setAllScores();
   updateReviewBadge();
   updateWeakSpots();
+  refreshGoalProgress();
 }
 
 function findProblemById(probId){
