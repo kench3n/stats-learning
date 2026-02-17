@@ -1349,6 +1349,7 @@ function showFB(id,ok,ex){
   pc.classList.add(ok?'correct':'incorrect');
   if(ok){
     spawnConfetti();
+    _recordActivity();
     const card=document.getElementById('pc-'+id);
     if(card){card.classList.add('correct-pulse');setTimeout(()=>card.classList.remove('correct-pulse'),600);}
   }
@@ -3116,20 +3117,32 @@ function buildWeeklyGoals(){
   if(wgList)wgList.innerHTML=html;
 }
 
+function _recordActivity(){
+  if(typeof localStorage==='undefined')return;
+  var activity={};
+  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  var dateStr=todayStr();
+  activity[dateStr]=(activity[dateStr]||0)+1;
+  localStorage.setItem('sh-activity',JSON.stringify(activity));
+}
 function buildHeatmap(){
   if(typeof document==='undefined')return;
   const grid=document.getElementById('heatmapGrid');
   if(!grid)return;
   const streak=getStreakData();
   const history=streak.history||[];
+  var activity={};
+  if(typeof localStorage!=='undefined'){try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}}
   const today=new Date();
   let html='';
   for(let i=89;i>=0;i--){
     const d=new Date(today);d.setDate(d.getDate()-i);
     const dateStr=d.toISOString().slice(0,10);
-    const active=history.includes(dateStr);
+    const count=activity[dateStr]||0;
+    const active=history.includes(dateStr)||count>0;
     const cls=active?'heatmap-active':'heatmap-empty';
-    html+='<div class="heatmap-cell '+cls+'" title="'+dateStr+'"></div>';
+    const titleText=count>0?(dateStr+': '+count+' problem'+(count===1?'':'s')+' solved'):dateStr;
+    html+='<div class="heatmap-cell '+cls+'" title="'+titleText+'"></div>';
   }
   grid.innerHTML=html;
 }
