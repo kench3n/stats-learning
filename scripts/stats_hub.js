@@ -846,7 +846,7 @@ function showHint(id){
 function spawnConfetti(){
   if(typeof document==='undefined')return;
   if(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  const colors=['var(--cyan)','var(--amber)','var(--pink)','var(--green)','var(--purple)'];
+  const colors=['#06b6d4','#f59e0b','#f472b6','#34d399','#a78bfa','#fb923c'];
   for(let i=0;i<20;i++){
     const el=document.createElement('div');
     el.className='confetti-piece';
