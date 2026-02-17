@@ -458,6 +458,7 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .progress-cell-red{border-color:rgba(239,68,68,0.3);}
 .progress-cell-red .progress-cell-score{color:var(--red);}
 .progress-cell-empty .progress-cell-score{color:var(--muted);}
+.progress-cell-perfect{border-color:var(--amber)!important;box-shadow:0 0 0 1px rgba(245,158,11,0.3);}
 .progress-actions{margin-top:10px;display:flex;gap:8px;justify-content:flex-end;}
 .reset-btn{
   font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;

@@ -2336,14 +2336,14 @@ function buildProgressPanel(){
   let html='';
   for(let unit=1;unit<=MAX_UNIT;unit++){
     const row=summary[unit]||{total:0,attempted:0,correct:0};
-    let cls='progress-cell-empty';
+    let cls='progress-cell-empty';let perfect=false;
     if(row.total>0&&row.attempted>0){
       const pct=(row.correct/row.total)*100;
-      if(pct>=80)cls='progress-cell-green';
+      if(pct>=80){cls='progress-cell-green progress-cell-perfect';perfect=true;}
       else if(pct>=40)cls='progress-cell-amber';
       else cls='progress-cell-red';
     }
-    html+=`<div class="progress-cell ${cls}"><div class="progress-cell-label">Unit ${unit}</div><div class="progress-cell-score">${row.correct} / ${row.total}</div></div>`;
+    html+=`<div class="progress-cell ${cls}" title="${perfect?'Unit complete! ≥ 80% accuracy':''}"><div class="progress-cell-label">Unit ${unit}${perfect?' ⭐':''}</div><div class="progress-cell-score">${row.correct} / ${row.total}</div></div>`;
   }
   grid.innerHTML=html;
   updateMilestoneDisplay();
