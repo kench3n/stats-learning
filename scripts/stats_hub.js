@@ -3703,6 +3703,18 @@ window.deleteCustomProblem=function(idx){
   showToast('Problem deleted');
 };
 
+function exportRoadmapProgress(){
+  if(typeof document==='undefined'||typeof Blob==='undefined')return;
+  var topics=getTopicState();
+  var checked=Object.keys(topics).filter(function(k){return !!topics[k];});
+  var data={version:1,type:'roadmap-progress',exportedAt:new Date().toISOString(),checkedTopics:checked,totalChecked:checked.length};
+  var json=JSON.stringify(data,null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='roadmap-progress.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  showToast('Roadmap progress exported!');
+}
 function exportCustomDeck(){
   if(typeof document==='undefined'||typeof Blob==='undefined')return;
   const customs=getCustomProblems();
