@@ -1073,3 +1073,5 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .card-collapse-btn:hover{color:var(--fg);}
 .pc.pc-collapsed .pc-body,.pc.pc-collapsed .choices,.pc.pc-collapsed .fr-row,.pc.pc-collapsed .hint-row,.pc.pc-collapsed .fb,.pc.pc-collapsed .note-row,.pc.pc-collapsed .diff-vote-row{display:none;}
 .pc-diff{cursor:help;}
+.formula-copy-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:12px;padding:1px 6px;margin-left:auto;opacity:0.6;transition:opacity 0.2s,color 0.2s;}
+.formula-copy-btn:hover{opacity:1;color:var(--cyan);}

@@ -820,6 +820,19 @@ const FORMULAS={
   ],
 };
 
+function copyFormula(btn){
+  if(typeof document==='undefined')return;
+  var row=btn.closest('.formula-row');
+  if(!row)return;
+  var eq=row.querySelector('.formula-eq');
+  if(!eq)return;
+  var text=eq.textContent||'';
+  if(typeof navigator!=='undefined'&&navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
+    navigator.clipboard.writeText(text).then(function(){showToast('Formula copied!');}).catch(function(){showToast('Could not copy');});
+  }else if(typeof window!=='undefined'){
+    showToast('Formula: '+text);
+  }
+}
 function buildFormulas(unit){
   if(typeof document==='undefined')return;
   const content=document.getElementById('formulaContent');
@@ -828,7 +841,7 @@ function buildFormulas(unit){
   if(!formulas.length){content.innerHTML='';return;}
   let html='';
   formulas.forEach(f=>{
-    html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq">${f.formula}</span></div>`;
+    html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button></div>`;
   });
   content.innerHTML=html;
 }
