@@ -1,6 +1,6 @@
 {
   "name": "stats-learning-hub",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Interactive statistics learning platform",
   "private": true,
   "scripts": {
@@ -8,6 +8,11 @@
     "test:html": "node tests/validate_html.js",
     "test:problems": "node tests/validate_problems.js",
     "test:math": "node tests/validate_math.js",
-    "test:visualizers": "node tests/validate_visualizers.js"
+    "test:visualizers": "node tests/validate_visualizers.js",
+    "test:extended": "node tests/run_extended.js",
+    "test:engagement": "node tests/validate_engagement.js",
+    "test:ui": "node tests/validate_ui_features.js",
+    "test:units": "node tests/validate_new_units.js",
+    "benchmark": "node tests/benchmark.js"
   }
 }
