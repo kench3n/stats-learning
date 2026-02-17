@@ -3329,6 +3329,28 @@ function updateBookmarkUI(probId){
   btn.classList.toggle('bookmarked',!!bm[probId]);
 }
 
+function printProblemSet(){
+  if(typeof window==='undefined'||typeof document==='undefined')return;
+  var probs=activeProbs||[];
+  if(!probs.length){showToast('No problems to print.');return;}
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Stats Hub — Problem Set</title>';
+  html+='<style>body{font-family:Georgia,serif;padding:40px;color:#1a1a2e;max-width:800px;margin:0 auto;}h1{font-size:20px;margin-bottom:4px;}';
+  html+='.meta{font-size:12px;color:#666;margin-bottom:32px;}.problem{margin-bottom:28px;page-break-inside:avoid;}';
+  html+='.pnum{font-size:11px;color:#666;font-family:monospace;margin-bottom:4px;}.pq{font-size:14px;line-height:1.6;margin-bottom:8px;}';
+  html+='.pdata{font-size:12px;background:#f5f5f5;padding:8px 12px;border-radius:4px;margin-bottom:8px;white-space:pre-line;font-family:monospace;}';
+  html+='.blank{height:48px;border-bottom:1px solid #ccc;margin-top:8px;}</style></head><body>';
+  html+='<h1>Stats Learning Hub — Practice Problems</h1>';
+  html+='<div class="meta">Unit '+currentUnit+' &middot; '+probs.length+' problems &middot; '+new Date().toLocaleDateString()+'</div>';
+  probs.forEach(function(p,i){
+    html+='<div class="problem"><div class="pnum">#'+(i+1)+'. ['+p.diff+'] '+p.topic+'</div>';
+    html+='<div class="pq">'+p.q+'</div>';
+    if(p.data)html+='<div class="pdata">'+p.data+'</div>';
+    html+='<div class="blank"></div></div>';
+  });
+  html+='<script>window.onload=function(){window.print();}<\/script></body></html>';
+  var win=window.open('','_blank');
+  if(win){win.document.write(html);win.document.close();}
+}
 function exportNotes(){
   if(typeof document==='undefined'||typeof Blob==='undefined')return;
   var notes=getNotes();
