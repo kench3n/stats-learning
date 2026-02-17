@@ -863,10 +863,10 @@ const probs=[
 {id:7,diff:'medium',topic:'IQR',q:'Find the IQR of this dataset:',data:'2, 5, 7, 10, 12, 15, 18, 20, 25',type:'fr',ans:13,tol:1,ex:'Q1=(5+7)/2=6. Q3=(18+20)/2=19. IQR=19−6=13.',hint:'Q1 is the median of the lower half, Q3 of the upper half.'},
 {id:8,diff:'medium',topic:'Skewness',q:'Employee salaries: mean=$72,000, median=$55,000. What shape?',data:null,type:'mc',ans:1,ch:['Left skewed','Right skewed','Symmetric','Cannot determine'],ex:'Mean > median → right (positively) skewed. High salaries pull the mean right.',hint:'Compare mean vs median: which direction does the tail pull?'},
 {id:9,diff:'medium',topic:'Outliers',q:'Five-number summary: Min=12, Q1=25, Med=32, Q3=41, Max=95. Is 95 an outlier (1.5×IQR rule)?',data:null,type:'mc',ans:0,ch:['Yes','No','Need more info','Only if n>30'],ex:'IQR=16. Fence=41+24=65. Since 95>65, yes — outlier.',hint:'IQR fence = Q3 + 1.5×IQR. Is max beyond this fence?'},
-{id:10,diff:'medium',topic:'Transforms',q:'Every value ×3 then +10. Original mean=20, SD=4. New mean and SD?',data:null,type:'mc',ans:2,ch:['Mean=70, SD=22','Mean=70, SD=4','Mean=70, SD=12','Mean=30, SD=12'],ex:'New mean=3(20)+10=70. New SD=3(4)=12. Adding a constant doesn\'t affect spread.'},
-{id:11,diff:'hard',topic:'Resistance',q:'Which measure of center is more resistant to outliers?',data:null,type:'mc',ans:1,ch:['Mean — uses all data','Median — only depends on middle values','Mode — ignores values','Equally resistant'],ex:'Median depends only on position; one extreme value can\'t shift it much.'},
+{id:10,diff:'medium',topic:'Transforms',q:'Every value ×3 then +10. Original mean=20, SD=4. New mean and SD?',data:null,type:'mc',ans:2,ch:['Mean=70, SD=22','Mean=70, SD=4','Mean=70, SD=12','Mean=30, SD=12'],ex:'New mean=3(20)+10=70. New SD=3(4)=12. Adding a constant doesn\'t affect spread.',hint:'Linear transform y=ax+b: new mean = a·old mean+b, new SD = a·old SD.'},
+{id:11,diff:'hard',topic:'Resistance',q:'Which measure of center is more resistant to outliers?',data:null,type:'mc',ans:1,ch:['Mean — uses all data','Median — only depends on middle values','Mode — ignores values','Equally resistant'],ex:'Median depends only on position; one extreme value can\'t shift it much.',hint:'An outlier pulls the mean toward it, but the median stays near the middle value.'},
 {id:12,diff:'hard',topic:'Z-scores',q:'Student A: 72 on a test (mean=65, SD=10). Student B: 85 (mean=78, SD=14). Who did better relative to class?',data:null,type:'mc',ans:0,ch:['Student A (z=0.7 vs 0.5)','Student B (scored 85)','Equal','Can\'t compare'],ex:'z_A=(72−65)/10=0.70. z_B=(85−78)/14=0.50. Student A is further above their class.',hint:'Compute z = (score - mean) / SD for each student.'},
-{id:13,diff:'hard',topic:'Std Dev',q:'Same mean of 50. A:{48,49,50,51,52}. B:{20,35,50,65,80}. Which has larger SD?',data:null,type:'mc',ans:1,ch:['Dataset A','Dataset B','Equal','Can\'t tell'],ex:'B has values much farther from the mean (20 and 80 are 30 away vs 1-2 in A).'},
+{id:13,diff:'hard',topic:'Std Dev',q:'Same mean of 50. A:{48,49,50,51,52}. B:{20,35,50,65,80}. Which has larger SD?',data:null,type:'mc',ans:1,ch:['Dataset A','Dataset B','Equal','Can\'t tell'],ex:'B has values much farther from the mean (20 and 80 are 30 away vs 1-2 in A).',hint:'SD measures average distance from the mean. Look at how far each value is from 50.'},
 {id:14,diff:'hard',topic:'Choosing Stats',q:'Home prices: most $200K–$400K, three mansions over $2M. Which stats to report?',data:null,type:'mc',ans:2,ch:['Mean and SD','Mean and range','Median and IQR','Mode and range'],ex:'Median and IQR resist outliers. This is why real estate uses median price.',hint:'Which measures are resistant to the extreme mansion prices?'},
 {id:15,diff:'hard',topic:'Shape',q:'Histogram peaks near 90, tail stretches to 40. Mean=78, median=83. Shape?',data:null,type:'mc',ans:0,ch:['Left skewed','Right skewed','Symmetric','Bimodal'],ex:'Peak right, tail left → left skewed. Confirmed: mean(78)<median(83).',hint:'Compare mean vs median. Tail points toward the lower values.'}
 ];
@@ -3996,19 +3996,19 @@ function addTutorMessage(text,sender){
 
 const NLP_PATTERNS=[
   {
-    regex:/z.?score.*xs*=?s*([d.]+).*means*=?s*([d.]+).*(?:std|stdev|sigma|sd)s*=?s*([d.]+)/i,
+    regex:/z.?score.*x\s*=?\s*([\d.]+).*mean\s*=?\s*([\d.]+).*(?:std|stdev|sigma|sd)\s*=?\s*([\d.]+)/i,
     solve:function(m){const z=(+m[1]-+m[2])/+m[3];return{answer:'z = ('+m[1]+' − '+m[2]+') / '+m[3]+' = '+z.toFixed(4),steps:['x = '+m[1]+', μ = '+m[2]+', σ = '+m[3],'z = (x − μ) / σ','z = ('+m[1]+' − '+m[2]+') / '+m[3],'z = '+z.toFixed(4)]};},
   },
   {
-    regex:/mean.*ofs+([d.,s]+)/i,
-    solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const avg=mean(vals);return{answer:'Mean = '+avg.toFixed(4),steps:['Values: '+vals.join(', '),'Sum = '+vals.reduce(function(a,b){return a+b;},0),'n = '+vals.length,'Mean = Sum / n = '+avg.toFixed(4)]};},
+    regex:/mean.*of\s+([\d.,\s]+)/i,
+    solve:function(m){const vals=m[1].split(/[,\s]+/).map(Number).filter(function(v){return !isNaN(v);});const avg=mean(vals);return{answer:'Mean = '+avg.toFixed(4),steps:['Values: '+vals.join(', '),'Sum = '+vals.reduce(function(a,b){return a+b;},0),'n = '+vals.length,'Mean = Sum / n = '+avg.toFixed(4)]};},
   },
   {
-    regex:/(?:standard deviation|stdev|std dev).*ofs+([d.,s]+)/i,
-    solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const sd=stdev(vals);return{answer:'σ = '+sd.toFixed(4),steps:['Values: '+vals.join(', '),'Mean = '+mean(vals).toFixed(4),'σ = √(Σ(xᵢ − x̄)² / n)','σ = '+sd.toFixed(4)]};},
+    regex:/(?:standard deviation|stdev|std dev).*of\s+([\d.,\s]+)/i,
+    solve:function(m){const vals=m[1].split(/[,\s]+/).map(Number).filter(function(v){return !isNaN(v);});const sd=stdev(vals);return{answer:'σ = '+sd.toFixed(4),steps:['Values: '+vals.join(', '),'Mean = '+mean(vals).toFixed(4),'σ = √(Σ(xᵢ − x̄)² / n)','σ = '+sd.toFixed(4)]};},
   },
   {
-    regex:/median.*ofs+([d.,s]+)/i,
+    regex:/median.*of\s+([\d.,\s]+)/i,
     solve:function(m){const vals=m[1].split(/[,s]+/).map(Number).filter(function(v){return !isNaN(v);});const med=median(vals);return{answer:'Median = '+med,steps:['Values sorted: '+sorted(vals).join(', '),'n = '+vals.length,'Median = '+med]};},
   },
 ];

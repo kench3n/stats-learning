@@ -110,3 +110,79 @@
 - User accounts
 - Monetization
 - Mobile app
+
+---
+
+## Phase 10: PWA, Mobile, Offline (COMPLETE)
+### Status: DONE — 185/185 tests passing
+- PWA install prompt with dismissal
+- Service worker for offline support
+- Mobile optimization and offline indicator
+
+## Phase 11: Weak Spots, Focus Mode, Session Summary (COMPLETE)
+### Status: DONE
+- Weak spot detection panel (topics with <60% accuracy)
+- Focus Mode (distraction-free practice)
+- Session summary modal with XP and accuracy breakdown
+
+## Phase 12: Units 12-14 — ANOVA, Nonparametric, Bayesian (COMPLETE)
+### Status: DONE
+- 30 new problems (10 each for units 12, 13, 14)
+- 3 new visualizers: ANOVA F-distribution, Nonparametric rank, Bayesian posterior
+- MAX_UNIT dynamic constant replacing hardcoded unit counts
+
+## Phase 13: Daily Challenges, Weekly Goals, Achievements (COMPLETE)
+### Status: DONE
+- Daily challenge (3 problems, refreshes each day)
+- Weekly problem-count goals with progress tracking
+- Achievement showcase page with activity heatmap and badge gallery
+
+## Phase 14: Bookmarks, Notes, Search, Filter (COMPLETE)
+### Status: DONE
+- Bookmark (star) any problem for later review
+- Per-problem freeform notes
+- Search problems by keyword
+- Filter by difficulty, status, or bookmark
+
+## Phase 15: Analytics, PDF Export, Study Calendar (COMPLETE)
+### Status: DONE
+- Analytics dashboard (accuracy chart, XP chart, unit breakdown)
+- Practice history calendar heatmap
+- PDF export of practice session
+
+## Phase 16: Flashcard Mode, Matching Games, Formula Builder (COMPLETE)
+### Status: DONE
+- Flip-style flashcard mode for all problems
+- Term-definition matching game
+- Formula drag-and-drop builder
+
+## Phase 17: Real Datasets, CSV Upload, Live Visualizations (COMPLETE)
+### Status: DONE
+- 3 built-in datasets (Iris, Grades, Housing)
+- CSV upload for custom data
+- Live stats panel (mean, SD, min, max)
+
+## Phase 18: Custom Problems, Deck Sharing, Ratings (COMPLETE)
+### Status: DONE
+- Custom MC/FR problem creator
+- Export/import problem decks as JSON
+- Per-problem helpful/unclear ratings
+
+## Phase 19: AI Tutor, Step-by-Step Solver, NLP Input (COMPLETE)
+### Status: DONE
+- Local knowledge base AI tutor (16 stats topics)
+- Step-by-step solution reveal for selected problems
+- NLP input bar (z-score, mean, stdev, median patterns)
+
+## Phase 20: Learning Paths, Goals/Deadlines, Certificates (COMPLETE)
+### Status: DONE
+- 4 pre-defined learning paths with progress tracking
+- Custom deadline with pace calculator
+- Printable completion certificate generator
+
+## Phase 21: Test Suite Expansion, Documentation, Benchmarks (COMPLETE)
+### Status: DONE
+- 3 new test files (engagement, UI features, new units)
+- Extended test runner (260 total tests)
+- Performance benchmark script
+- README, PHASES, CHANGELOG documentation updates

@@ -1,9 +1,8 @@
 # Stats Learning Hub
 [![Tests](https://github.com/kench3n/stats-learning/actions/workflows/test.yml/badge.svg)](https://github.com/kench3n/stats-learning/actions/workflows/test.yml)
 [![Deploy](https://github.com/kench3n/stats-learning/actions/workflows/deploy.yml/badge.svg)](https://kench3n.github.io/stats-learning/stats_hub.html)
-[![Deploy](https://github.com/kench3n/stats-learning/actions/workflows/deploy.yml/badge.svg)](https://kench3n.github.io/stats-learning/stats_hub.html)
 
-A self-contained learning platform for introductory statistics and quantitative finance. Built with vanilla JavaScript and HTML5 Canvas — no external libraries.
+A comprehensive, single-page web application for learning introductory statistics. Built with vanilla HTML, CSS, and JavaScript — no frameworks, no build tools, no backend. 145+ practice problems across 14 units with interactive visualizers, spaced repetition review, learning paths, and more.
 
 ## Quick Start
 
@@ -140,9 +139,16 @@ All canvas visualizations automatically redraw on window resize.
 ### Running Tests
 
 ```bash
-node tests/run_all.js          # Run all 185 tests
-node tests/validate_html.js    # HTML structure only
-node tests/validate_problems.js # Problem schema only
-node tests/validate_math.js    # Formula correctness only
-node tests/validate_visualizers.js # Visualizer functions only
+node tests/run_all.js          # Original 185 tests (HTML, problems, math, visualizers)
+node tests/run_extended.js     # Extended suite: 260 tests (includes engagement, UI, new units)
+node tests/benchmark.js        # Performance report (informational, no pass/fail)
+
+# Individual suites
+node tests/validate_html.js
+node tests/validate_problems.js
+node tests/validate_math.js
+node tests/validate_visualizers.js
+node tests/validate_engagement.js
+node tests/validate_ui_features.js
+node tests/validate_new_units.js
 ```
