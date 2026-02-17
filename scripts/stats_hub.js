@@ -620,6 +620,7 @@ const probs=[
 let answered={},pScore=0;
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('DOMContentLoaded',()=>{
+    loadTheme();
     buildRoadmap();buildProblems();loadPreset();
     updateStreakDisplay();
     updateXPDisplay();
@@ -1981,6 +1982,145 @@ function resetAllProgress(){
   updateXPDisplay();
   updateMilestoneDisplay();
   updateReviewBadge();
+}
+
+
+// ===================== POMODORO TIMER =====================
+let pomoState={running:false,seconds:25*60,total:25*60,interval:null,sessionsToday:0};
+
+function togglePomoPanel(){
+  if(typeof document==='undefined')return;
+  const p=document.getElementById('pomoPanel');
+  if(p)p.style.display=p.style.display==='none'?'':'none';
+}
+
+function setPomoTime(mins){
+  if(pomoState.running)return;
+  pomoState.seconds=mins*60;
+  pomoState.total=mins*60;
+  updatePomoDisplay();
+  document.querySelectorAll('.pomo-preset').forEach(b=>b.classList.remove('active'));
+  if(typeof event!=='undefined'&&event&&event.target)event.target.classList.add('active');
+}
+
+function startPomo(){
+  if(pomoState.running)return;
+  pomoState.running=true;
+  const startBtn=document.getElementById('pomoStart');
+  const pauseBtn=document.getElementById('pomoPause');
+  const label=document.getElementById('pomoLabel');
+  if(startBtn)startBtn.style.display='none';
+  if(pauseBtn)pauseBtn.style.display='';
+  if(label)label.textContent='Focusing...';
+  pomoState.interval=setInterval(()=>{
+    pomoState.seconds--;
+    updatePomoDisplay();
+    if(pomoState.seconds<=0){
+      clearInterval(pomoState.interval);
+      pomoState.running=false;
+      pomoComplete();
+    }
+  },1000);
+}
+
+function pausePomo(){
+  clearInterval(pomoState.interval);
+  pomoState.running=false;
+  const startBtn=document.getElementById('pomoStart');
+  const pauseBtn=document.getElementById('pomoPause');
+  const label=document.getElementById('pomoLabel');
+  if(startBtn)startBtn.style.display='';
+  if(pauseBtn)pauseBtn.style.display='none';
+  if(label)label.textContent='Paused';
+}
+
+function resetPomo(){
+  clearInterval(pomoState.interval);
+  pomoState.running=false;
+  pomoState.seconds=pomoState.total;
+  updatePomoDisplay();
+  const startBtn=document.getElementById('pomoStart');
+  const pauseBtn=document.getElementById('pomoPause');
+  const label=document.getElementById('pomoLabel');
+  if(startBtn)startBtn.style.display='';
+  if(pauseBtn)pauseBtn.style.display='none';
+  if(label)label.textContent='Focus Time';
+}
+
+function updatePomoDisplay(){
+  if(typeof document==='undefined')return;
+  const m=Math.floor(pomoState.seconds/60);
+  const s=pomoState.seconds%60;
+  const el=document.getElementById('pomoDisplay');
+  if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  if(pomoState.running)document.title='('+m+':'+String(s).padStart(2,'0')+') Stats Hub';
+  else document.title='Stats Learning Hub';
+}
+
+function pomoComplete(){
+  if(typeof document==='undefined')return;
+  pomoState.sessionsToday++;
+  setElText('pomoSessions',pomoState.sessionsToday);
+  const label=document.getElementById('pomoLabel');
+  const startBtn=document.getElementById('pomoStart');
+  const pauseBtn=document.getElementById('pomoPause');
+  if(label)label.textContent='Break time! 🎉';
+  if(startBtn)startBtn.style.display='';
+  if(pauseBtn)pauseBtn.style.display='none';
+  awardXP(15,'pomo-session');
+  recordActivity();
+  showToast('Focus session complete! +15 XP. Take a break.');
+  if(typeof localStorage!=='undefined'){
+    const today=todayStr();
+    const data=JSON.parse(localStorage.getItem('sh-pomo')||'{}');
+    data[today]=(data[today]||0)+1;
+    localStorage.setItem('sh-pomo',JSON.stringify(data));
+  }
+  pomoState.seconds=5*60;
+  pomoState.total=5*60;
+  updatePomoDisplay();
+}
+
+// ===================== THEME TOGGLE =====================
+function toggleTheme(){
+  if(typeof document==='undefined')return;
+  const current=document.documentElement.getAttribute('data-theme');
+  const next=current==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',next);
+  const btn=document.getElementById('themeToggle');
+  if(btn)btn.textContent=next==='light'?'☀️':'🌙';
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-theme',next);
+}
+
+function loadTheme(){
+  if(typeof localStorage==='undefined'||typeof document==='undefined')return;
+  const saved=localStorage.getItem('sh-theme');
+  if(saved){
+    document.documentElement.setAttribute('data-theme',saved);
+    const btn=document.getElementById('themeToggle');
+    if(btn)btn.textContent=saved==='light'?'☀️':'🌙';
+  }
+}
+
+// ===================== KEYBOARD SHORTCUTS =====================
+function toggleShortcutsHelp(){
+  if(typeof document==='undefined')return;
+  const el=document.getElementById('shortcutsOverlay');
+  if(el)el.style.display=el.style.display==='none'?'flex':'none';
+}
+
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+    if(e.key==='1'){goPage('home');}
+    else if(e.key==='2'){goPage('roadmap');}
+    else if(e.key==='3'){goPage('visualizer');}
+    else if(e.key==='4'){goPage('practice');}
+    else if(e.key==='5'){goPage('review');}
+    else if(e.key==='t'||e.key==='T'){togglePomoPanel();}
+    else if(e.key==='d'||e.key==='D'){toggleTheme();}
+    else if(e.key==='?'){toggleShortcutsHelp();}
+  });
 }
 
 let toastTimer=null;
