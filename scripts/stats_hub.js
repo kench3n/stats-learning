@@ -3096,6 +3096,9 @@ function toggleFocusMode(){
   if(typeof document==='undefined')return;
   focusModeActive=!focusModeActive;
   document.body.classList.toggle('focus-mode',focusModeActive);
+  ['breadcrumb','quickStatsRow','recentActivity'].forEach(function(id){
+    var el=document.getElementById(id);if(el){el.classList.toggle('focus-mode-hidden',focusModeActive);}
+  });
   const btn=document.getElementById('focusBtn');
   if(btn)btn.textContent=focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
   if(focusModeActive){
