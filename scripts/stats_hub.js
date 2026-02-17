@@ -663,6 +663,27 @@ const FORMULAS={
     {name:'Residual',formula:'e = y − ŷ'},
     {name:'R²',formula:'1 − (SS_res / SS_tot)'},
   ],
+  12:[
+    {name:'SSB',formula:'Σnⱼ(x̄ⱼ − x̄)²'},
+    {name:'SSW',formula:'ΣΣ(xᵢⱼ − x̄ⱼ)²'},
+    {name:'F-statistic',formula:'F = MSB/MSW = (SSB/dfB)/(SSW/dfW)'},
+    {name:'df between',formula:'k − 1'},
+    {name:'df within',formula:'N − k'},
+    {name:'Eta-squared',formula:'η² = SSB/SST'},
+  ],
+  13:[
+    {name:'Sign Test',formula:'X ~ Bin(n, 0.5) under H₀'},
+    {name:'Mann-Whitney U',formula:'U = n₁n₂ + n₁(n₁+1)/2 − R₁'},
+    {name:'Spearman r',formula:'rₛ = 1 − 6Σdᵢ²/n(n²−1)'},
+    {name:'Kruskal-Wallis',formula:'H = 12/N(N+1) ΣRⱼ²/nⱼ − 3(N+1)'},
+  ],
+  14:[
+    {name:'Bayes Theorem',formula:'P(H|E) = P(E|H)P(H)/P(E)'},
+    {name:'Prior',formula:'P(H) — belief before evidence'},
+    {name:'Likelihood',formula:'P(E|H) — evidence given hypothesis'},
+    {name:'Posterior',formula:'P(H|E) — updated belief'},
+    {name:'Credible Interval',formula:'P(a ≤ θ ≤ b | data) = 0.95'},
+  ],
 };
 
 function buildFormulas(unit){
@@ -760,8 +781,12 @@ const UNIT_META={
   8:{name:'Confidence Intervals'},
   9:{name:'Hypothesis Testing'},
   10:{name:'Chi-Square Tests'},
-  11:{name:'Regression Inference'}
+  11:{name:'Regression Inference'},
+  12:{name:'ANOVA'},
+  13:{name:'Nonparametric Tests'},
+  14:{name:'Bayesian Statistics'}
 };
+const MAX_UNIT=Object.keys(UNIT_META).length;
 
 let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
 let currentUnit=1;
@@ -1096,7 +1121,7 @@ function updateDailyDigest(){
       btn.onclick=function(){goPage('review');};
     }else{
       let weakest=null,weakestPct=101;
-      for(let u=1;u<=11;u++){
+      for(let u=1;u<=MAX_UNIT;u++){
         const r=summary[u]||{total:0,attempted:0,correct:0};
         if(r.total===0)continue;
         const pct=r.attempted>0?(r.correct/r.total)*100:0;
@@ -1286,6 +1311,46 @@ allProbs[11]=[
   {id:1010,unit:11,diff:'hard',topic:'SE Meaning',q:'Two models have the same slope b1=1.8. Model A has SE=0.9, Model B has SE=0.3. Which has stronger evidence against H0:beta1=0?',data:null,type:'mc',ans:1,tol:0.01,ch:['Model A, because larger SE is better','Model B, because smaller SE gives larger |t|','They are equal since slopes match','Cannot compare without intercept'],ex:'t=b1/SE, so Model B has much larger t and stronger evidence.',hint:'Check: residuals normally distributed, constant variance.'}
 ];
 
+
+allProbs[12]=[
+  {id:1101,unit:12,diff:'easy',topic:'Hypotheses',q:'ANOVA tests whether group means are:',data:null,type:'mc',ans:1,tol:0.01,ch:['All different from each other','Equal (H0) vs at least one different (Ha)','Greater than zero','Normally distributed'],ex:'H0: all means equal; Ha: at least one differs.',hint:'ANOVA partitions total variation into between and within group components.'},
+  {id:1102,unit:12,diff:'easy',topic:'Assumptions',q:'Which is NOT an assumption of one-way ANOVA?',data:null,type:'mc',ans:2,tol:0.01,ch:['Independent samples','Equal population variances','Equal sample sizes','Normally distributed populations'],ex:'Equal sample sizes are helpful but not required.',hint:'F = MSB/MSW; larger F gives more evidence against H0.'},
+  {id:1103,unit:12,diff:'medium',topic:'SSB',q:'Three groups: n=5 each. Grand mean=10. Group means: 8, 10, 12. Compute SSB.',data:'n=5 per group, grand mean=10, means: 8,10,12',type:'fr',ans:40,tol:0.1,ex:'SSB=5*(8-10)²+5*(10-10)²+5*(12-10)²=5*4+0+5*4=40.',hint:'SSB = Σnⱼ(x̄ⱼ - x̄)²'},
+  {id:1104,unit:12,diff:'medium',topic:'df',q:'In a one-way ANOVA with k=4 groups and N=24 total observations, what is df_within?',data:'k=4, N=24',type:'fr',ans:20,tol:0.1,ex:'df_within = N - k = 24 - 4 = 20.',hint:'df between = k-1; df within = N-k'},
+  {id:1105,unit:12,diff:'medium',topic:'F-statistic',q:'MSB=120 and MSW=30. Compute the F-statistic.',data:'MSB=120, MSW=30',type:'fr',ans:4,tol:0.01,ex:'F = MSB/MSW = 120/30 = 4.',hint:'MSB = SSB/df_between; MSW = SSW/df_within'},
+  {id:1106,unit:12,diff:'medium',topic:'Interpretation',q:'An ANOVA F-test yields F=5.2 with p=0.006 at α=0.05. The conclusion is:',data:null,type:'mc',ans:0,tol:0.01,ch:['Reject H0; at least one mean differs','Fail to reject H0; all means are equal','All pairwise differences are significant','The effect size must be large'],ex:'p=0.006<0.05 so reject H0.',hint:'Rejecting ANOVA H0 means at least one pair differs; post-hoc tests identify which.'},
+  {id:1107,unit:12,diff:'hard',topic:'Post-hoc',q:'After a significant ANOVA, which procedure is used to control Type I error across multiple pairwise comparisons?',data:null,type:'mc',ans:1,tol:0.01,ch:['Paired t-test only','Tukey HSD or Bonferroni correction','Another ANOVA','Chi-square test'],ex:'Post-hoc methods adjust for multiple comparisons.',hint:'Eta-squared η² = SSB/SST measures proportion of variance explained.'},
+  {id:1108,unit:12,diff:'hard',topic:'Eta-squared',q:'SST=200, SSB=80. Compute eta-squared.',data:'SST=200, SSB=80',type:'fr',ans:0.4,tol:0.01,ex:'η²=SSB/SST=80/200=0.40.',hint:'η² > 0.14 is considered large effect.'},
+  {id:1109,unit:12,diff:'easy',topic:'One-way vs Two-way',q:'One-way ANOVA compares means across levels of:',data:null,type:'mc',ans:0,tol:0.01,ch:['One categorical factor','Two categorical factors','Continuous predictors only','Paired groups'],ex:'One-way ANOVA has one grouping factor.',hint:'ANOVA generalizes the two-sample t-test to 3+ groups.'},
+  {id:1110,unit:12,diff:'hard',topic:'SST Partition',q:'In ANOVA, SST = SSB + SSW. If SST=300 and SSW=220, what is SSB?',data:'SST=300, SSW=220',type:'fr',ans:80,tol:0.1,ex:'SSB = SST - SSW = 300 - 220 = 80.',hint:'SST = SSB + SSW always holds.'}
+];
+
+allProbs[13]=[
+  {id:1201,unit:13,diff:'easy',topic:'When to Use',q:'Nonparametric tests are preferred when:',data:null,type:'mc',ans:2,tol:0.01,ch:['Data is perfectly normal','Sample sizes are very large','Data violates normality assumptions or is ordinal','All groups have equal variance'],ex:'Nonparametric tests make fewer distributional assumptions.',hint:'Nonparametric tests rank data, reducing sensitivity to outliers.'},
+  {id:1202,unit:13,diff:'easy',topic:'Sign Test',q:'The sign test for paired data uses which distribution under H0?',data:null,type:'mc',ans:1,tol:0.01,ch:['Normal','Binomial with p=0.5','t-distribution','Chi-square'],ex:'Under H0 of no difference, + and - signs occur with probability 0.5.',hint:'Sign test: count positive differences, test if p=0.5.'},
+  {id:1203,unit:13,diff:'medium',topic:'Wilcoxon',q:'The Wilcoxon signed-rank test for n=6 pairs assigns ranks to:',data:null,type:'mc',ans:0,tol:0.01,ch:['Absolute differences, then sums positive and negative rank groups','Raw differences directly','Only positive pairs','Only the median'],ex:'Rank absolute differences; sum positive-sign ranks vs negative-sign ranks.',hint:'Wilcoxon signed-rank test is more powerful than sign test.'},
+  {id:1204,unit:13,diff:'medium',topic:'Mann-Whitney',q:'Mann-Whitney U test compares:',data:null,type:'mc',ans:1,tol:0.01,ch:['Two related samples','Two independent samples without normality assumption','Three or more groups','One sample to a population'],ex:'Mann-Whitney U is the nonparametric alternative to the two-sample t-test.',hint:'U = n₁n₂ + n₁(n₁+1)/2 - R₁'},
+  {id:1205,unit:13,diff:'medium',topic:'Ranks',q:'Ranks for values 3, 7, 7, 12 are (average ranks for ties):',data:null,type:'mc',ans:2,tol:0.01,ch:['1,2,3,4','1,2,2,4','1,2.5,2.5,4','1,3,3,4'],ex:'Values 7 and 7 tie for ranks 2 and 3, so both get rank 2.5.',hint:'Tied values receive average of their ranks.'},
+  {id:1206,unit:13,diff:'medium',topic:'Kruskal-Wallis',q:'The Kruskal-Wallis test extends which procedure to 3+ groups?',data:null,type:'mc',ans:2,tol:0.01,ch:['Sign test','Wilcoxon signed-rank','Mann-Whitney U','Spearman rank correlation'],ex:'Kruskal-Wallis is the nonparametric equivalent of one-way ANOVA.',hint:'Kruskal-Wallis uses overall ranks across all groups.'},
+  {id:1207,unit:13,diff:'hard',topic:'Spearman',q:'For 4 pairs, d² = {1,4,0,1}. Compute Spearman rₛ.',data:'n=4, Σd²=6',type:'fr',ans:0.4,tol:0.02,ex:'rₛ=1-6*6/(4*(16-1))=1-36/60=1-0.6=0.4.',hint:'rₛ = 1 − 6Σdᵢ²/n(n²−1)'},
+  {id:1208,unit:13,diff:'easy',topic:'Parametric vs Nonparametric',q:'Compared to parametric tests, nonparametric tests generally have:',data:null,type:'mc',ans:1,tol:0.01,ch:['Higher power when normality holds','Lower power when normality holds','Same power regardless','No assumptions at all'],ex:'Parametric tests are more powerful under normality; nonparametric is more robust.',hint:'Nonparametric tests sacrifice some power for robustness.'},
+  {id:1209,unit:13,diff:'easy',topic:'Ordinal Data',q:'Which data type is most naturally suited to nonparametric analysis?',data:null,type:'mc',ans:2,tol:0.01,ch:['Continuous ratio scale data','Normally distributed interval data','Ordinal rankings like satisfaction scores','Count data with large n'],ex:'Ordinal data lacks true distances, making ranks appropriate.',hint:'Ranking data removes the need for distributional assumptions.'},
+  {id:1210,unit:13,diff:'hard',topic:'Interpretation',q:'A Mann-Whitney test yields p=0.032 at α=0.05. The conclusion is:',data:null,type:'mc',ans:0,tol:0.01,ch:['Reject H0; distributions differ significantly','Fail to reject H0','The medians are exactly equal','Parametric test is required'],ex:'p=0.032<0.05, reject H0.',hint:'Mann-Whitney tests whether one population tends to produce larger values.'}
+];
+
+allProbs[14]=[
+  {id:1301,unit:14,diff:'easy',topic:'Prior',q:'In Bayesian statistics, the prior probability represents:',data:null,type:'mc',ans:0,tol:0.01,ch:['Belief about a parameter before seeing data','The sample proportion','P-value from classical testing','The posterior mean'],ex:'Prior = P(H) — belief before observing evidence.',hint:'Posterior = Prior × Likelihood (normalized).'},
+  {id:1302,unit:14,diff:'easy',topic:'Bayes Theorem',q:'Bayes Theorem states:',data:null,type:'mc',ans:2,tol:0.01,ch:['P(H)=P(E|H)','P(E|H)=P(H|E)P(E)','P(H|E)=P(E|H)P(H)/P(E)','P(H|E)=P(H)+P(E)'],ex:'Bayes: P(H|E)=P(E|H)P(H)/P(E).',hint:'P(E) in denominator is the normalizing constant.'},
+  {id:1303,unit:14,diff:'medium',topic:'Calculation',q:'P(Disease)=0.01, P(Positive|Disease)=0.95, P(Positive|No Disease)=0.05. Compute P(Disease|Positive).',data:'P(D)=0.01, P(+|D)=0.95, P(+|¬D)=0.05',type:'fr',ans:0.161,tol:0.005,ex:'P(+)=0.95*0.01+0.05*0.99=0.059. P(D|+)=0.95*0.01/0.059≈0.161.',hint:'P(E) = P(E|H)P(H) + P(E|¬H)P(¬H)'},
+  {id:1304,unit:14,diff:'medium',topic:'Posterior Update',q:'After observing data, the posterior distribution becomes the new _____ for the next update.',data:null,type:'mc',ans:1,tol:0.01,ch:['Likelihood','Prior','Evidence','P-value'],ex:'Sequential Bayesian updating uses posterior as the next prior.',hint:'Conjugate priors allow closed-form posterior computation.'},
+  {id:1305,unit:14,diff:'easy',topic:'Comparison',q:'A key difference between frequentist and Bayesian inference is that Bayesian:',data:null,type:'mc',ans:0,tol:0.01,ch:['Treats parameters as random variables with distributions','Only uses large samples','Never requires data','Uses only p-values'],ex:'Frequentists treat parameters as fixed; Bayesians assign probability distributions to them.',hint:'Credible interval: P(a ≤ θ ≤ b | data) = 0.95 — a probabilistic statement.'},
+  {id:1306,unit:14,diff:'medium',topic:'Credible Interval',q:'A 95% Bayesian credible interval means:',data:null,type:'mc',ans:1,tol:0.01,ch:['If we repeated sampling, 95% of intervals would contain the true value','Given the data, there is 95% probability the parameter lies in the interval','The parameter equals the center value with 95% confidence','P-value is below 0.05'],ex:'Credible interval has a direct probability interpretation unlike confidence intervals.',hint:'Frequentist CI: procedure captures true value 95% of the time.'},
+  {id:1307,unit:14,diff:'medium',topic:'Base Rate',q:'Ignoring the prior probability of an event is called the:',data:null,type:'mc',ans:2,tol:0.01,ch:['Posterior fallacy','Likelihood error','Base rate fallacy','Selection bias'],ex:'Base rate fallacy occurs when the prior (base rate) is ignored.',hint:'Always use P(H) when computing P(H|E).'},
+  {id:1308,unit:14,diff:'hard',topic:'Conjugate Prior',q:'For binomial likelihood, the conjugate prior is:',data:null,type:'mc',ans:1,tol:0.01,ch:['Normal distribution','Beta distribution','Gamma distribution','Exponential distribution'],ex:'Beta prior × Binomial likelihood = Beta posterior. Beta is conjugate to Binomial.',hint:'Conjugate prior: prior and posterior have same distributional form.'},
+  {id:1309,unit:14,diff:'hard',topic:'Prior Sensitivity',q:'A flat (uniform) prior means:',data:null,type:'mc',ans:0,tol:0.01,ch:['All parameter values are equally likely before seeing data','No data is needed','The posterior equals the likelihood','The mean equals zero'],ex:'Flat prior: maximum ignorance, all values equally probable initially.',hint:'With large samples, posterior is dominated by likelihood regardless of prior.'},
+  {id:1310,unit:14,diff:'easy',topic:'Interpretation',q:'The posterior distribution P(θ|data) summarizes:',data:null,type:'mc',ans:2,tol:0.01,ch:['Only the prior belief','Only the observed data','Updated belief about the parameter given the data','The p-value of the test'],ex:'Posterior combines prior knowledge with evidence from data.',hint:'As sample size grows, posterior concentrates around the true parameter value.'}
+];
+
 const _canvasCache={};
 function prepCanvas2(id,h){
   const c=document.getElementById(id);
@@ -1344,6 +1409,15 @@ function vizTemplate(unit){
   if(unit===10){
     return `<div class="sub-panel active"><div class="viz-box"><div class="viz-title">Chi-Square Distribution Explorer</div><div class="viz-desc">Use df and chi-square sliders to see the right-tail p-value and critical cutoffs.</div><canvas id="chiCanvas" height="330"></canvas><div class="controls"><div class="cg"><span class="cl">df <span class="sv-val" id="u10DfVal">4</span></span><input type="range" id="u10Df" min="1" max="15" value="4" step="1" oninput="drawChiSq()"></div><div class="cg"><span class="cl">chi^2 value <span class="sv-val" id="u10XVal">6.0</span></span><input type="range" id="u10X" min="0" max="30" value="6.0" step="0.1" oninput="drawChiSq()"></div></div><div class="stats-row"><div class="sc"><div class="sv sv-cyan" id="u10DfStat">-</div><div class="sl">df</div></div><div class="sc"><div class="sv sv-amber" id="u10XStat">-</div><div class="sl">chi^2</div></div><div class="sc"><div class="sv sv-pink" id="u10PStat">-</div><div class="sl">p-value</div></div></div></div><div class="explain"><h3>Right Tail</h3><p id="u10CritText">Critical values shown for alpha=0.05 and 0.01.</p><div class="formula">p-value = P(Chi-square_df >= observed)</div></div></div>`+vizPracticeBtn(unit);
   }
+  if(unit===12){
+    return `<div class="sub-panel active"><div class="viz-box"><div class="viz-title">ANOVA Visualizer</div><div class="viz-desc">Adjust group means and within-group spread to see F-statistic update in real time.</div><canvas id="anovaCanvas" height="320"></canvas><div class="controls"><div class="cg"><span class="cl">Group 1 Mean <span class="sv-val" id="u12M1Val">8</span></span><input type="range" id="u12M1" min="1" max="20" value="8" step="0.5" oninput="drawAnova()"></div><div class="cg"><span class="cl">Group 2 Mean <span class="sv-val" id="u12M2Val">10</span></span><input type="range" id="u12M2" min="1" max="20" value="10" step="0.5" oninput="drawAnova()"></div><div class="cg"><span class="cl">Group 3 Mean <span class="sv-val" id="u12M3Val">12</span></span><input type="range" id="u12M3" min="1" max="20" value="12" step="0.5" oninput="drawAnova()"></div><div class="cg"><span class="cl">Within-group SD <span class="sv-val" id="u12SDVal">2</span></span><input type="range" id="u12SD" min="0.5" max="6" value="2" step="0.1" oninput="drawAnova()"></div></div><div class="stats-row"><div class="sc"><div class="sv sv-cyan" id="u12SSB">-</div><div class="sl">SSB</div></div><div class="sc"><div class="sv sv-pink" id="u12SSW">-</div><div class="sl">SSW</div></div><div class="sc"><div class="sv sv-amber" id="u12F">-</div><div class="sl">F-stat</div></div><div class="sc"><div class="sv sv-green" id="u12Eta">-</div><div class="sl">η²</div></div></div></div><div class="explain"><h3>ANOVA Formula</h3><p>F tests if between-group variance exceeds within-group variance.</p><div class="formula">F = MSB/MSW = (SSB/df_B)/(SSW/df_W)</div></div></div>`+vizPracticeBtn(unit);
+  }
+  if(unit===13){
+    return `<div class="sub-panel active"><div class="viz-box"><div class="viz-title">Rank-Based vs Parametric Test</div><div class="viz-desc">See how rankings make nonparametric tests robust to skewness and outliers.</div><canvas id="nonparamCanvas" height="320"></canvas><div class="controls"><div class="cg"><span class="cl">Distribution Shape</span><select id="u13Shape" onchange="drawNonparam()"><option value="normal">Normal</option><option value="skew">Right-skewed</option><option value="outlier">With Outlier</option></select></div><div class="cg"><span class="cl">Group Shift <span class="sv-val" id="u13ShiftVal">2</span></span><input type="range" id="u13Shift" min="0" max="6" value="2" step="0.5" oninput="drawNonparam()"></div></div><div class="stats-row"><div class="sc"><div class="sv sv-cyan" id="u13RankDiff">-</div><div class="sl">rank diff</div></div><div class="sc"><div class="sv sv-amber" id="u13MeanDiff">-</div><div class="sl">mean diff</div></div></div></div><div class="explain"><h3>Ranking Data</h3><p>Ranks replace actual values, removing sensitivity to extreme values and skewness.</p><div class="formula">rₛ = 1 − 6Σdᵢ²/n(n²−1)</div></div></div>`+vizPracticeBtn(unit);
+  }
+  if(unit===14){
+    return `<div class="sub-panel active"><div class="viz-box"><div class="viz-title">Bayesian Updating</div><div class="viz-desc">Watch how prior, likelihood, and posterior interact as you adjust evidence strength.</div><canvas id="bayesCanvas" height="320"></canvas><div class="controls"><div class="cg"><span class="cl">Prior Strength <span class="sv-val" id="u14PriorVal">5</span></span><input type="range" id="u14Prior" min="1" max="20" value="5" step="1" oninput="drawBayes()"></div><div class="cg"><span class="cl">Observed p̂ <span class="sv-val" id="u14DataVal">0.70</span></span><input type="range" id="u14Data" min="0.01" max="0.99" value="0.70" step="0.01" oninput="drawBayes()"></div><div class="cg"><span class="cl">Sample Size <span class="sv-val" id="u14NVal">20</span></span><input type="range" id="u14N" min="1" max="100" value="20" step="1" oninput="drawBayes()"></div></div><div class="stats-row"><div class="sc"><div class="sv sv-cyan" id="u14PostMean">-</div><div class="sl">posterior mean</div></div><div class="sc"><div class="sv sv-amber" id="u14PostSD">-</div><div class="sl">posterior SD</div></div><div class="sc"><div class="sv sv-pink" id="u14CI">-</div><div class="sl">95% CI</div></div></div></div><div class="explain"><h3>Bayes Theorem</h3><p>Prior belief updated by data evidence yields the posterior.</p><div class="formula">P(θ|data) ∝ P(data|θ) · P(θ)</div></div></div>`+vizPracticeBtn(unit);
+  }
   if(unit===11){
     return `<div class="sub-panel active"><div class="viz-box"><div class="viz-title">Regression Output Interpreter</div><div class="viz-desc">Choose a dataset preset and hover highlighted values for quick interpretation tips.</div><canvas id="regCanvas" height="340"></canvas><div class="controls"><div class="cg"><span class="cl">Preset dataset</span><select id="u11Preset" onchange="drawRegOut()"><option value="study">Study Hours vs Score</option><option value="ads">Ad Spend vs Sales</option><option value="house">Home Size vs Price</option></select></div></div><div class="stats-row"><div class="sc"><div class="sv sv-cyan" id="u11Slope">-</div><div class="sl">slope</div></div><div class="sc"><div class="sv sv-amber" id="u11SE">-</div><div class="sl">SE</div></div><div class="sc"><div class="sv sv-pink" id="u11T">-</div><div class="sl">t-stat</div></div><div class="sc"><div class="sv sv-purple" id="u11P">-</div><div class="sl">p-value</div></div><div class="sc"><div class="sv sv-green" id="u11R2">-</div><div class="sl">r^2</div></div></div><div id="u11Tip" class="viz-tip">Hover a highlighted value for explanation.</div></div><div class="explain"><h3>Inference Formulas</h3><p>Use slope inference to test whether the linear relationship differs from zero.</p><div class="formula">t = b1 / SE(b1) &nbsp;&nbsp; CI: b1 +/- t* SE(b1)</div></div></div>`+vizPracticeBtn(unit);
   }
@@ -1361,7 +1435,10 @@ const allViz={
   8:{tabs:['coverage'],draw:drawCoverage},
   9:{tabs:['pvalue'],draw:drawPValue},
   10:{tabs:['chisq'],draw:drawChiSq},
-  11:{tabs:['regout'],draw:drawRegOut}
+  11:{tabs:['regout'],draw:drawRegOut},
+  12:{tabs:['anova'],draw:drawAnova},
+  13:{tabs:['nonparam'],draw:drawNonparam},
+  14:{tabs:['bayes'],draw:drawBayes}
 };
 
 function isVizPageActive(){
@@ -2024,7 +2101,7 @@ function drawRegOut(){
 
 function getProgressSummary(){
   const summary={};
-  for(let unit=1;unit<=11;unit++){
+  for(let unit=1;unit<=MAX_UNIT;unit++){
     const probs=allProbs[unit]||[];
     let stored={};
     if(typeof localStorage!=='undefined'){
@@ -2054,7 +2131,7 @@ function buildProgressPanel(){
   if(!grid)return;
   const summary=getProgressSummary();
   let html='';
-  for(let unit=1;unit<=11;unit++){
+  for(let unit=1;unit<=MAX_UNIT;unit++){
     const row=summary[unit]||{total:0,attempted:0,correct:0};
     let cls='progress-cell-empty';
     if(row.total>0&&row.attempted>0){
@@ -2096,7 +2173,7 @@ function resetAllProgress(){
   if(typeof document==='undefined')return;
   if(typeof confirm==='function'&&!confirm('Reset ALL progress? This cannot be undone.'))return;
   if(typeof localStorage!=='undefined'){
-    for(let i=1;i<=11;i++)localStorage.removeItem('sh-practice-'+i);
+    for(let i=1;i<=MAX_UNIT;i++)localStorage.removeItem('sh-practice-'+i);
     localStorage.removeItem('sh-topics');
     localStorage.removeItem('sh-streak');
     localStorage.removeItem('sh-xp');
@@ -2319,7 +2396,7 @@ function dismissInstall(){
 function analyzeWeakSpots(){
   if(typeof allProbs==='undefined'||typeof getPracticeState==='undefined')return[];
   const spots=[];
-  for(let u=1;u<=11;u++){
+  for(let u=1;u<=MAX_UNIT;u++){
     const probs=allProbs[u]||[];
     const state=getPracticeState(u);
     const ans=state.answered||{};
@@ -2411,6 +2488,169 @@ function getSessionMessage(){
   return'Every problem makes you stronger. Come back tomorrow!';
 }
 
+
+// ===================== UNIT 12: ANOVA VISUALIZER =====================
+function drawAnova(){
+  const r=prepCanvas2('anovaCanvas',320);if(!r)return;
+  const {ctx,W,H}=r;
+  const m1=parseFloat(document.getElementById('u12M1')?.value||8);
+  const m2=parseFloat(document.getElementById('u12M2')?.value||10);
+  const m3=parseFloat(document.getElementById('u12M3')?.value||12);
+  const sd=parseFloat(document.getElementById('u12SD')?.value||2);
+  const n=8;
+  const grandMean=(m1+m2+m3)/3;
+  const SSB=n*((m1-grandMean)**2+(m2-grandMean)**2+(m3-grandMean)**2);
+  const SSW=(n-1)*3*(sd**2);
+  const F=(SSB/2)/(SSW/(3*n-3));
+  const eta=SSB/(SSB+SSW);
+  const sv=id=>document.getElementById(id);
+  if(sv('u12SSB'))sv('u12SSB').textContent=SSB.toFixed(1);
+  if(sv('u12SSW'))sv('u12SSW').textContent=SSW.toFixed(1);
+  if(sv('u12F'))sv('u12F').textContent=F.toFixed(2);
+  if(sv('u12Eta'))sv('u12Eta').textContent=eta.toFixed(3);
+  if(sv('u12M1Val'))sv('u12M1Val').textContent=m1;
+  if(sv('u12M2Val'))sv('u12M2Val').textContent=m2;
+  if(sv('u12M3Val'))sv('u12M3Val').textContent=m3;
+  if(sv('u12SDVal'))sv('u12SDVal').textContent=sd;
+  const groups=[{mean:m1,color:'#00e5c7'},{mean:m2,color:'#ff6b9d'},{mean:m3,color:'#f59e0b'}];
+  const pad=50,gapW=(W-2*pad)/3;
+  const allVals=groups.flatMap((g,i)=>Array.from({length:n},()=>g.mean+(Math.random()-0.5)*2*sd));
+  const minV=Math.min(...allVals)-1,maxV=Math.max(...allVals)+1;
+  function toY(v){return pad+(H-2*pad)*(1-(v-minV)/(maxV-minV));}
+  ctx.fillStyle=typeof getComputedStyle==='function'?getComputedStyle(document.documentElement).getPropertyValue('--bg2')||'#1a1a2e':'#1a1a2e';
+  ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+  for(let i=0;i<5;i++){const y=pad+(H-2*pad)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();}
+  // Grand mean line
+  ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.setLineDash([5,5]);ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(pad,toY(grandMean));ctx.lineTo(W-pad,toY(grandMean));ctx.stroke();
+  ctx.setLineDash([]);
+  // Draw dots per group
+  const seed=12345;let rng=seed;function nextR(){rng=(rng*1664525+1013904223)&0xffffffff;return(rng&0x7fffffff)/0x7fffffff;}
+  groups.forEach((g,gi)=>{
+    const cx=pad+gapW*(gi+0.5);
+    for(let j=0;j<n;j++){
+      const jitter=(nextR()-0.5)*gapW*0.5;
+      const yv=g.mean+(nextR()-0.5)*2*sd;
+      const y=toY(yv);
+      ctx.beginPath();ctx.arc(cx+jitter,y,5,0,Math.PI*2);
+      ctx.fillStyle=g.color+'cc';ctx.fill();
+    }
+    // Group mean line
+    ctx.strokeStyle=g.color;ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(cx-gapW*0.3,toY(g.mean));ctx.lineTo(cx+gapW*0.3,toY(g.mean));ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='12px monospace';ctx.textAlign='center';
+    ctx.fillText('G'+(gi+1)+'('+g.mean+')',cx,H-pad+20);
+  });
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px monospace';ctx.textAlign='right';
+  ctx.fillText('grand x̄='+grandMean.toFixed(1),W-pad,toY(grandMean)-5);
+}
+
+// ===================== UNIT 13: NONPARAMETRIC VISUALIZER =====================
+function drawNonparam(){
+  const r=prepCanvas2('nonparamCanvas',320);if(!r)return;
+  const {ctx,W,H}=r;
+  const shape=document.getElementById('u13Shape')?.value||'normal';
+  const shift=parseFloat(document.getElementById('u13Shift')?.value||2);
+  const sv=id=>document.getElementById(id);
+  if(sv('u13ShiftVal'))sv('u13ShiftVal').textContent=shift;
+  const n=12;
+  function genData(offset){
+    if(shape==='normal')return Array.from({length:n},(_,i)=>offset+normalApprox(i,n));
+    if(shape==='skew')return Array.from({length:n},(_,i)=>offset+Math.abs(normalApprox(i,n))*1.5);
+    return Array.from({length:n},(_,i)=>i===0?offset+15:offset+normalApprox(i,n));
+  }
+  function normalApprox(i,n){const u=(i+0.5)/n;return approxInvNorm(u)*2;}
+  const grp1=genData(5),grp2=genData(5+shift);
+  const meanDiff=((grp2.reduce((a,b)=>a+b,0)-grp1.reduce((a,b)=>a+b,0))/n).toFixed(2);
+  // Rank all values together
+  const all=[...grp1.map((v,i)=>({v,g:1,i})),...grp2.map((v,i)=>({v,g:2,i}))];
+  all.sort((a,b)=>a.v-b.v);
+  all.forEach((d,r)=>d.rank=r+1);
+  const r1=all.filter(d=>d.g===1).reduce((a,d)=>a+d.rank,0);
+  const r2=all.filter(d=>d.g===2).reduce((a,d)=>a+d.rank,0);
+  const rankDiff=(r2-r1).toFixed(1);
+  if(sv('u13RankDiff'))sv('u13RankDiff').textContent=rankDiff;
+  if(sv('u13MeanDiff'))sv('u13MeanDiff').textContent=meanDiff;
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  const minV=Math.min(...grp1,...grp2)-1,maxV=Math.max(...grp1,...grp2)+1;
+  const pad=50;
+  function toX(v){return pad+(W-2*pad)*(v-minV)/(maxV-minV);}
+  // Draw dots
+  [grp1,grp2].forEach((grp,gi)=>{
+    grp.forEach(v=>{
+      const x=toX(v);const y=gi===0?H/3:2*H/3;
+      ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
+      ctx.fillStyle=gi===0?'#00e5c7cc':'#ff6b9dcc';ctx.fill();
+    });
+    const mean=grp.reduce((a,b)=>a+b,0)/grp.length;
+    ctx.strokeStyle=gi===0?'#00e5c7':'#ff6b9d';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(toX(mean),gi===0?H/3-20:2*H/3-20);ctx.lineTo(toX(mean),gi===0?H/3+20:2*H/3+20);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='12px monospace';ctx.textAlign='center';
+    ctx.fillText('Group '+(gi+1),W/2,gi===0?H/3-30:2*H/3-30);
+  });
+}
+
+// ===================== UNIT 14: BAYESIAN VISUALIZER =====================
+function betaPDF(x,a,b){
+  if(x<=0||x>=1)return 0;
+  const logB=gammaLn(a)+gammaLn(b)-gammaLn(a+b);
+  return Math.exp((a-1)*Math.log(x)+(b-1)*Math.log(1-x)-logB);
+}
+
+function drawBayes(){
+  const r=prepCanvas2('bayesCanvas',320);if(!r)return;
+  const {ctx,W,H}=r;
+  const priorStr=parseFloat(document.getElementById('u14Prior')?.value||5);
+  const phat=parseFloat(document.getElementById('u14Data')?.value||0.70);
+  const n=parseInt(document.getElementById('u14N')?.value||20);
+  const sv=id=>document.getElementById(id);
+  if(sv('u14PriorVal'))sv('u14PriorVal').textContent=priorStr;
+  if(sv('u14DataVal'))sv('u14DataVal').textContent=phat.toFixed(2);
+  if(sv('u14NVal'))sv('u14NVal').textContent=n;
+  // Beta(a0,b0) prior, binomial likelihood
+  const a0=priorStr,b0=priorStr;
+  const successes=Math.round(phat*n);
+  const aPost=a0+successes,bPost=b0+(n-successes);
+  const postMean=aPost/(aPost+bPost);
+  const postSD=Math.sqrt(aPost*bPost/((aPost+bPost)**2*(aPost+bPost+1)));
+  if(sv('u14PostMean'))sv('u14PostMean').textContent=postMean.toFixed(3);
+  if(sv('u14PostSD'))sv('u14PostSD').textContent=postSD.toFixed(3);
+  const ci95lo=clamp(postMean-1.96*postSD,0,1),ci95hi=clamp(postMean+1.96*postSD,0,1);
+  if(sv('u14CI'))sv('u14CI').textContent='('+ci95lo.toFixed(2)+','+ci95hi.toFixed(2)+')';
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,0,W,H);
+  const pad=50;
+  const steps=200;
+  const vals=Array.from({length:steps},(_,i)=>{const x=(i+0.5)/steps;return{x,prior:betaPDF(x,a0,b0),post:betaPDF(x,aPost,bPost)};});
+  const maxY=Math.max(...vals.map(v=>v.prior),...vals.map(v=>v.post));
+  function toX(x){return pad+(W-2*pad)*x;}
+  function toY(y){return H-pad-(H-2*pad)*(y/maxY);}
+  // Shaded posterior CI
+  ctx.fillStyle='rgba(0,229,199,0.1)';
+  ctx.beginPath();
+  vals.filter(v=>v.x>=ci95lo&&v.x<=ci95hi).forEach((v,i)=>{
+    if(i===0)ctx.moveTo(toX(v.x),H-pad);
+    ctx.lineTo(toX(v.x),toY(v.post));
+  });
+  ctx.lineTo(toX(ci95hi),H-pad);ctx.closePath();ctx.fill();
+  // Prior curve
+  ctx.strokeStyle='rgba(245,158,11,0.7)';ctx.lineWidth=2;ctx.beginPath();
+  vals.forEach((v,i)=>{if(i===0)ctx.moveTo(toX(v.x),toY(v.prior));else ctx.lineTo(toX(v.x),toY(v.prior));});ctx.stroke();
+  // Posterior curve
+  ctx.strokeStyle='#00e5c7';ctx.lineWidth=2.5;ctx.beginPath();
+  vals.forEach((v,i)=>{if(i===0)ctx.moveTo(toX(v.x),toY(v.post));else ctx.lineTo(toX(v.x),toY(v.post));});ctx.stroke();
+  // Labels
+  ctx.fillStyle='rgba(245,158,11,0.9)';ctx.font='11px monospace';ctx.textAlign='left';ctx.fillText('Prior Beta('+a0+','+b0+')',pad+5,pad+15);
+  ctx.fillStyle='#00e5c7';ctx.fillText('Posterior Beta('+aPost+','+bPost+')',pad+5,pad+30);
+  // Posterior mean line
+  ctx.strokeStyle='rgba(0,229,199,0.5)';ctx.setLineDash([4,4]);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(toX(postMean),pad);ctx.lineTo(toX(postMean),H-pad);ctx.stroke();
+  ctx.setLineDash([]);
+  // X axis labels
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px monospace';
+  for(let i=0;i<=4;i++){const x=i/4;ctx.textAlign='center';ctx.fillText(x.toFixed(2),toX(x),H-pad+15);}
+}
+
 let toastTimer=null;
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;
@@ -2426,7 +2666,7 @@ function exportProgressJSON(){
   if(typeof document==='undefined')return;
   if(typeof localStorage==='undefined')return;
   const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null,streak:getStreakData(),xp:getXPData(),milestones:getMilestones(),review:getReviewData(),reviewMeta:getReviewMeta()};
-  for(let unit=1;unit<=11;unit++){
+  for(let unit=1;unit<=MAX_UNIT;unit++){
     try{payload.practice[unit]=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'null');}
     catch{payload.practice[unit]=null;}
   }
@@ -2455,7 +2695,7 @@ async function copyProgressSummary(){
   const divider='\u2500'.repeat(29);
   const lines=['Stats Learning Hub \u2014 Progress',divider];
   let totalCorrect=0,totalQuestions=0;
-  for(let unit=1;unit<=11;unit++){
+  for(let unit=1;unit<=MAX_UNIT;unit++){
     const row=summary[unit]||{total:0,correct:0};
     const pct=row.total?Math.round((row.correct/row.total)*100):0;
     lines.push('Unit '+String(unit).padStart(2,' ')+': '+row.correct+'/'+row.total+' correct ('+pct+'%)');
