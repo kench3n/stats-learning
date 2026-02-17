@@ -898,6 +898,30 @@ function buildFormulas(unit){
 html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button></div>`;
   });
   content.innerHTML=html;
+  // Restore saved height
+  if(typeof localStorage!=='undefined'){try{var h=parseInt(localStorage.getItem('sh-formula-height'));if(h>=100&&h<=600)content.style.maxHeight=h+'px';}catch(e){}}
+}
+
+function initFormulaResize(){
+  if(typeof document==='undefined')return;
+  var handle=document.getElementById('formulaResizeHandle');
+  var panel=document.getElementById('formulaContent');
+  if(!handle||!panel)return;
+  var startY=0,startH=0;
+  handle.addEventListener('mousedown',function(e){
+    startY=e.clientY;
+    startH=panel.offsetHeight;
+    function onMove(e2){
+      var newH=Math.min(600,Math.max(100,startH+(e2.clientY-startY)));
+      panel.style.maxHeight=newH+'px';
+      if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-formula-height',newH);}catch(err){}
+    }
+    function onUp(){
+      if(typeof document!=='undefined'){document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
+    }
+    if(typeof document!=='undefined'){document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);}
+    e.preventDefault();
+  });
 }
 
 function filterFormulas(query){
@@ -981,6 +1005,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
   document.addEventListener('DOMContentLoaded',()=>{
     loadTheme();
     buildRoadmap();buildProblems();loadPreset();
+    initFormulaResize();
     updateStreakDisplay();
     updateXPDisplay();
     updateMilestoneDisplay();

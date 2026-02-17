@@ -628,8 +628,10 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .formula-toggle:hover{border-color:var(--cyan);}
 .formula-content{
   background:var(--bg2);border:1px solid var(--border);border-top:none;
-  border-radius:0 0 8px 8px;padding:12px 16px;
+  border-radius:0 0 8px 8px;padding:12px 16px;overflow-y:auto;
 }
+.formula-resize-handle{height:6px;background:var(--border);border-radius:0 0 6px 6px;cursor:ns-resize;margin-top:-1px;}
+.formula-resize-handle:hover{background:var(--cyan);}
 .formula-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
 .formula-row:last-child{border-bottom:none;}
 .formula-name{color:var(--text);font-size:13px;font-weight:600;}
