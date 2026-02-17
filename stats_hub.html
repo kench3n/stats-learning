@@ -14,6 +14,11 @@
 
 <!-- SKIP NAV -->
 <a class="skip-link" href="#main-content">Skip to main content</a>
+<noscript>
+  <p style="padding:40px;text-align:center;color:#e6e4f0;font-family:sans-serif;">
+    This app requires JavaScript to run. Please enable JavaScript in your browser settings.
+  </p>
+</noscript>
 
 <!-- TOP NAV -->
 <nav class="top-nav" aria-label="Main navigation">
@@ -54,8 +59,8 @@
     <div class="home-card card-practice" onclick="goPage('practice')" role="button" tabindex="0" aria-label="Open Practice Problems" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('practice')}">
       <div class="card-icon" aria-hidden="true">&#x270f;</div>
       <div class="card-title">Practice Problems</div>
-      <div class="card-desc">65 problems across 11 units — from descriptive stats to regression inference. Multiple choice and free response with detailed step-by-step explanations.</div>
-      <div class="card-meta">65 problems &middot; 11 units &middot; 3 difficulty levels</div>
+      <div class="card-desc">115+ problems across 11 units — from descriptive stats to regression inference. Multiple choice and free response with detailed step-by-step explanations.</div>
+      <div class="card-meta">115+ problems &middot; 11 units &middot; 3 difficulty levels</div>
     </div>
   </div>
 </section>
@@ -213,7 +218,7 @@
   <header class="section-header">
     <p class="section-tag" id="practiceUnitTag">Unit 1 — Descriptive Statistics</p>
     <h2 class="section-title">Practice <em>Problems</em></h2>
-    <p class="section-desc">15 problems from easy to hard. Work them by hand, then check.</p>
+    <p class="section-desc">Practice problems from easy to hard. Work them by hand, then check.</p>
   </header>
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>
@@ -264,4 +269,5 @@
 <script src="scripts/stats_hub.js" defer></script>
 </body>
 </html>
+
 

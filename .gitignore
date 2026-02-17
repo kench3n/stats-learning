@@ -3,3 +3,9 @@
 Thumbs.db
 node_modules/
 .env
+
+# Editor & IDE
+.vscode/
+
+# Claude Code local settings
+.claude/settings.local.json

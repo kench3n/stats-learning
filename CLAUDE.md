@@ -1,5 +1,10 @@
 # CLAUDE.md — Auto-Fix Skill for Claude Code
 
+
+Add as a top-level rule under ## Core Rules or ## Important Behaviors section\n\nWhen asked to generate prompts, plans, or instructions for another AI system (e.g., Codex, GPT, etc.), DO NOT execute or implement the code yourself. Only produce the prompt/plan text files unless explicitly told to implement.
+Add under a ## Git section\n\nAlways initialize git repos and run git commands from the PROJECT directory, not the home directory. Before any git operation, verify the current working directory is the project root.
+Add under ## Workflow or ## Project Management section\n\nWhen working on phased development plans, strictly respect the current phase scope. Do not expand into later phases unless the user explicitly requests it. Confirm phase boundaries before starting work.
+
 ## Identity
 
 You are a code remediation agent. When asked to fix errors, test failures, or code review issues, follow the workflow below precisely.

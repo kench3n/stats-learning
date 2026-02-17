@@ -62,11 +62,11 @@ function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();r
 function sorted(a){return[...a].sort((x,y)=>x-y)}
 function mean(a){if(!a.length)return 0;return a.reduce((s,v)=>s+v,0)/a.length}
 function median(a){const s=sorted(a),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2}
-function mode(a){const f={};a.forEach(v=>{const k=Math.round(v*2)/2;f[k]=(f[k]||0)+1});let mx=0,mv=0;for(let k in f)if(f[k]>mx){mx=f[k];mv=+k}return mv}
+function mode(a){const f={};a.forEach(v=>{const k=Number.isInteger(v)?v:Math.round(v*2)/2;f[k]=(f[k]||0)+1});let mx=0,mv=0;for(let k in f)if(f[k]>mx){mx=f[k];mv=+k}return mv}
 function stdev(a){const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length)}
 function quantile(a,q){const s=sorted(a),p=(s.length-1)*q,b=Math.floor(p),f=p-b;return s[b]+(s[b+1]-s[b]||0)*f}
 function normalPDF(x,mu,sig){if(sig<=0)return 0;return Math.exp(-0.5*((x-mu)/sig)**2)/(sig*Math.sqrt(2*Math.PI))}
-function erf(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return s*y}
+function erf(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+p*x);const y=1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return s*y}
 function normalCDF(x,mu,sig){if(sig<=0)return x>=mu?1:0;return 0.5*(1+erf((x-mu)/(sig*Math.sqrt(2))))}
 function gNum(id,fallback){const el=document.getElementById(id);return el?+el.value:fallback}
 function fmtPct(v){return (v*100).toFixed(1)+'%'}
@@ -283,51 +283,10 @@ const probs=[
 ];
 
 let answered={},pScore=0;
-function buildProblems(){
-  const c=document.getElementById('probContainer');let html='';
-  probs.forEach(p=>{
-    const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}">${p.diff}</span><span class="pc-topic">${p.topic}</span></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
-    if(p.type==='mc'){
-      html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
-      p.ch.forEach((c,j)=>{html+=`<div class="ch-btn" onclick="ansMC(${p.id},${j})" id="cb-${p.id}-${j}"><span class="lt">${L[j]}</span><span>${c}</span></div>`;});
-      html+='</div>';
-    }else{
-      html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
-    }
-    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div></div>`;
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+  document.addEventListener('DOMContentLoaded',()=>{
+    buildRoadmap();buildProblems();loadPreset();
   });
-  c.innerHTML=html;
-}
-function ansMC(id,ch){
-  if(answered[id]!==undefined)return;answered[id]=ch;const p=probs.find(x=>x.id===id);const ok=ch===p.ans;if(ok)pScore++;
-  p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);el.classList.add('dis');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
-  showFB(id,ok,p.ex);updatePScore();
-}
-function ansFR(id){
-  if(answered[id]!==undefined)return;const p=probs.find(x=>x.id===id);const inp=document.getElementById('fi-'+id);const v=parseFloat(inp.value);if(isNaN(v))return;
-  answered[id]=v;const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
-  inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
-  showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);updatePScore();
-}
-function showFB(id,ok,ex){
-  document.getElementById('fb-'+id).classList.add('show');
-  const b=document.getElementById('fbx-'+id);b.className='fb-box '+(ok?'fb-ok':'fb-no');
-  b.innerHTML=`<strong>${ok?'✓ Correct!':'✗ Not quite.'}</strong><span class="ex">${ex}</span>`;
-  document.getElementById('pc-'+id).classList.add(ok?'correct':'incorrect');
-}
-function updatePScore(){
-  const n=Object.keys(answered).length;
-  document.getElementById('scoreText').textContent=pScore+' / '+n+' correct';
-  document.getElementById('scoreFill').style.width=(n/probs.length*100)+'%';
-}
-
-// ===================== INIT =====================
-buildProblems();
-if(typeof requestAnimationFrame!=='undefined'){
-  requestAnimationFrame(function(){buildRoadmap();loadPreset();});
-}else{
-  buildRoadmap();loadPreset();
 }
 
 // ===================== PHASE 1 CORE =====================
@@ -346,7 +305,7 @@ const UNIT_META={
 };
 
 let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
-var currentUnit=1;
+let currentUnit=1;
 let activeProbs=allProbs[1];
 
 function setElText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
@@ -1221,14 +1180,19 @@ function drawRegOut(){
       const x=e.clientX-r.left,y=e.clientY-r.top;
       vizState.u11.mouse={x,y};
       const hit=vizState.u11.hotspots.find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h);
-      vizState.u11.hover=hit?hit.key:'';
-      setElText('u11Tip',hit?hit.tip:'Hover a highlighted value for explanation.');
-      drawRegOut();
+      const newHover=hit?hit.key:'';
+      if(newHover!==vizState.u11.hover){
+        vizState.u11.hover=newHover;
+        setElText('u11Tip',hit?hit.tip:'Hover a highlighted value for explanation.');
+        drawRegOut();
+      }
     });
     canvas.addEventListener('mouseleave',()=>{
-      vizState.u11.hover='';
-      setElText('u11Tip','Hover a highlighted value for explanation.');
-      drawRegOut();
+      if(vizState.u11.hover!==''){
+        vizState.u11.hover='';
+        setElText('u11Tip','Hover a highlighted value for explanation.');
+        drawRegOut();
+      }
     });
   }
 
@@ -1484,4 +1448,5 @@ if(typeof document!=='undefined')buildProgressPanel();
 if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('resize',debounce(function(){drawActiveVisualizer();},150));
 }
+
 
