@@ -1,0 +1,10 @@
+{
+  "name": "Stats Learning Hub",
+  "short_name": "Stats Hub",
+  "description": "Interactive statistics learning platform",
+  "start_url": "/stats_hub.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00e5c7",
+  "icons": []
+}

@@ -155,7 +155,7 @@ function buildRoadmap(){
     cards.forEach(c=>{
       html+=`<div class="pillar-card" data-p="${c.p}"><div class="ph"><div class="pi">${c.icon}</div><span class="pt">${c.time}</span></div><div class="pn-row"><div class="pn">${c.name}</div></div><div class="pg">${c.goal}</div><div class="tl">`;
       c.topics.forEach(t=>{
-        html+=`<div class="ti" onclick="toggleTopic(this)"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}</div>`;
+        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}</div>`;
       });
       html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)">Resources ↓</button></div><div class="res-panel">`;
       (c.res||[]).forEach(r=>{html+=`<div class="res-item"><div class="res-type">${r.t}</div><div class="res-name">${r.n}</div></div>`;});
@@ -178,8 +178,8 @@ function buildRoadmap(){
 
 function getTopicState(){try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
 function saveTopicState(s){localStorage.setItem('sh-topics',JSON.stringify(s))}
-function toggleTopic(el){el.classList.toggle('chk');const n=el.querySelector('.tn').textContent;const s=getTopicState();s[n]=el.classList.contains('chk');saveTopicState(s);updateTopicProgress();}
-function restoreTopics(){const s=getTopicState();document.querySelectorAll('.ti').forEach(el=>{const n=el.querySelector('.tn').textContent;if(s[n])el.classList.add('chk');});}
+function toggleTopic(el){el.classList.toggle('chk');el.setAttribute('aria-checked',el.classList.contains('chk')?'true':'false');const n=el.querySelector('.tn').textContent;const s=getTopicState();s[n]=el.classList.contains('chk');saveTopicState(s);updateTopicProgress();}
+function restoreTopics(){const s=getTopicState();document.querySelectorAll('.ti').forEach(el=>{const n=el.querySelector('.tn').textContent;if(s[n]){el.classList.add('chk');el.setAttribute('aria-checked','true');}else el.setAttribute('aria-checked','false');});}
 function toggleRes(btn){const p=btn.closest('.pillar-card').querySelector('.res-panel');p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'Resources ↑':'Resources ↓';}
 function updateTopicProgress(){
   const total=document.querySelectorAll('.ti').length;
@@ -307,6 +307,7 @@ const UNIT_META={
 let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
 let currentUnit=1;
 let activeProbs=allProbs[1];
+let vizDrawn={};
 
 function setElText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
 function setAllScores(){
@@ -329,7 +330,7 @@ buildProblems=function(unit=currentUnit){
     html+=`<div class="pc" id="pc-${p.id}"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}">${p.diff}</span><span class="pc-topic">${p.topic}</span></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
-      p.ch.forEach((ch,j)=>{html+=`<div class="ch-btn" onclick="ansMC(${p.id},${j})" id="cb-${p.id}-${j}"><span class="lt">${L[j]}</span><span>${ch}</span></div>`;});
+      p.ch.forEach((ch,j)=>{html+=`<div class="ch-btn" role="button" tabindex="0" onclick="ansMC(${p.id},${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ansMC(${p.id},${j})}" id="cb-${p.id}-${j}"><span class="lt">${L[j]}</span><span>${ch}</span></div>`;});
       html+='</div>';
     }else{
       html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
@@ -344,7 +345,7 @@ buildProblems=function(unit=currentUnit){
     if(answered[p.id]===undefined)return;
     if(p.type==='mc'){
       const ch=+answered[p.id],ok=ch===p.ans;if(ok)pScore++;
-      p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+p.id+'-'+j);if(!el)return;el.classList.add('dis');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
+      p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+p.id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
       showFB(p.id,ok,ok?p.ex:'Correct answer: '+p.ch[p.ans]+'. '+p.ex);
     }else{
       const v=parseFloat(answered[p.id]);if(!Number.isFinite(v))return;
@@ -360,7 +361,7 @@ function ansMC(id,ch){
   if(answered[id]!==undefined)return;
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
-  p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
+  p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
   showFB(id,ok,p.ex);persistPracticeState();setAllScores();
 }
 
@@ -379,7 +380,14 @@ function showFB(id,ok,ex){
   if(!fb||!pc||!b)return;
   fb.classList.add('show');
   b.className='fb-box '+(ok?'fb-ok':'fb-no');
-  b.innerHTML=`<strong>${ok?'Correct!':'Not quite.'}</strong><span class="ex">${ex}</span>`;
+  b.textContent='';
+  const s=document.createElement('strong');
+  s.textContent=ok?'Correct!':'Not quite.';
+  const sp=document.createElement('span');
+  sp.className='ex';
+  sp.textContent=ex;
+  b.appendChild(s);
+  b.appendChild(sp);
   pc.classList.add(ok?'correct':'incorrect');
 }
 
@@ -394,6 +402,7 @@ function setUnit(n){
   setElText('vizUnitTag','Unit '+n+' - '+UNIT_META[n].name);
   buildProblems(n);
   buildVizForUnit(n);
+  if(isVizPageActive())drawActiveVisualizer();
 }
 
 allProbs[2]=[
@@ -600,6 +609,12 @@ const allViz={
   11:{tabs:['regout'],draw:drawRegOut}
 };
 
+function isVizPageActive(){
+  if(typeof document==='undefined')return false;
+  const vizPage=document.getElementById('page-visualizer');
+  return !!(vizPage&&vizPage.classList.contains('active'));
+}
+
 function buildVizForUnit(unit=currentUnit){
   const tabs=document.getElementById('vizTabs');
   const panels=document.getElementById('viz-panels');
@@ -608,21 +623,28 @@ function buildVizForUnit(unit=currentUnit){
   if(unit===1){
     tabs.style.display='flex';panels.style.display='block';
     dynamic.style.display='none';dynamic.innerHTML='';
-    setTimeout(()=>drawActiveVisualizer(),20);
+    vizDrawn[1]=false;
     return;
   }
   tabs.style.display='none';panels.style.display='none';
   dynamic.style.display='block';dynamic.innerHTML=vizTemplate(unit);
-  setTimeout(()=>{const v=allViz[unit];if(v&&typeof v.draw==='function')v.draw();},20);
+  vizDrawn[unit]=false;
 }
 
-function drawActiveVisualizer(){
-  if(typeof document!=='undefined'){
-    const vizPage=document.getElementById('page-visualizer');
-    if(vizPage&&!vizPage.classList.contains('active'))return;
+function drawActiveVisualizer(force){
+  if(!isVizPageActive())return;
+  if(currentUnit===1){
+    if(vizDrawn[1]&&!force)return;
+    drawHist();drawBox();drawNorm();drawComp();
+    vizDrawn[1]=true;
+    return;
   }
-  if(currentUnit===1){drawHist();drawBox();drawNorm();drawComp();return;}
-  const v=allViz[currentUnit];if(v&&typeof v.draw==='function')v.draw();
+  if(vizDrawn[currentUnit]&&!force)return;
+  const v=allViz[currentUnit];
+  if(v&&typeof v.draw==='function'){
+    v.draw();
+    vizDrawn[currentUnit]=true;
+  }
 }
 
 const vizState={
@@ -1445,8 +1467,11 @@ function importProgressJSON(file){
 
 setUnit(1);
 if(typeof document!=='undefined')buildProgressPanel();
+if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){
+  navigator.serviceWorker.register('/service-worker.js').catch(function(){});
+}
 if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
-  window.addEventListener('resize',debounce(function(){drawActiveVisualizer();},150));
+  window.addEventListener('resize',debounce(function(){drawActiveVisualizer(true);},150));
 }
 
 
