@@ -244,6 +244,81 @@ Add a per-problem timer that shows how long the user has spent on the current pr
 - Element id: `timer-{probId}`, updated with setInterval every second
 - Guard with typeof IntersectionObserver and typeof document
 
+
+### TASK: practice-filter-persistence
+Save the current unit filter, difficulty filter, and search query to localStorage so they persist across page reloads.
+- Keys: `sh-filter-unit`, `sh-filter-diff`, `sh-filter-search`
+- On `buildProblems()` load, restore these values to the select/input elements
+- On change of unit select, difficulty filter, or search input, save to localStorage
+- Guard with typeof localStorage
+
+### TASK: problem-card-zoom
+Add a "Focus" button on each problem card that expands it to full-width overlay for easier reading.
+- Button: small 🔍 icon in pc-head (after prob-timer span)
+- On click: clone or move the card into a full-screen overlay `.prob-focus-overlay`
+- Pressing Escape or clicking the overlay backdrop closes it
+- Style with `.prob-focus-overlay`, `.prob-focus-inner`, `.prob-focus-close`
+- Guard with typeof document
+
+### TASK: leaderboard-widget
+Add a mock leaderboard widget on the Achievements page showing top 5 "players" with fake names and scores.
+- Data hardcoded: 5 fake entries (e.g., "Alex — 4200 XP", "Taylor — 3800 XP", etc.)
+- Highlight the user's row (computed from actual XP in localStorage `sh-xp`)
+- Style with `.leaderboard-widget`, `.leaderboard-row`, `.leaderboard-rank`, `.leaderboard-you`
+- Place after the milestone badges section
+
+### TASK: problem-difficulty-vote
+Let users upvote/downvote the difficulty rating of a problem (too easy / just right / too hard).
+- Add 3 small buttons below the feedback box: "😅 Too Easy", "✓ Just Right", "😤 Too Hard"
+- Save vote to `sh-diff-votes`: `{[probId]: 'easy'|'ok'|'hard'}`
+- Show the user's current vote highlighted
+- No aggregate stats needed — just personal feedback
+- Style with `.diff-vote-row`, `.diff-vote-btn`, `.diff-vote-btn.active`
+
+### TASK: home-quick-stats
+On the Home page, add a "Quick Stats" summary row between the hero and daily digest.
+- Show 4 stats: Total Problems Attempted, Total Correct, Overall Accuracy %, Current Streak (days)
+- Pull from `sh-xp`, `sh-streak`, practice state across all units
+- Style with `.quick-stats-row`, `.quick-stat-item`, `.quick-stat-value`, `.quick-stat-label`
+- Update dynamically when page renders
+
+### TASK: visualizer-history
+Track which visualizers the user has visited in `sh-viz-history` (array of unit numbers, last 5 unique).
+- Update on each `setUnit(n)` call when on the visualizer page
+- Show a "Recently Viewed" row below the unit selector with clickable unit chips
+- Style with `.viz-history-row`, `.viz-history-chip`
+- Guard with typeof localStorage, typeof document
+
+### TASK: keyboard-shortcut-numbers-extended
+Extend the number key navigation so keys 6–8 navigate to Achievements (6), Flashcards (7), and Create (8).
+- In keydown handler, add `else if(e.key==='6'){goPage('achievements');}` etc.
+- Update the shortcuts overlay to show 6 → Achievements, 7 → Flashcards, 8 → Create
+- No conflicts with existing shortcuts
+
+### TASK: reading-time-estimate
+Add an estimated reading/solve time for each problem based on difficulty.
+- Easy: ~1 min, Medium: ~3 min, Hard: ~5 min
+- Show as small text in pc-head: "~1 min" after the difficulty badge
+- Element: `<span class="solve-time">~N min</span>` 
+- Add minimal CSS: `.solve-time{font-size:11px;color:var(--muted);margin-left:4px;}`
+
+### TASK: session-goal-setting
+Let users set a session goal (number of problems to solve) before starting practice.
+- In the progress-actions area, add a `<select id="sessionGoal">` with options: 5, 10, 15, 20 problems
+- Track how many answered in current session vs goal
+- Show a progress bar `<progress id="goalProgress">` filling as user answers
+- When goal reached, show toast "Session goal reached! Great work."
+- Save goal to `sh-session-goal` localStorage
+
+### TASK: problem-tags-filter
+Add tag-based filtering for problems in addition to difficulty and search.
+- Extract unique topics from all problems in current unit
+- Render as filter chips above the problem list: `.tag-filter-chip`
+- Clicking a chip filters problems to only show that topic
+- Multiple chips can be active at once (multi-select)
+- Deactivate by clicking again; "All" chip clears all topic filters
+- Save active tags to `sh-active-tags` localStorage
+
 ---
 
 ## RULES (ALWAYS)
