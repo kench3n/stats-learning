@@ -1,9 +1,9 @@
 ---
 active: true
 iteration: 1
-max_iterations: 10
-completion_promise: "ALL QA TASKS DONE"
-started_at: "2026-02-17T22:30:32Z"
+max_iterations: 50
+completion_promise: "USER HAS RETURNED AND STOPPED THE LOOP"
+started_at: "2026-02-17T22:37:27Z"
 ---
 
-Implement all 6 tasks from codex_prompts/codex_prompt_QA.md sequentially. For each task: read the prompt, implement, run tests, fix failures in source code only, commit and push when green. Check git log for completed tasks. When all 6 are committed, output the completion promise.
+Implement tasks from codex_prompts/codex_prompt_CONTINUOUS.md one at a time. Each iteration: check git log to find the first TASK not yet committed, implement it fully, run node tests/run_all.js AND node tests/run_extended.js, fix failures in source only never in tests/, commit and push. If all tasks are done, invent new improvements, append them to the file, and implement the next one. Never stop working. The loop continues until the user manually stops it.
