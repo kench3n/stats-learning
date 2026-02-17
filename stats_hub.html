@@ -58,6 +58,7 @@
     <p class="hero-tag">College Intro Statistics</p>
     <h1>Stats Learning <em>Hub</em></h1>
     <p>Your all-in-one tool for learning statistics. Roadmap to track what to learn, interactive visualizations to build intuition, and practice problems to test your understanding.</p>
+    <button class="export-all-btn" onclick="exportAllData()" style="margin-top:12px;">Export All Data</button>
   </header>
   <div class="daily-digest" id="dailyDigest" style="display:none;">
     <div class="digest-row">
@@ -343,6 +344,7 @@
       <label class="share-btn import-label">
         Import <input type="file" id="importFile" accept=".json" onchange="importProgressJSON(this.files[0])" hidden>
       </label>
+      <button class="share-btn" onclick="exportAllData()">Export All Data</button>
       <button class="reset-btn" onclick="resetAllProgress()">Reset All Progress</button>
     </div>
     <div class="milestone-shelf" id="milestoneShelf">

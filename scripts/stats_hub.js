@@ -3725,6 +3725,25 @@ window.deleteCustomProblem=function(idx){
   showToast('Problem deleted');
 };
 
+function exportAllData(){
+  if(typeof document==='undefined'||typeof Blob==='undefined')return;
+  var data={};
+  if(typeof localStorage!=='undefined'){
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.startsWith('sh-')){
+        try{data[k]=JSON.parse(localStorage.getItem(k));}catch(e){data[k]=localStorage.getItem(k);}
+      }
+    }
+  }
+  var today=todayStr();
+  var json=JSON.stringify({version:2,exportedAt:new Date().toISOString(),data:data},null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='stats-hub-export-'+today+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  showToast('All data exported!');
+}
 function exportRoadmapProgress(){
   if(typeof document==='undefined'||typeof Blob==='undefined')return;
   var topics=getTopicState();
