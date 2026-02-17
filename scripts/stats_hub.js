@@ -966,6 +966,7 @@ let vizDrawn={};
 let reviewQueue=[];
 let reviewIndex=0;
 let reviewSessionCorrect=0;
+let reviewSessionByUnit={};
 
 function setElText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
 function setAllScores(){
@@ -1082,6 +1083,7 @@ function startReview(){
   reviewQueue=dueIds.slice(0,10);
   reviewIndex=0;
   reviewSessionCorrect=0;
+  reviewSessionByUnit={};
 
   const btn=document.getElementById('startReviewBtn');
   const card=document.getElementById('reviewCard');
@@ -1134,6 +1136,10 @@ function reviewMC(probId,chosen){
 
   const ok=chosen===prob.ans;
   if(ok)reviewSessionCorrect++;
+  var _rUnit=prob.unit||1;
+  if(!reviewSessionByUnit[_rUnit])reviewSessionByUnit[_rUnit]={correct:0,total:0};
+  reviewSessionByUnit[_rUnit].total++;
+  if(ok)reviewSessionByUnit[_rUnit].correct++;
 
   (prob.ch||[]).forEach((_,j)=>{
     const el=document.getElementById('rv-'+activeId+'-'+j);
@@ -1185,6 +1191,10 @@ function reviewFR(probId){
 
   const ok=Math.abs(v-prob.ans)<=(prob.tol||0.1);
   if(ok)reviewSessionCorrect++;
+  var _rUnit=prob.unit||1;
+  if(!reviewSessionByUnit[_rUnit])reviewSessionByUnit[_rUnit]={correct:0,total:0};
+  reviewSessionByUnit[_rUnit].total++;
+  if(ok)reviewSessionByUnit[_rUnit].correct++;
 
   inp.disabled=true;
   inp.style.borderColor=ok?'var(--green)':'var(--red)';
@@ -1216,6 +1226,30 @@ function reviewFR(probId){
   else{reviewIndex++;showReviewCard();}
 }
 
+function drawReviewChart(canvas,byUnit){
+  if(!canvas||typeof canvas.getContext!=='function')return;
+  var units=Object.keys(byUnit).sort(function(a,b){return +a-+b;});
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var n=units.length;
+  if(!n)return;
+  var barW=Math.floor((W-20)/(n*2));
+  var maxH=H-30;
+  units.forEach(function(u,i){
+    var r=byUnit[u];
+    var acc=r.total?r.correct/r.total:0;
+    var bh=Math.round(acc*maxH);
+    var x=10+i*(barW*2+4);
+    ctx.fillStyle='#06b6d4';
+    ctx.fillRect(x,H-20-bh,barW,bh);
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.font='9px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('U'+u,x+barW/2,H-6);
+    ctx.fillText(Math.round(acc*100)+'%',x+barW/2,H-22-bh);
+  });
+}
 function endReview(){
   if(typeof document==='undefined')return;
   const card=document.getElementById('reviewCard');
@@ -1237,9 +1271,28 @@ function endReview(){
   checkMilestones();
   updateReviewBadge();
 
+  // Show chart if session had problems from >1 unit
+  var unitKeys=Object.keys(reviewSessionByUnit);
+  if(unitKeys.length>1&&typeof document!=='undefined'){
+    var overlay=document.createElement('div');
+    overlay.className='session-overlay';
+    overlay.onclick=function(){overlay.remove();};
+    var modal=document.createElement('div');
+    modal.className='session-modal';
+    modal.onclick=function(e){e.stopPropagation();};
+    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+reviewSessionCorrect+'/'+total+' correct ('+pct+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
+    var _closeBtn=modal.querySelector('#reviewChartClose');
+    if(_closeBtn)_closeBtn.onclick=function(){overlay.remove();};
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    var canvas=document.getElementById('reviewChart');
+    drawReviewChart(canvas,reviewSessionByUnit);
+  }
+
   reviewQueue=[];
   reviewIndex=0;
   reviewSessionCorrect=0;
+  reviewSessionByUnit={};
 }
 
 function updateReviewBadge(){
