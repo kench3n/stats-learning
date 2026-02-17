@@ -1050,6 +1050,8 @@ buildProblems=function(unit=currentUnit){
       });
     }catch(e){}
   }
+  buildTagFilter();
+  if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
   const saved=getPracticeState(unit);
   answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
   pScore=0;
@@ -3258,6 +3260,48 @@ function completeDailyChallenge(){
   checkMilestones();
 }
 
+var activeTags=new Set();
+function buildTagFilter(){
+  if(typeof document==='undefined')return;
+  var bar=document.getElementById('tagFilterBar');
+  if(!bar)return;
+  var topics=[];
+  var seen={};
+  (activeProbs||[]).forEach(function(p){
+    if(p.topic&&!seen[p.topic]){seen[p.topic]=true;topics.push(p.topic);}
+  });
+  if(!topics.length){bar.style.display='none';return;}
+  bar.style.display='flex';
+  var html='<button class="tag-filter-chip tag-all-chip'+(activeTags.size===0?' active':'')+'" onclick="clearTagFilter()">All Topics</button>';
+  topics.forEach(function(t){
+    var enc=t.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    var isActive=activeTags.has(t);
+    html+='<button class="tag-filter-chip'+(isActive?' active':'')+'" onclick="toggleTag(this,'+JSON.stringify(t)+')">'+enc+'</button>';
+  });
+  bar.innerHTML=html;
+}
+function toggleTag(btn,topic){
+  if(activeTags.has(topic))activeTags.delete(topic);
+  else activeTags.add(topic);
+  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-active-tags',JSON.stringify([...activeTags]));}catch(e){}
+  applyTagFilter();
+  buildTagFilter();
+}
+function clearTagFilter(){
+  activeTags=new Set();
+  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-active-tags','[]');}catch(e){}
+  applyTagFilter();
+  buildTagFilter();
+}
+function applyTagFilter(){
+  if(typeof document==='undefined')return;
+  document.querySelectorAll('.pc').forEach(function(el){
+    if(!activeTags.size){el.style.display='';return;}
+    var id=el.id.replace('pc-','');
+    var prob=(activeProbs||[]).find(function(p){return String(p.id)===id;});
+    el.style.display=(prob&&activeTags.has(prob.topic))?'':'none';
+  });
+}
 function buildQuickStats(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var totalAttempted=0,totalCorrect=0;
