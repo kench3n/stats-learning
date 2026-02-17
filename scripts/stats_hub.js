@@ -33,7 +33,7 @@ function goPage(id){
   _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();}
+  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -1178,6 +1178,7 @@ function ansMC(id,ch){
   sessionData.problemsAnswered++;if(ok)sessionData.correct++;
   updateWeeklyProgress('problems',1);
   recordActivity();
+  _recordTodayActivity(p.id,p.unit,ok);
   setAllScores();
   updateReviewBadge();
   updateWeakSpots();
@@ -1201,6 +1202,7 @@ function ansFR(id){
   sessionData.problemsAnswered++;if(ok)sessionData.correct++;
   updateWeeklyProgress('problems',1);
   recordActivity();
+  _recordTodayActivity(p.id,p.unit,ok);
   setAllScores();
   updateReviewBadge();
   updateWeakSpots();
@@ -3475,6 +3477,38 @@ function applyTagFilter(){
     el.style.display=(prob&&activeTags.has(prob.topic))?'':'none';
   });
 }
+function _recordTodayActivity(id,unit,ok){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var arr=JSON.parse(localStorage.getItem('sh-today-activity')||'[]');
+    if(!Array.isArray(arr))arr=[];
+    arr.unshift({id:String(id),unit:unit,ok:ok,t:Date.now()});
+    if(arr.length>20)arr=arr.slice(0,20);
+    localStorage.setItem('sh-today-activity',JSON.stringify(arr));
+  }catch(e){}
+}
+function buildRecentActivity(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('recentActivity');
+  if(!el)return;
+  var arr=[];
+  try{arr=JSON.parse(localStorage.getItem('sh-today-activity')||'[]');}catch(e){}
+  if(!Array.isArray(arr))arr=[];
+  var today=typeof todayStr!=='undefined'?todayStr():'';
+  var todayArr=arr.filter(function(a){
+    return !today||new Date(a.t).toISOString().slice(0,10)===today;
+  }).slice(0,5);
+  if(!todayArr.length){el.style.display='none';return;}
+  el.style.display='';
+  var html='<div class="ra-title">Recent Activity</div>';
+  todayArr.forEach(function(a){
+    var statusCls=a.ok?'ra-ok':'ra-no';
+    var statusText=a.ok?'Correct':'Wrong';
+    var unitName=typeof UNIT_META!=='undefined'&&UNIT_META[a.unit]?'Unit '+a.unit:('Unit '+a.unit);
+    html+='<div class="ra-row"><span class="ra-id">#'+a.id+'</span><span class="ra-unit">'+unitName+'</span><span class="ra-status '+statusCls+'">'+statusText+'</span></div>';
+  });
+  el.innerHTML=html;
+}
 function buildQuickStats(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var totalAttempted=0,totalCorrect=0;
@@ -4947,6 +4981,7 @@ if(typeof document!=='undefined'){
   buildNLPHistory();
   buildPOD();
   buildQuickStats();
+  buildRecentActivity();
   loadReadingMode();
   buildPomoHistory();
 }
