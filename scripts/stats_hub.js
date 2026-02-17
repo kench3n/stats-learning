@@ -8,6 +8,7 @@ function syncTabState(tabBar,activeTab){
   });
 }
 
+var _goPageSkipPush=false;
 function goPage(id){
   if(typeof document==='undefined')return;
   const nextPage=document.getElementById('page-'+id);
@@ -19,6 +20,10 @@ function goPage(id){
   const activeTab=document.getElementById('tab-'+id)||[...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id);
   if(activeTab){activeTab.classList.add('active');syncTabState(navTabs,activeTab);}
   if(typeof window!=='undefined'&&typeof window.scrollTo==='function')window.scrollTo(0,0);
+  if(typeof window!=='undefined'&&typeof history!=='undefined'&&history.pushState&&!_goPageSkipPush){
+    history.pushState({page:id},'','#/'+id);
+  }
+  _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();},50);}
   if(id==='review')updateReviewBadge();
   if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();}
@@ -891,7 +896,29 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
       if(!allProbs[p.unit])allProbs[p.unit]=[];
       if(!allProbs[p.unit].find(x=>x.id===p.id))allProbs[p.unit].push(p);
     });
+    // Hash-based initial navigation
+    if(typeof window!=='undefined'&&window.location&&window.location.hash){
+      const hashPage=window.location.hash.replace('#/','');
+      const validPages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
+      if(validPages.indexOf(hashPage)!==-1&&hashPage!=='home'){
+        _goPageSkipPush=true;goPage(hashPage);
+      }
+    }
   });
+  // Browser back/forward support
+  if(typeof window!=='undefined'){
+    window.addEventListener('popstate',function(e){
+      if(e.state&&e.state.page){
+        _goPageSkipPush=true;goPage(e.state.page);
+      } else if(typeof window!=='undefined'&&window.location&&window.location.hash){
+        const hashPage=window.location.hash.replace('#/','');
+        const validPages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
+        if(validPages.indexOf(hashPage)!==-1){
+          _goPageSkipPush=true;goPage(hashPage);
+        }
+      }
+    });
+  }
 }
 
 // ===================== PHASE 1 CORE =====================
