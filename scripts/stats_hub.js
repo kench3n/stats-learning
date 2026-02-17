@@ -874,6 +874,8 @@ function buildFormulas(unit){
   if(typeof document==='undefined')return;
   const content=document.getElementById('formulaContent');
   if(!content)return;
+  var lbl=document.getElementById('formulaUnitLabel');
+  if(lbl){var un=typeof UNIT_META!=='undefined'&&UNIT_META[unit]?UNIT_META[unit].name:'';lbl.textContent=un?'Unit '+unit+': '+un:'';};
   const formulas=FORMULAS[unit]||[];
   if(!formulas.length){content.innerHTML='';return;}
   let html='';
