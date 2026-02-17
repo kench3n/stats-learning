@@ -1103,6 +1103,7 @@ buildProblems=function(unit=currentUnit){
   }
   updatePracticeNavBadge();
   buildTagFilter();
+  if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
   if(typeof localStorage!=='undefined'){try{var collSet=new Set(JSON.parse(localStorage.getItem('sh-collapsed-'+unit)||'[]'));collSet.forEach(function(cid){var card=document.getElementById('pc-'+cid);if(card){card.classList.add('pc-collapsed');var btn=card.querySelector('.card-collapse-btn');if(btn)btn.textContent='▸';}});}catch(e){}}
   const saved=getPracticeState(unit);
@@ -4019,6 +4020,27 @@ function clearSearch(){
   if(input)input.value='';
   searchProblems();
   setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+}
+function sortProblems(method){
+  if(typeof document==='undefined')return;
+  if(typeof localStorage!=='undefined'){try{localStorage.setItem('sh-problem-sort',method);}catch(e){}}
+  var container=document.getElementById('probContainer');
+  if(!container)return;
+  var cards=Array.from(container.querySelectorAll('.pc'));
+  if(!cards.length)return;
+  var diffOrder={'easy':0,'medium':1,'hard':2};
+  cards.sort(function(a,b){
+    var ida=parseInt(a.id.replace('pc-',''))||0;
+    var idb=parseInt(b.id.replace('pc-',''))||0;
+    var pa=(activeProbs||[]).find(function(p){return String(p.id)===String(ida);});
+    var pb=(activeProbs||[]).find(function(p){return String(p.id)===String(idb);});
+    if(method==='easy-first'){return (diffOrder[pa&&pa.diff]||0)-(diffOrder[pb&&pb.diff]||0);}
+    if(method==='hard-first'){return (diffOrder[pb&&pb.diff]||0)-(diffOrder[pa&&pa.diff]||0);}
+    if(method==='id-asc'){return ida-idb;}
+    if(method==='id-desc'){return idb-ida;}
+    return 0;
+  });
+  cards.forEach(function(c){container.appendChild(c);});
 }
 function applySearchChip(term){
   if(typeof document==='undefined')return;

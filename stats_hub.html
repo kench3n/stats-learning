@@ -435,6 +435,16 @@
   <button class="search-chip" onclick="applySearchChip('Normal Distribution')">Normal Distribution</button>
   <button class="search-chip" onclick="applySearchChip('Regression')">Regression</button>
 </div>
+<div class="sort-bar">
+  <label class="cl" for="problemSort">Sort:</label>
+  <select id="problemSort" onchange="sortProblems(this.value)">
+    <option value="default">Default</option>
+    <option value="easy-first">Easy → Hard</option>
+    <option value="hard-first">Hard → Easy</option>
+    <option value="id-asc">ID (Asc)</option>
+    <option value="id-desc">ID (Desc)</option>
+  </select>
+</div>
 <div class="filter-bar" id="filterBar">
   <button class="filter-chip active" onclick="filterProblems('all')" data-filter="all">All</button>
   <button class="filter-chip" onclick="filterProblems('unanswered')" data-filter="unanswered">Unanswered</button>
