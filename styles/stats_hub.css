@@ -880,3 +880,26 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .dataset-selector select{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;}
 .data-stats{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--cyan);font-family:'Space Mono',monospace;}
 .data-stat{background:var(--bg2);padding:4px 8px;border-radius:4px;border:1px solid var(--border);}
+
+/* ===== PHASE 18: CUSTOM PROBLEM CREATOR, RATINGS ===== */
+.deck-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.create-form{max-width:560px;display:flex;flex-direction:column;gap:12px;}
+.cf-row{display:flex;gap:12px;flex-wrap:wrap;}
+.cf-label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;flex:1;min-width:120px;}
+.cf-label input,.cf-label textarea,.cf-label select{padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;margin-top:2px;}
+.cf-label input:focus,.cf-label textarea:focus,.cf-label select:focus{border-color:var(--cyan);outline:none;}
+.create-submit{padding:12px 24px;background:var(--cyan);color:var(--bg);border:none;border-radius:8px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;width:fit-content;}
+.create-submit:hover{background:var(--amber);}
+.custom-problems-list{margin-top:24px;max-width:560px;}
+.custom-prob-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.custom-prob-head{display:flex;flex-direction:column;gap:2px;flex:1;}
+.custom-prob-meta{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.custom-prob-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 8px;}
+.custom-prob-del:hover{color:var(--red);}
+
+.rating-row{margin-top:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.rate-label{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.rate-btn{padding:4px 10px;font-size:11px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--muted);cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
+.rate-btn:hover{border-color:var(--amber);color:var(--amber);}
+.rate-btn.rate-right{border-color:var(--green);color:var(--green);}
+.rate-thanks{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;font-style:italic;}

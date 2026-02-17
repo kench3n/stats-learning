@@ -31,6 +31,7 @@
     <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" onclick="goPage('review')">Review <span class="review-badge" id="reviewBadge" style="display:none;">0</span></button>
     <button class="nav-tab" id="tab-achievements" role="tab" aria-selected="false" aria-controls="page-achievements" onclick="goPage('achievements')">Achievements</button>
     <button class="nav-tab" id="tab-flashcards" role="tab" aria-selected="false" aria-controls="page-flashcards" onclick="goPage('flashcards')">Flashcards</button>
+    <button class="nav-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="page-create" onclick="goPage('create')">Create</button>
   </div>
   <div class="nav-right">
     <div class="progress-pill" role="status" aria-live="polite">Topics: <span id="topicCount">0</span> / <span id="topicTotal">0</span></div>
@@ -446,6 +447,52 @@
   </div>
 </div>
 <script src="scripts/stats_hub.js" defer></script>
+<section class="page" id="page-create" role="tabpanel" aria-labelledby="tab-create">
+  <header class="section-header">
+    <p class="section-tag">Create Your Own</p>
+    <h2 class="section-title">Problem <em>Builder</em></h2>
+    <p class="section-desc">Create problems to reinforce your learning.</p>
+  </header>
+  <div class="deck-actions">
+    <button class="share-btn" onclick="exportCustomDeck()">📤 Export Deck</button>
+    <button class="share-btn" onclick="importCustomDeck()">📥 Import Deck</button>
+  </div>
+  <form class="create-form" id="createForm" onsubmit="event.preventDefault();saveCustomProblem();">
+    <div class="cf-row">
+      <label class="cf-label">Unit:
+        <select id="cpUnit"></select>
+      </label>
+      <label class="cf-label">Difficulty:
+        <select id="cpDiff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+      </label>
+      <label class="cf-label">Type:
+        <select id="cpType" onchange="toggleCreateType()"><option value="mc">Multiple Choice</option><option value="fr">Free Response</option></select>
+      </label>
+    </div>
+    <label class="cf-label">Topic: <input type="text" id="cpTopic" required placeholder="e.g., Z-score calculation"></label>
+    <label class="cf-label">Question: <textarea id="cpQuestion" required rows="3" placeholder="Write your question..."></textarea></label>
+    <div id="cpMCFields">
+      <label class="cf-label">Choice A: <input type="text" id="cpA"></label>
+      <label class="cf-label">Choice B: <input type="text" id="cpB"></label>
+      <label class="cf-label">Choice C: <input type="text" id="cpC"></label>
+      <label class="cf-label">Choice D: <input type="text" id="cpD"></label>
+      <label class="cf-label">Correct:
+        <select id="cpMCAns"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+      </label>
+    </div>
+    <div id="cpFRFields" style="display:none;">
+      <label class="cf-label">Answer (number): <input type="number" id="cpFRAns" step="any"></label>
+      <label class="cf-label">Tolerance: <input type="number" id="cpTol" value="0.1" step="0.01"></label>
+    </div>
+    <label class="cf-label">Explanation: <textarea id="cpExplanation" required rows="2" placeholder="Step-by-step solution..."></textarea></label>
+    <label class="cf-label">Hint (optional): <input type="text" id="cpHint" placeholder="A nudge toward the approach..."></label>
+    <button type="submit" class="create-submit">Save Problem +10 XP</button>
+  </form>
+  <div class="custom-problems-list">
+    <h3 class="achieve-section-title">Your Custom Problems (<span id="cpCount">0</span>)</h3>
+    <div id="cpList"></div>
+  </div>
+</section>
 <section class="page" id="page-flashcards" role="tabpanel" aria-labelledby="tab-flashcards">
   <header class="section-header">
     <p class="section-tag">Quick Review</p>

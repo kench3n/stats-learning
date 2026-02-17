@@ -24,6 +24,7 @@ function goPage(id){
   if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();}
   if(id==='achievements'){buildHeatmap();buildAchievementsPage();}
   if(id==='flashcards'){initFlashcardsPage();}
+  if(id==='create'){initCreatePage();}
 }
 function showSub(prefix,id,btn){
   if(prefix==='viz'&&currentUnit!==1)return;
@@ -883,6 +884,12 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     updateWeakSpots();
     buildDailyChallenge();
     buildWeeklyGoals();
+    // Load custom problems
+    const _customs=getCustomProblems();
+    _customs.forEach(p=>{
+      if(!allProbs[p.unit])allProbs[p.unit]=[];
+      if(!allProbs[p.unit].find(x=>x.id===p.id))allProbs[p.unit].push(p);
+    });
   });
 }
 
@@ -2305,6 +2312,8 @@ function resetAllProgress(){
     localStorage.removeItem('sh-review-meta');
     localStorage.removeItem('sh-bookmarks');
     localStorage.removeItem('sh-notes');
+    localStorage.removeItem('sh-custom-problems');
+    localStorage.removeItem('sh-ratings');
   }
   answered={};
   pScore=0;
@@ -3443,6 +3452,155 @@ function builderCheck(){
   const correct=builderSelected.join('')===builderParts.join('');
   if(status)status.textContent=correct?'✅ Correct! +10 XP':'❌ Not quite. The formula is: '+builderTarget.formula;
   if(correct)awardXP(10,'formula-builder');
+}
+
+
+// ===================== PHASE 18: CUSTOM PROBLEM CREATOR, DECK SHARING, RATINGS =====================
+function getCustomProblems(){
+  if(typeof localStorage==='undefined')return[];
+  try{return JSON.parse(localStorage.getItem('sh-custom-problems')||'[]')||[];}catch{return[];}
+}
+
+function initCreatePage(){
+  if(typeof document==='undefined')return;
+  const sel=document.getElementById('cpUnit');
+  if(sel&&!sel.options.length){
+    Object.keys(UNIT_META).forEach(u=>{
+      const opt=document.createElement('option');
+      opt.value=u;opt.textContent='Unit '+u+': '+UNIT_META[u].name;
+      sel.appendChild(opt);
+    });
+  }
+  buildCustomProblemList();
+}
+
+function toggleCreateType(){
+  if(typeof document==='undefined')return;
+  const type=document.getElementById('cpType')?.value;
+  const mc=document.getElementById('cpMCFields');
+  const fr=document.getElementById('cpFRFields');
+  if(mc)mc.style.display=type==='mc'?'':'none';
+  if(fr)fr.style.display=type==='fr'?'':'none';
+}
+
+function saveCustomProblem(){
+  if(typeof document==='undefined')return;
+  const unit=+(document.getElementById('cpUnit')?.value||1);
+  const type=document.getElementById('cpType')?.value||'mc';
+  const customs=getCustomProblems();
+  const id='custom-'+(Date.now());
+  const prob={
+    id,unit,type,
+    diff:document.getElementById('cpDiff')?.value||'medium',
+    topic:document.getElementById('cpTopic')?.value||'Custom',
+    q:document.getElementById('cpQuestion')?.value||'',
+    ex:document.getElementById('cpExplanation')?.value||'',
+    hint:document.getElementById('cpHint')?.value||null,
+    custom:true
+  };
+  if(!prob.q||!prob.ex){showToast('Please fill in question and explanation.');return;}
+  if(type==='mc'){
+    prob.ch=[
+      document.getElementById('cpA')?.value||'A',
+      document.getElementById('cpB')?.value||'B',
+      document.getElementById('cpC')?.value||'C',
+      document.getElementById('cpD')?.value||'D'
+    ];
+    prob.ans=+(document.getElementById('cpMCAns')?.value||0);
+  }else{
+    const ans=parseFloat(document.getElementById('cpFRAns')?.value||'0');
+    if(!Number.isFinite(ans)){showToast('Please enter a numeric answer.');return;}
+    prob.ans=ans;
+    prob.tol=+(document.getElementById('cpTol')?.value||0.1);
+  }
+  customs.push(prob);
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-custom-problems',JSON.stringify(customs));
+  if(!allProbs[unit])allProbs[unit]=[];
+  allProbs[unit].push(prob);
+  showToast('Problem saved! Find it in Unit '+unit+' practice. +10 XP');
+  awardXP(10,'create-problem-'+id);
+  const form=document.getElementById('createForm');if(form)form.reset();
+  buildCustomProblemList();
+}
+
+function buildCustomProblemList(){
+  if(typeof document==='undefined')return;
+  const list=document.getElementById('cpList');
+  const countEl=document.getElementById('cpCount');
+  if(!list)return;
+  const customs=getCustomProblems();
+  if(countEl)countEl.textContent=customs.length;
+  if(!customs.length){list.innerHTML='<p style="color:var(--muted);font-size:13px;">No custom problems yet. Create your first one above!</p>';return;}
+  let html='';
+  customs.forEach((p,i)=>{
+    html+='<div class="custom-prob-item"><div class="custom-prob-head"><span>'+p.q.slice(0,60)+(p.q.length>60?'...':'')+'</span><span class="custom-prob-meta">Unit '+p.unit+' · '+p.diff+'</span></div><button class="custom-prob-del" onclick="deleteCustomProblem('+i+')">✕</button></div>';
+  });
+  list.innerHTML=html;
+}
+
+window.deleteCustomProblem=function(idx){
+  if(typeof localStorage==='undefined')return;
+  const customs=getCustomProblems();
+  const prob=customs[idx];
+  customs.splice(idx,1);
+  localStorage.setItem('sh-custom-problems',JSON.stringify(customs));
+  if(prob&&allProbs[prob.unit]){
+    allProbs[prob.unit]=allProbs[prob.unit].filter(p=>p.id!==prob.id);
+  }
+  buildCustomProblemList();
+  showToast('Problem deleted');
+};
+
+function exportCustomDeck(){
+  if(typeof document==='undefined'||typeof Blob==='undefined')return;
+  const customs=getCustomProblems();
+  if(!customs.length){showToast('No custom problems to export.');return;}
+  const json=JSON.stringify({version:1,type:'custom-deck',problems:customs},null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='stats-hub-custom-deck.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  showToast('Deck exported!');
+}
+
+function importCustomDeck(){
+  if(typeof document==='undefined'||typeof FileReader==='undefined')return;
+  const input=document.createElement('input');
+  input.type='file';input.accept='.json';
+  input.onchange=function(e){
+    const file=e&&e.target&&e.target.files?e.target.files[0]:null;if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const data=JSON.parse(ev&&ev.target?ev.target.result:'{}');
+        if(!data.problems||!Array.isArray(data.problems))throw new Error('invalid');
+        const customs=getCustomProblems();
+        let added=0;
+        data.problems.forEach(p=>{
+          p.id='custom-'+(Date.now()+added);p.custom=true;
+          customs.push(p);
+          if(!allProbs[p.unit])allProbs[p.unit]=[];
+          allProbs[p.unit].push(p);
+          added++;
+        });
+        if(typeof localStorage!=='undefined')localStorage.setItem('sh-custom-problems',JSON.stringify(customs));
+        showToast('Imported '+added+' problems!');
+        buildCustomProblemList();
+      }catch{showToast('Invalid deck file.');}
+    };
+    reader.readAsText(file);
+  };
+  if(typeof input.click==='function')input.click();
+}
+
+function rateProblem(probId,rating){
+  if(typeof localStorage==='undefined')return;
+  const ratings=JSON.parse(localStorage.getItem('sh-ratings')||'{}');
+  ratings[probId]=rating;
+  localStorage.setItem('sh-ratings',JSON.stringify(ratings));
+  const row=document.getElementById('rate-'+probId);
+  if(row)row.innerHTML='<span class="rate-thanks">Thanks for the rating!</span>';
+  awardXP(1,'rate-'+probId);
 }
 
 let toastTimer=null;
