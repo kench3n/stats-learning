@@ -2952,6 +2952,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='7'){goPage('flashcards');}
     else if(e.key==='8'){goPage('create');}
     else if(e.key==='r'||e.key==='R'){goPage('review');}
+    else if(e.key==='f'||e.key==='F'){const pp=document.getElementById('page-practice');if(pp&&pp.classList.contains('active')&&typeof toggleFocusMode!=='undefined')toggleFocusMode();}
     else if(e.key==='t'||e.key==='T'){togglePomoPanel();}
     else if(e.key==='d'||e.key==='D'){toggleTheme();}
     else if(e.key==='?'){toggleShortcutsHelp();}
