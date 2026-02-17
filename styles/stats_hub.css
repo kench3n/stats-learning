@@ -572,6 +572,60 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 }
 .shortcuts-modal button:hover{border-color:var(--cyan);color:var(--cyan);}
 
+
+/* ===================== FORMULA REFERENCE ===================== */
+.formula-panel{margin-bottom:16px;}
+.formula-toggle{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 16px;width:100%;text-align:left;cursor:pointer;
+  color:var(--cyan);font-family:'Space Mono',monospace;font-size:13px;
+  transition:border-color 0.2s;
+}
+.formula-toggle:hover{border-color:var(--cyan);}
+.formula-content{
+  background:var(--bg2);border:1px solid var(--border);border-top:none;
+  border-radius:0 0 8px 8px;padding:12px 16px;
+}
+.formula-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
+.formula-row:last-child{border-bottom:none;}
+.formula-name{color:var(--text);font-size:13px;font-weight:600;}
+.formula-eq{color:var(--amber);font-family:'Space Mono',monospace;font-size:13px;}
+
+/* ===================== HINT SYSTEM ===================== */
+.hint-row{margin:8px 0;}
+.hint-btn{
+  background:none;border:1px solid var(--amber);border-radius:6px;
+  padding:6px 14px;color:var(--amber);font-size:12px;cursor:pointer;
+  font-family:'Space Mono',monospace;transition:all 0.2s;
+}
+.hint-btn:hover{background:var(--amber);color:var(--bg);}
+.hint-text{
+  margin-top:8px;padding:10px 14px;background:rgba(255,191,0,0.08);
+  border-left:3px solid var(--amber);border-radius:0 6px 6px 0;
+  color:var(--text);font-size:13px;line-height:1.5;
+}
+
+/* ===================== CELEBRATION ANIMATIONS ===================== */
+@keyframes confetti-fall{
+  0%{transform:translateY(-10vh) rotate(0deg);opacity:1;}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0;}
+}
+.confetti-piece{
+  position:fixed;top:0;width:8px;height:8px;border-radius:2px;
+  z-index:2001;pointer-events:none;
+  animation:confetti-fall 1.5s ease-out forwards;
+}
+@keyframes correct-pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.02);}
+  100%{transform:scale(1);}
+}
+.correct-pulse{animation:correct-pulse 0.4s ease;}
+
+@media(prefers-reduced-motion:reduce){
+  .confetti-piece,.correct-pulse{animation:none !important;}
+}
+
 @media print {
   :root {
     --bg: #fff; --bg2: #f5f5f5; --text: #111; --muted: #555;

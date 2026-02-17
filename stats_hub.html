@@ -302,7 +302,13 @@
     <div class="score-text" id="scoreText">0 / 15</div>
     <button class="reset-btn reset-unit-btn" onclick="resetUnit(currentUnit)">Reset Unit</button>
   </div>
-  <div class="problems" id="probContainer" aria-label="Practice problems"></div>
+  <div class="formula-panel" id="formulaPanel">
+  <button class="formula-toggle" id="formulaToggle" onclick="toggleFormulas()" aria-expanded="false">
+    📐 Formulas <span id="formulaArrow">▸</span>
+  </button>
+  <div class="formula-content" id="formulaContent" style="display:none;"></div>
+</div>
+<div class="problems" id="probContainer" aria-label="Practice problems"></div>
 </section>
 
 <!-- ==================== REVIEW ==================== -->
