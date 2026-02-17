@@ -11,6 +11,7 @@ function syncTabState(tabBar,activeTab){
 var _goPageSkipPush=false;
 function goPage(id){
   if(typeof document==='undefined')return;
+  if(id!=='practice'&&practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
   const nextPage=document.getElementById('page-'+id);
   if(!nextPage)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1031,6 +1032,7 @@ let activeProbs=allProbs[1];
 let probTimers={},probTimerStart={};
 let wrongAttempts={};
 let vizDrawn={};
+let practiceSessionStart=0,practiceSessionInterval=null;
 let reviewQueue=[];
 let reviewIndex=0;
 let reviewSessionCorrect=0;
@@ -1056,6 +1058,10 @@ function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typ
 buildProblems=function(unit=currentUnit){
   activeProbs=allProbs[unit]||[];
   wrongAttempts={};
+  // Session timer
+  if(practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
+  practiceSessionStart=Date.now();
+  if(typeof setInterval!=='undefined'){practiceSessionInterval=setInterval(function(){var el=typeof document!=='undefined'&&document.getElementById('sessionTime');if(!el)return;var s=Math.floor((Date.now()-practiceSessionStart)/1000);var m=Math.floor(s/60);var ss=s%60;el.textContent=(m>0?m+'m ':'')+ss+'s';},1000);}
   const c=document.getElementById('probContainer');if(!c)return;
   const bm=getBookmarks();
   const notes=getNotes();
