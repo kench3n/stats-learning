@@ -1103,3 +1103,10 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .reading-mode-btn{background:none;border:none;cursor:pointer;font-size:18px;opacity:0.6;transition:opacity 0.2s;padding:4px;}
 .reading-mode-btn:hover{opacity:1;}
 body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
+.ans-dist{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+.ans-dist-row{display:flex;align-items:center;gap:6px;}
+.ans-dist-label{font-size:11px;color:var(--muted);width:16px;text-align:center;font-weight:600;}
+.ans-dist-track{flex:1;background:var(--bg3);border-radius:3px;height:12px;overflow:hidden;}
+.ans-dist-bar{height:100%;background:var(--muted);border-radius:3px;transition:width 0.4s ease;}
+.ans-dist-bar.ans-dist-correct{background:var(--cyan);}
+.ans-dist-pct{font-size:10px;color:var(--muted);width:30px;}

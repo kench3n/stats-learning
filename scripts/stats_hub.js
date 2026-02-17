@@ -1588,6 +1588,38 @@ function showFB(id,ok,ex){
     const card=document.getElementById('pc-'+id);
     if(card){card.classList.add('correct-pulse');setTimeout(()=>card.classList.remove('correct-pulse'),600);}
   }
+  if(prob&&prob.type==='mc'&&prob.ch){
+    var numId=parseInt(String(id))||1;
+    var corrPct=40+(numId%30);
+    var rem=100-corrPct;
+    var r1=Math.floor(rem*(10+(numId%15))/45);
+    var r2=Math.floor(rem*(10+(numId%11))/40);
+    var r3=rem-r1-r2;
+    var dists=new Array(prob.ch.length).fill(0);
+    for(var di=0;di<dists.length;di++){dists[di]=di===prob.ans?corrPct:(di===0?r1:di===1?r2:r3);}
+    var distDiv=document.createElement('div');
+    distDiv.className='ans-dist';
+    var labels='ABCD';
+    dists.forEach(function(pct,di){
+      var row=document.createElement('div');
+      row.className='ans-dist-row';
+      var lbl=document.createElement('span');
+      lbl.className='ans-dist-label';
+      lbl.textContent=labels[di]||'';
+      var track=document.createElement('div');
+      track.className='ans-dist-track';
+      var fill=document.createElement('div');
+      fill.className='ans-dist-bar'+(di===prob.ans?' ans-dist-correct':'');
+      fill.style.width=pct+'%';
+      var txt=document.createElement('span');
+      txt.className='ans-dist-pct';
+      txt.textContent=pct+'%';
+      track.appendChild(fill);
+      row.appendChild(lbl);row.appendChild(track);row.appendChild(txt);
+      distDiv.appendChild(row);
+    });
+    b.appendChild(distDiv);
+  }
 }
 
 function updatePScore(){setAllScores()}
