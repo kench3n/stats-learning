@@ -121,6 +121,11 @@
     </div>
     <button class="cert-btn" onclick="generateCertificate()">🎓 Get Certificate</button>
   </div>
+  <div class="pod-widget" id="podWidget" style="display:none;">
+    <div class="pod-header">Problem of the Day</div>
+    <div class="pod-question" id="podQuestion"></div>
+    <button class="pod-solve-btn" id="podSolveBtn">Solve It →</button>
+  </div>
   <div class="home-cards">
     <div class="home-card card-roadmap" onclick="goPage('roadmap')" role="button" tabindex="0" aria-label="Open Quant Roadmap" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('roadmap')}">
       <div class="card-icon" aria-hidden="true">&#x1f5fa;</div>

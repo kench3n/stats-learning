@@ -2955,6 +2955,23 @@ function completeDailyChallenge(){
   checkMilestones();
 }
 
+function buildPOD(){
+  if(typeof document==='undefined')return;
+  var widget=document.getElementById('podWidget');
+  var qEl=document.getElementById('podQuestion');
+  var btn=document.getElementById('podSolveBtn');
+  if(!widget||!qEl||!btn)return;
+  var pool=(allProbs[1]||[]);
+  if(!pool.length)return;
+  var dateStr=todayStr();
+  var hash=dateStr.split('').reduce(function(a,c){return a+c.charCodeAt(0);},0);
+  var prob=pool[hash%pool.length];
+  if(!prob)return;
+  qEl.textContent=prob.q;
+  var unitNum=prob.unit||1;
+  btn.onclick=function(){goPage('practice');setUnit(unitNum);if(typeof setTimeout!=='undefined'){setTimeout(function(){var el=document.querySelector('[data-id="'+prob.id+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);}};
+  widget.style.display='';
+}
 function buildDailyChallenge(){
   if(typeof document==='undefined')return;
   const panel=document.getElementById('dailyChallenge');
@@ -4214,6 +4231,7 @@ if(typeof document!=='undefined'){
   updatePathDisplay();
   updateGoalDisplay();
   buildNLPHistory();
+  buildPOD();
 }
 if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){
   navigator.serviceWorker.register('./service-worker.js').catch(function(){});
