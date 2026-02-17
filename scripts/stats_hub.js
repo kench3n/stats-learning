@@ -1446,6 +1446,32 @@ function showFB(id,ok,ex){
 
 function updatePScore(){setAllScores()}
 
+function showUnitInfo(){
+  if(typeof document==='undefined'||typeof window==='undefined')return;
+  var unit=currentUnit;
+  var meta=UNIT_META[unit];
+  if(!meta)return;
+  var probs=(allProbs[unit]||[]);
+  var easy=probs.filter(function(p){return p.diff==='easy';}).length;
+  var med=probs.filter(function(p){return p.diff==='medium';}).length;
+  var hard=probs.filter(function(p){return p.diff==='hard';}).length;
+  var topics=[...new Set(probs.map(function(p){return p.topic;}))].slice(0,8);
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick=function(){overlay.remove();};
+  var modal=document.createElement('div');
+  modal.className='unit-info-modal';
+  modal.onclick=function(e){e.stopPropagation();};
+  var topicList=topics.map(function(t){return '<li>'+t+'</li>';}).join('');
+  modal.innerHTML='<div class="unit-info-header"><strong>Unit '+unit+': '+meta.name+'</strong></div>'+
+    '<div class="unit-info-stat-row"><span>'+probs.length+' problems</span><span class="ui-easy">'+easy+' easy</span><span class="ui-med">'+med+' medium</span><span class="ui-hard">'+hard+' hard</span></div>'+
+    '<div class="unit-info-topics"><div class="unit-info-label">Topics covered:</div><ul class="unit-info-topic-list">'+topicList+'</ul></div>'+
+    '<button id="unitInfoClose" class="unit-info-close">Close</button>';
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  var closeBtn=modal.querySelector('#unitInfoClose');
+  if(closeBtn)closeBtn.onclick=function(){overlay.remove();};
+}
 function setUnit(n){
   if(!UNIT_META[n])return;
   currentUnit=n;
