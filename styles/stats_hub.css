@@ -1125,3 +1125,4 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .sf-btn:hover:not(:disabled){background:color-mix(in srgb,var(--cyan) 15%,var(--bg2));}
 .sf-btn:disabled{opacity:0.5;cursor:not-allowed;}
 .focus-mode-hidden{display:none!important;}
+.motivational-quote{font-style:italic;color:var(--muted);font-size:13px;margin:12px 0 0;padding:0;border:none;text-align:center;opacity:0.8;}

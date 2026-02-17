@@ -33,7 +33,7 @@ function goPage(id){
   _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();}
+  if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -3480,6 +3480,24 @@ function applyTagFilter(){
     el.style.display=(prob&&activeTags.has(prob.topic))?'':'none';
   });
 }
+function buildMotivationalQuote(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('motivationalQuote');
+  if(!el)return;
+  var quotes=[
+    '"Statistics is the grammar of science." — Karl Pearson',
+    '"Without data, you are just another person with an opinion." — W. Edwards Deming',
+    '"The goal of education is not to fill a bucket but to light a fire." — W. B. Yeats',
+    '"An approximate answer to the right question is better than the exact answer to the wrong one." — John Tukey',
+    '"In God we trust. All others must bring data." — W. Edwards Deming',
+    '"Practice makes permanent — the more problems you solve, the stronger your intuition becomes."',
+    '"Every expert was once a beginner. Consistency is the real superpower."',
+    '"Data beats hunches — but only if you understand what the data is saying."'
+  ];
+  var dateStr=typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10);
+  var hash=dateStr.split('').reduce(function(a,c){return a+c.charCodeAt(0);},0);
+  el.textContent=quotes[hash%quotes.length];
+}
 function _recordTodayActivity(id,unit,ok){
   if(typeof localStorage==='undefined')return;
   try{
@@ -5019,6 +5037,7 @@ if(typeof document!=='undefined'){
   buildPOD();
   buildQuickStats();
   buildRecentActivity();
+  buildMotivationalQuote();
   loadReadingMode();
   buildPomoHistory();
 }
