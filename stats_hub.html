@@ -389,6 +389,7 @@
   <input type="text" id="nlpInput" placeholder="Try: 'What is the z-score if x=85, mean=70, stdev=5?'" onkeydown="if(event.key==='Enter')solveNLP()" aria-label="Natural language problem input">
   <button onclick="solveNLP()">Solve</button>
 </div>
+<div class="nlp-history" id="nlpHistory"></div>
 <div class="nlp-result" id="nlpResult" style="display:none;"></div>
 <div class="formula-panel" id="formulaPanel">
   <button class="formula-toggle" id="formulaToggle" onclick="toggleFormulas()" aria-expanded="false">

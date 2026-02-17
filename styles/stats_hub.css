@@ -956,6 +956,9 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .nlp-answer{color:var(--cyan);font-weight:700;font-family:'Space Mono',monospace;margin-bottom:8px;font-size:14px;}
 .nlp-steps{display:flex;flex-direction:column;gap:4px;}
 .nlp-no-match{color:var(--muted);font-size:13px;line-height:1.6;}
+.nlp-history{display:flex;flex-wrap:wrap;gap:6px;max-width:780px;margin:0 auto 6px;padding:0 24px;min-height:0;}
+.nlp-history-chip{padding:4px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.15s;}
+.nlp-history-chip:hover{border-color:var(--purple);color:var(--purple);}
 
 /* ===== Phase 20: Learning Paths ===== */
 .path-section{margin:16px auto;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);max-width:1100px;}

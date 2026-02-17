@@ -4145,6 +4145,33 @@ const NLP_PATTERNS=[
   },
 ];
 
+function _saveNLPHistory(query){
+  if(typeof localStorage==='undefined')return;
+  var hist=[];
+  try{hist=JSON.parse(localStorage.getItem('sh-nlp-history')||'[]');}catch(e){}
+  hist=hist.filter(function(q){return q!==query;});
+  hist.unshift(query);
+  if(hist.length>5)hist=hist.slice(0,5);
+  localStorage.setItem('sh-nlp-history',JSON.stringify(hist));
+}
+function _applyNLPChip(idx){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var hist=[];try{hist=JSON.parse(localStorage.getItem('sh-nlp-history')||'[]');}catch(e){}
+  var inp=document.getElementById('nlpInput');
+  if(inp&&hist[idx]!==undefined){inp.value=hist[idx];solveNLP();}
+}
+function buildNLPHistory(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('nlpHistory');
+  if(!el)return;
+  var hist=[];
+  if(typeof localStorage!=='undefined'){try{hist=JSON.parse(localStorage.getItem('sh-nlp-history')||'[]');}catch(e){}}
+  if(!hist.length){el.innerHTML='';return;}
+  el.innerHTML=hist.map(function(q,i){
+    var label=q.length>40?q.slice(0,40)+'...':q;
+    return '<button class="nlp-history-chip" onclick="_applyNLPChip('+i+')">'+label+'</button>';
+  }).join('');
+}
 function solveNLP(){
   if(typeof document==='undefined')return;
   const input=document.getElementById('nlpInput');
@@ -4152,6 +4179,8 @@ function solveNLP(){
   if(!input||!result)return;
   const query=input.value.trim();
   if(!query)return;
+  _saveNLPHistory(query);
+  buildNLPHistory();
   for(let i=0;i<NLP_PATTERNS.length;i++){
     const pattern=NLP_PATTERNS[i];
     const match=query.match(pattern.regex);
@@ -4184,6 +4213,7 @@ if(typeof document!=='undefined'){
   buildPathGrid();
   updatePathDisplay();
   updateGoalDisplay();
+  buildNLPHistory();
 }
 if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serviceWorker&&typeof navigator.serviceWorker.register==='function'){
   navigator.serviceWorker.register('./service-worker.js').catch(function(){});
