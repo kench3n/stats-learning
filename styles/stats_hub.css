@@ -1069,3 +1069,6 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .tag-filter-chip{background:var(--bg2);border:1px solid var(--border);border-radius:12px;color:var(--fg);font-size:11px;padding:3px 10px;cursor:pointer;transition:border-color 0.2s,background 0.2s,color 0.2s;}
 .tag-filter-chip:hover{border-color:var(--cyan);}
 .tag-filter-chip.active{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 15%,var(--bg2));color:var(--cyan);}
+.card-collapse-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;transition:color 0.2s;}
+.card-collapse-btn:hover{color:var(--fg);}
+.pc.pc-collapsed .pc-body,.pc.pc-collapsed .choices,.pc.pc-collapsed .fr-row,.pc.pc-collapsed .hint-row,.pc.pc-collapsed .fb,.pc.pc-collapsed .note-row,.pc.pc-collapsed .diff-vote-row{display:none;}
