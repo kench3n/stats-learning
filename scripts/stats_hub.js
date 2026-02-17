@@ -1184,6 +1184,20 @@ buildProblems=function(unit=currentUnit){
     }
   });
   setAllScores();
+  // Touch swipe gestures for MC answer selection
+  if(typeof document!=='undefined'&&typeof window!=='undefined'&&'ontouchstart' in window){
+    activeProbs.forEach(function(p){
+      if(p.type!=='mc')return;
+      var card=document.getElementById('pc-'+p.id);if(!card)return;
+      var tx=0,ty=0;
+      card.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+      card.addEventListener('touchend',function(e){
+        var dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+        if(Math.abs(dx)<60||Math.abs(dy)>40)return;
+        if(dx>0)ansMC(p.id,0);else ansMC(p.id,p.ch.length-1);
+      },{passive:true});
+    });
+  }
 }
 
 function updateSessionGoal(){
