@@ -468,6 +468,74 @@ After a problem is answered correctly (MC type), show a bar in the feedback indi
 - The correct answer bar is cyan, others are muted
 - Style with `.ans-dist`, `.ans-dist-bar`, `.ans-dist-label`
 
+
+### TASK: practice-bookmark-export
+Add an "Export Bookmarks" button in the progress-actions area that downloads all bookmarked problem IDs as JSON.
+- Read from `sh-bookmarks` localStorage
+- Export as JSON: `{bookmarks: [id1, id2, ...], exportDate: "YYYY-MM-DD"}`
+- Filename: `stats-hub-bookmarks-YYYY-MM-DD.json`
+- Button label: "Export Bookmarks"
+
+### TASK: formula-panel-unit-name
+Show the current unit name as a label above the formula panel.
+- Add `<div class="formula-unit-label" id="formulaUnitLabel"></div>` above `#formulaContent`
+- Update it in `buildFormulas(unit)` with the unit name from UNIT_META
+- CSS: `.formula-unit-label { font-size:11px; color:var(--muted); ... }`
+
+### TASK: xp-milestone-notifications
+Show a special toast when the user crosses XP milestones (100, 250, 500, 1000, 2500, 5000 XP).
+- In `awardXP()`, after updating total, check if old total and new total straddle a milestone
+- Show toast: "🎯 XP Milestone! You've reached 500 XP!"
+- Guard with existing xp logic, no new localStorage keys needed
+
+### TASK: keyboard-shortcut-focus
+Add keyboard shortcut `F` to toggle focus mode.
+- In keydown handler: `else if(e.key==='f'||e.key==='F'){if(typeof toggleFocusMode!=='undefined')toggleFocusMode();}`
+- Update shortcuts overlay to show `F → Focus Mode`
+- Guard: only when practice page is active
+
+### TASK: problem-hint-auto-expand
+After a problem has been answered incorrectly 2 times (same session), automatically show the hint.
+- Track wrong attempts per problem in a `wrongAttempts = {}` object
+- In `ansMC`/`ansFR`: if `!ok`, increment `wrongAttempts[id]`; if >= 2, call `showHint(id)` automatically
+- Show toast "Hint revealed after 2 incorrect attempts."
+- Guard with typeof document
+
+### TASK: practice-time-spent
+Show total time spent in the current practice session in the score bar area.
+- Track session start time: `practiceSessionStart = Date.now()` in `buildProblems()`
+- Show as `<span class="session-time" id="sessionTime">0:00</span>` near the score text
+- Update with `setInterval` every second while practice page is active
+- Guard with typeof setInterval, typeof document
+
+### TASK: roadmap-topic-count-badge
+Show a count badge on the Roadmap nav tab with the number of unchecked topics.
+- Count from `sh-topics` localStorage vs total topics in ROADMAP_DATA
+- Show as `<span class="nav-badge" id="roadmapNavBadge">N</span>` on the Roadmap tab button
+- Update when the roadmap page is built and when a topic is toggled
+
+### TASK: visualizer-screenshot
+Add a "Save as PNG" button below each visualizer canvas.
+- Button: "💾 Save PNG" placed near the viz-share-btn
+- Uses `canvas.toDataURL('image/png')` to create a downloadable link
+- Filename: `stats-hub-viz-unit{N}-YYYY-MM-DD.png`
+- Gets the active canvas from the visualizer tab
+- Guard with typeof document, typeof Blob
+
+### TASK: practice-sort-options
+Add a sort dropdown for problem cards in the Practice page.
+- `<select id="problemSort">` with options: "Default", "Difficulty (Easy→Hard)", "Difficulty (Hard→Easy)", "ID (Asc)", "ID (Desc)"
+- On change, reorder `.pc` elements in `#probContainer` according to selection
+- Don't modify `activeProbs` array — just reorder DOM nodes
+- Save sort preference to `sh-problem-sort` localStorage
+
+### TASK: home-motivational-quote
+Show a random motivational statistics/learning quote on the Home page hero.
+- Array of 8 quotes about learning, statistics, or persistence
+- Select a deterministic daily quote seeded by todayStr() hash
+- Display as `<blockquote class="motivational-quote">` in the hero section
+- Style: italic, muted color, smaller font
+
 ---
 
 ## RULES (ALWAYS)
