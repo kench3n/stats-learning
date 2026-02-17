@@ -4187,4 +4187,21 @@ if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('resize',debounce(function(){drawActiveVisualizer(true);},150));
 }
 
+// Mobile swipe navigation
+if(typeof window!=='undefined'&&typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+  var _swipeX=0,_swipeY=0;
+  var _swipePages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
+  document.addEventListener('touchstart',function(e){
+    _swipeX=e.touches[0].clientX;_swipeY=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-_swipeX;
+    var dy=e.changedTouches[0].clientY-_swipeY;
+    if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx))return;
+    var cur=_swipePages.indexOf(document.querySelector('.page.active')?document.querySelector('.page.active').id.replace('page-',''):'home');
+    if(dx<0&&cur<_swipePages.length-1)goPage(_swipePages[cur+1]);
+    else if(dx>0&&cur>0)goPage(_swipePages[cur-1]);
+  },{passive:true});
+}
+
 
