@@ -819,10 +819,12 @@ function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typ
 buildProblems=function(unit=currentUnit){
   activeProbs=allProbs[unit]||[];
   const c=document.getElementById('probContainer');if(!c)return;
+  const bm=getBookmarks();
+  const notes=getNotes();
   let html='';
   activeProbs.forEach(p=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}">${p.diff}</span><span class="pc-topic">${p.topic}</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}">${p.diff}</span><span class="pc-topic">${p.topic}</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -831,7 +833,7 @@ buildProblems=function(unit=currentUnit){
     }else{
       html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
     }
-    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div></div>`;
+    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')"></div></div>`;
   });
   c.innerHTML=html;
   const saved=getPracticeState(unit);
@@ -1185,6 +1187,7 @@ function setUnit(n){
   buildFormulas(n);
   buildVizForUnit(n);
   if(isVizPageActive())drawActiveVisualizer();
+  filterProblems('all');
 }
 
 allProbs[2]=[
@@ -2186,6 +2189,8 @@ function resetAllProgress(){
     localStorage.removeItem('sh-milestones');
     localStorage.removeItem('sh-review');
     localStorage.removeItem('sh-review-meta');
+    localStorage.removeItem('sh-bookmarks');
+    localStorage.removeItem('sh-notes');
   }
   answered={};
   pScore=0;
@@ -2900,6 +2905,109 @@ function buildAchievementsPage(){
   badgeGrid.innerHTML=badgeHtml;
 }
 
+
+// ===================== PHASE 14: BOOKMARKS, NOTES, SEARCH, FILTER =====================
+function getBookmarks(){
+  if(typeof localStorage==='undefined')return{};
+  try{return JSON.parse(localStorage.getItem('sh-bookmarks')||'{}')||{};}catch{return{};}
+}
+
+function toggleBookmark(probId){
+  if(typeof localStorage==='undefined')return;
+  const bm=getBookmarks();
+  if(bm[probId])delete bm[probId];
+  else bm[probId]=true;
+  localStorage.setItem('sh-bookmarks',JSON.stringify(bm));
+  updateBookmarkUI(probId);
+}
+
+function updateBookmarkUI(probId){
+  if(typeof document==='undefined')return;
+  const btn=document.getElementById('bm-'+probId);
+  if(!btn)return;
+  const bm=getBookmarks();
+  btn.textContent=bm[probId]?'★':'☆';
+  btn.classList.toggle('bookmarked',!!bm[probId]);
+}
+
+function getNotes(){
+  if(typeof localStorage==='undefined')return{};
+  try{return JSON.parse(localStorage.getItem('sh-notes')||'{}')||{};}catch{return{};}
+}
+
+function saveNote(probId){
+  if(typeof document==='undefined')return;
+  const input=document.getElementById('note-'+probId);
+  if(!input)return;
+  const notes=getNotes();
+  const val=input.value.trim();
+  if(val)notes[probId]=val;
+  else delete notes[probId];
+  if(typeof localStorage!=='undefined')localStorage.setItem('sh-notes',JSON.stringify(notes));
+  showToast('Note saved');
+}
+
+function searchProblems(){
+  if(typeof document==='undefined')return;
+  const input=document.getElementById('searchInput');
+  if(!input)return;
+  const query=input.value.toLowerCase().trim();
+  const clearBtn=document.getElementById('searchClear');
+  if(clearBtn)clearBtn.style.display=query?'':'none';
+  if(!query){
+    document.querySelectorAll('.pc').forEach(el=>el.style.display='');
+    setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+    return;
+  }
+  const results=new Set();
+  for(const u in allProbs){
+    (allProbs[u]||[]).forEach(p=>{
+      const text=(p.q+' '+p.topic+(p.hint||'')+' '+(p.data||'')).toLowerCase();
+      if(text.includes(query))results.add(String(p.id));
+    });
+  }
+  document.querySelectorAll('.pc').forEach(el=>{
+    const id=el.id.replace('pc-','');
+    el.style.display=results.has(id)?'':'none';
+  });
+  setElText('practiceUnitTag','Search: '+results.size+' result'+(results.size===1?'':'s'));
+}
+
+function clearSearch(){
+  if(typeof document==='undefined')return;
+  const input=document.getElementById('searchInput');
+  if(input)input.value='';
+  searchProblems();
+  setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+}
+
+function filterProblems(filter){
+  if(typeof document==='undefined')return;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  const chip=document.querySelector('.filter-chip[data-filter="'+filter+'"]');
+  if(chip)chip.classList.add('active');
+  const bm=getBookmarks();
+  const state=getPracticeState(currentUnit);
+  const ans=state.answered||{};
+  document.querySelectorAll('.pc').forEach(el=>{
+    const id=el.id.replace('pc-','');
+    const prob=activeProbs.find(p=>String(p.id)===id);
+    if(!prob){el.style.display='none';return;}
+    let show=true;
+    if(filter==='unanswered')show=ans[id]===undefined;
+    else if(filter==='wrong'){
+      if(ans[id]===undefined){show=false;}
+      else if(prob.type==='mc'){show=(+ans[id])!==prob.ans;}
+      else{const v=parseFloat(ans[id]);show=!Number.isFinite(v)||Math.abs(v-prob.ans)>(prob.tol||0.1);}
+    }
+    else if(filter==='bookmarked')show=!!bm[id];
+    else if(filter==='easy')show=prob.diff==='easy';
+    else if(filter==='medium')show=prob.diff==='medium';
+    else if(filter==='hard')show=prob.diff==='hard';
+    el.style.display=show?'':'none';
+  });
+}
+
 let toastTimer=null;
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;
@@ -2914,7 +3022,7 @@ function showToast(msg,duration=2000){
 function exportProgressJSON(){
   if(typeof document==='undefined')return;
   if(typeof localStorage==='undefined')return;
-  const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null,streak:getStreakData(),xp:getXPData(),milestones:getMilestones(),review:getReviewData(),reviewMeta:getReviewMeta()};
+  const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null,streak:getStreakData(),xp:getXPData(),milestones:getMilestones(),review:getReviewData(),reviewMeta:getReviewMeta(),bookmarks:getBookmarks(),notes:getNotes()};
   for(let unit=1;unit<=MAX_UNIT;unit++){
     try{payload.practice[unit]=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'null');}
     catch{payload.practice[unit]=null;}
@@ -3015,6 +3123,12 @@ function importProgressJSON(file){
         }
         if(data.reviewMeta&&typeof data.reviewMeta==='object'&&!Array.isArray(data.reviewMeta)){
           localStorage.setItem('sh-review-meta',JSON.stringify(data.reviewMeta));
+        }
+        if(data.bookmarks&&typeof data.bookmarks==='object'&&!Array.isArray(data.bookmarks)){
+          localStorage.setItem('sh-bookmarks',JSON.stringify(data.bookmarks));
+        }
+        if(data.notes&&typeof data.notes==='object'&&!Array.isArray(data.notes)){
+          localStorage.setItem('sh-notes',JSON.stringify(data.notes));
         }
       }
       buildProblems(currentUnit);

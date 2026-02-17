@@ -324,7 +324,20 @@
     <div class="score-text" id="scoreText">0 / 15</div>
     <button class="reset-btn reset-unit-btn" onclick="resetUnit(currentUnit)">Reset Unit</button>
   </div>
-  <div class="formula-panel" id="formulaPanel">
+  <div class="search-bar" id="searchBar">
+  <input type="text" id="searchInput" placeholder="Search problems..." oninput="searchProblems()" aria-label="Search problems">
+  <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+</div>
+<div class="filter-bar" id="filterBar">
+  <button class="filter-chip active" onclick="filterProblems('all')" data-filter="all">All</button>
+  <button class="filter-chip" onclick="filterProblems('unanswered')" data-filter="unanswered">Unanswered</button>
+  <button class="filter-chip" onclick="filterProblems('wrong')" data-filter="wrong">Wrong</button>
+  <button class="filter-chip" onclick="filterProblems('bookmarked')" data-filter="bookmarked">★ Bookmarked</button>
+  <button class="filter-chip" onclick="filterProblems('easy')" data-filter="easy">Easy</button>
+  <button class="filter-chip" onclick="filterProblems('medium')" data-filter="medium">Medium</button>
+  <button class="filter-chip" onclick="filterProblems('hard')" data-filter="hard">Hard</button>
+</div>
+<div class="formula-panel" id="formulaPanel">
   <button class="formula-toggle" id="formulaToggle" onclick="toggleFormulas()" aria-expanded="false">
     📐 Formulas <span id="formulaArrow">▸</span>
   </button>
