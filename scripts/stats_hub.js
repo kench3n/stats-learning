@@ -2773,7 +2773,12 @@ function pomoComplete(){
   const xp=pomoState.total>=2700?35:pomoState.total>=1500?20:pomoState.total>=900?10:15;
   awardXP(xp,'pomo-session');
   recordActivity();
-  showToast('Focus session complete! +'+xp+' XP. Take a break.');
+  var sessionSolved=typeof sessionData!=='undefined'?sessionData.problemsAnswered||0:0;
+  var sessionCorrect=typeof sessionData!=='undefined'?sessionData.correct||0:0;
+  var sessionMsg='Focus session complete! +'+xp+' XP.';
+  if(sessionSolved>0)sessionMsg+=' You solved '+sessionSolved+' problem'+(sessionSolved===1?'':'s')+' ('+sessionCorrect+' correct) in this session.';
+  sessionMsg+=' Take a break.';
+  showToast(sessionMsg);
   showSessionSummary();
   if(typeof localStorage!=='undefined'){
     const today=todayStr();
