@@ -1027,6 +1027,7 @@ let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
 let currentUnit=1;
 let activeProbs=allProbs[1];
 let probTimers={},probTimerStart={};
+let wrongAttempts={};
 let vizDrawn={};
 let reviewQueue=[];
 let reviewIndex=0;
@@ -1052,6 +1053,7 @@ function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typ
 
 buildProblems=function(unit=currentUnit){
   activeProbs=allProbs[unit]||[];
+  wrongAttempts={};
   const c=document.getElementById('probContainer');if(!c)return;
   const bm=getBookmarks();
   const notes=getNotes();
@@ -1173,6 +1175,7 @@ function ansMC(id,ch){
   if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
+  if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
   showFB(id,ok,p.ex);
   addToReview(p.id,ok);
@@ -1197,6 +1200,7 @@ function ansFR(id){
   const inp=document.getElementById('fi-'+id);if(!inp)return;
   const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
   answered[id]=v;const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
+  if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
   showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);
   addToReview(p.id,ok);
