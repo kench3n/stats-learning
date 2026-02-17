@@ -834,3 +834,43 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .cal-cell.empty{background:transparent;}
 .cal-active{background:var(--cyan) !important;color:var(--bg) !important;font-weight:700;}
 .cal-today{border:2px solid var(--amber);}
+
+/* ===== PHASE 16: FLASHCARDS, MATCHING, FORMULA BUILDER ===== */
+.fc-unit-select{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:0 16px;}
+.fc-unit-select label{color:var(--muted);font-size:13px;font-family:'Space Mono',monospace;}
+.fc-unit-select select{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;}
+.fc-mode-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
+.fc-mode-btn.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
+.fc-mode-btn:hover:not(.active){border-color:var(--cyan);color:var(--cyan);}
+
+.fc-container{display:flex;justify-content:center;padding:20px 0;}
+.fc-card{width:100%;max-width:480px;min-height:240px;padding:32px;background:var(--bg2);border:2px solid var(--border);border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;transition:border-color 0.3s;font-size:16px;line-height:1.6;margin:0 auto;}
+.fc-card:hover{border-color:var(--cyan);}
+.fc-card.flipped{border-color:var(--amber);}
+.fc-front{color:var(--text);font-size:16px;}
+.fc-back{color:var(--cyan);font-family:'Space Mono',monospace;font-size:14px;}
+.fc-controls{display:flex;justify-content:center;align-items:center;gap:20px;margin:16px 0;}
+.fc-controls button{padding:8px 20px;border:1px solid var(--border);background:transparent;color:var(--text);border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;}
+.fc-controls button:hover{border-color:var(--cyan);color:var(--cyan);}
+.fc-actions{display:flex;justify-content:center;gap:12px;margin-bottom:16px;}
+.fc-know{padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;}
+.fc-unsure{padding:10px 20px;background:var(--pink);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;}
+
+.match-board{margin:16px 0;}
+.match-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:600px;margin:0 auto;}
+.match-col{display:flex;flex-direction:column;gap:8px;}
+.match-item{padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s;font-family:'Space Mono',monospace;}
+.match-item:hover:not(.match-done){border-color:var(--cyan);}
+.match-item.match-sel{border-color:var(--amber);background:rgba(245,158,11,0.1);}
+.match-item.match-done{border-color:var(--green);background:rgba(0,255,136,0.08);cursor:default;opacity:0.6;}
+.match-item.match-wrong{border-color:var(--red);background:rgba(255,80,80,0.1);}
+.match-status{text-align:center;margin-top:12px;font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+.builder-target{font-size:15px;color:var(--text);padding:16px;background:var(--bg2);border-radius:8px;margin-bottom:12px;}
+.builder-pieces{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.builder-piece{padding:8px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:14px;color:var(--cyan);transition:border-color 0.2s;}
+.builder-piece:hover:not(:disabled){border-color:var(--cyan);}
+.builder-piece:disabled{opacity:0.3;cursor:default;}
+.builder-slots{display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:var(--bg);border:1px dashed var(--border);border-radius:8px;}
+.builder-slot{padding:4px 10px;background:var(--bg2);border:1px solid var(--amber);border-radius:4px;font-family:'Space Mono',monospace;font-size:14px;color:var(--amber);}
+.builder-status{margin:10px 0;font-size:13px;font-family:'Space Mono',monospace;color:var(--muted);}

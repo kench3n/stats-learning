@@ -23,6 +23,7 @@ function goPage(id){
   if(id==='review')updateReviewBadge();
   if(id==='home'){updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();}
   if(id==='achievements'){buildHeatmap();buildAchievementsPage();}
+  if(id==='flashcards'){initFlashcardsPage();}
 }
 function showSub(prefix,id,btn){
   if(prefix==='viz'&&currentUnit!==1)return;
@@ -2340,6 +2341,9 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='t'||e.key==='T'){togglePomoPanel();}
     else if(e.key==='d'||e.key==='D'){toggleTheme();}
     else if(e.key==='?'){toggleShortcutsHelp();}
+    else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcNext();}
+    else if(e.key==='ArrowLeft'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active'))fcPrev();}
+    else if(e.key===' '){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();flipCard();}}
   });
 }
 
@@ -3150,6 +3154,183 @@ function buildCalendar(){
 
 function calPrev(){if(calDate){calDate.setMonth(calDate.getMonth()-1);buildCalendar();}}
 function calNext(){if(calDate){calDate.setMonth(calDate.getMonth()+1);buildCalendar();}}
+
+
+// ===================== PHASE 16: FLASHCARDS, MATCHING, FORMULA BUILDER =====================
+let fcCards=[],fcIndex=0;
+let matchSelected=null,matchedPairs=0,matchPairsTotal=0;
+let builderParts=[],builderTarget=null,builderSelected=[];
+
+function initFlashcardsPage(){
+  if(typeof document==='undefined')return;
+  const sel=document.getElementById('fcUnitSelect');
+  if(sel&&!sel.options.length){
+    Object.keys(UNIT_META).forEach(u=>{
+      const opt=document.createElement('option');
+      opt.value=u;opt.textContent='Unit '+u+': '+UNIT_META[u].name;
+      sel.appendChild(opt);
+    });
+  }
+  const unit=+(sel?.value||1);
+  buildFlashcards(unit);
+}
+
+function setFCMode(mode){
+  if(typeof document==='undefined')return;
+  ['flash','match','build'].forEach(m=>{
+    const btn=document.getElementById('fcMode'+m.charAt(0).toUpperCase()+m.slice(1));
+    const panel=document.getElementById('fc'+m.charAt(0).toUpperCase()+m.slice(1)+'Mode');
+    if(btn)btn.classList.toggle('active',m===mode);
+    if(panel)panel.style.display=m===mode?'':'none';
+  });
+  const unit=+(document.getElementById('fcUnitSelect')?.value||1);
+  if(mode==='match')startMatchGame(unit);
+  else if(mode==='build')startFormulaBuilder(unit);
+}
+
+function buildFlashcards(unit){
+  if(typeof document==='undefined')return;
+  fcCards=[];fcIndex=0;
+  (FORMULAS[unit]||[]).forEach(f=>{
+    fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula'});
+  });
+  (allProbs[unit]||[]).forEach(p=>{
+    const answer=p.type==='mc'?p.ch[p.ans]:String(p.ans);
+    fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem'});
+  });
+  for(let i=fcCards.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [fcCards[i],fcCards[j]]=[fcCards[j],fcCards[i]];
+  }
+  renderFlashcard();
+}
+
+function renderFlashcard(){
+  if(typeof document==='undefined')return;
+  const container=document.getElementById('fcContainer');
+  if(!container)return;
+  if(!fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
+  const card=fcCards[fcIndex];
+  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+card.front+'</div><div class="fc-back" style="display:none;">'+card.back+'</div></div>';
+  setElText('fcProgress',(fcIndex+1)+' / '+fcCards.length);
+}
+
+function flipCard(){
+  if(typeof document==='undefined')return;
+  const front=document.querySelector('.fc-front');
+  const back=document.querySelector('.fc-back');
+  if(!front||!back)return;
+  const showing=back.style.display!=='none';
+  front.style.display=showing?'':'none';
+  back.style.display=showing?'none':'';
+  const card=document.getElementById('fcCard');
+  if(card)card.classList.toggle('flipped',!showing);
+}
+
+function fcNext(){if(fcIndex<fcCards.length-1){fcIndex++;renderFlashcard();}}
+function fcPrev(){if(fcIndex>0){fcIndex--;renderFlashcard();}}
+function fcMark(known){
+  if(known)awardXP(2,'flashcard-'+fcIndex);
+  fcNext();
+}
+
+function startMatchGame(unit){
+  if(typeof document==='undefined')return;
+  const board=document.getElementById('matchBoard');
+  const status=document.getElementById('matchStatus');
+  if(!board)return;
+  const formulas=FORMULAS[unit]||[];
+  if(formulas.length<3){
+    board.innerHTML='<p style="color:var(--muted);text-align:center;">Not enough formulas for this unit to play the match game.</p>';
+    return;
+  }
+  const pool=[...formulas].sort(()=>Math.random()-0.5).slice(0,Math.min(6,formulas.length));
+  matchPairsTotal=pool.length;matchedPairs=0;matchSelected=null;
+  const left=pool.map((f,i)=>({id:i,text:f.name,matched:false})).sort(()=>Math.random()-0.5);
+  const right=pool.map((f,i)=>({id:i,text:f.formula,matched:false})).sort(()=>Math.random()-0.5);
+  if(status)status.textContent='Match each term with its formula. '+pool.length+' pairs to find.';
+  function render(){
+    let html='<div class="match-cols"><div class="match-col">';
+    left.forEach(l=>{
+      html+='<div class="match-item '+(l.matched?'match-done':'')+(matchSelected&&matchSelected.side===0&&matchSelected.id===l.id&&!l.matched?' match-sel':'')+'" id="ml-'+l.id+'" onclick="matchClick(0,'+l.id+')">'+l.text+'</div>';
+    });
+    html+='</div><div class="match-col">';
+    right.forEach(r=>{
+      html+='<div class="match-item '+(r.matched?'match-done':'')+(matchSelected&&matchSelected.side===1&&matchSelected.id===r.id&&!r.matched?' match-sel':'')+'" id="mr-'+r.id+'" onclick="matchClick(1,'+r.id+')">'+r.text+'</div>';
+    });
+    html+='</div></div>';
+    board.innerHTML=html;
+  }
+  window._matchLeft=left;window._matchRight=right;window._matchRender=render;window._matchStatus=status;window._matchPool=pool;
+  render();
+}
+
+window.matchClick=function(side,id){
+  const left=window._matchLeft;const right=window._matchRight;const render=window._matchRender;const status=window._matchStatus;
+  if(!matchSelected){
+    matchSelected={side,id};render();return;
+  }
+  if(matchSelected.side===side){matchSelected={side,id};render();return;}
+  const lId=side===1?matchSelected.id:id;
+  const rId=side===1?id:matchSelected.id;
+  const lItem=left.find(x=>x.id===lId);
+  const rItem=right.find(x=>x.id===rId);
+  if(lId===rId){
+    if(lItem)lItem.matched=true;if(rItem)rItem.matched=true;
+    matchedPairs++;
+    matchSelected=null;
+    render();
+    if(matchedPairs>=matchPairsTotal){
+      if(status)status.textContent='🎉 All '+matchedPairs+' pairs matched! +20 XP';
+      awardXP(20,'match-game');
+    }
+  }else{
+    const lEl=document.getElementById('ml-'+lId);const rEl=document.getElementById('mr-'+rId);
+    if(lEl)lEl.classList.add('match-wrong');if(rEl)rEl.classList.add('match-wrong');
+    setTimeout(()=>{if(lEl)lEl.classList.remove('match-wrong');if(rEl)rEl.classList.remove('match-wrong');},600);
+    matchSelected=null;render();
+  }
+};
+
+function startFormulaBuilder(unit){
+  if(typeof document==='undefined')return;
+  const target=document.getElementById('builderTarget');
+  const piecesEl=document.getElementById('builderPieces');
+  const ansEl=document.getElementById('builderAnswer');
+  const statusEl=document.getElementById('builderStatus');
+  if(!target)return;
+  const formulas=FORMULAS[unit]||[];
+  if(!formulas.length){target.innerHTML='<p style="color:var(--muted)">No formulas for this unit.</p>';return;}
+  builderTarget=formulas[Math.floor(Math.random()*formulas.length)];
+  builderParts=builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
+  builderSelected=[];
+  const shuffled=[...builderParts].sort(()=>Math.random()-0.5);
+  target.innerHTML='Build the formula for: <strong>'+builderTarget.name+'</strong>';
+  if(piecesEl){
+    window._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
+  }
+  if(ansEl)ansEl.innerHTML='<div class="builder-slots" id="builderSlots"></div>';
+  if(statusEl)statusEl.textContent='';
+}
+
+window.builderPick=function(idx){
+  if(typeof document==='undefined')return;
+  const piece=(window._builderShuffled||[])[idx]||'';
+  builderSelected.push(piece);
+  const btn=document.getElementById('bp-'+idx);
+  if(btn)btn.disabled=true;
+  const slots=document.getElementById('builderSlots');
+  if(slots)slots.innerHTML=builderSelected.map(p=>'<span class="builder-slot">'+p+'</span>').join(' ');
+};
+
+function builderCheck(){
+  if(typeof document==='undefined')return;
+  const status=document.getElementById('builderStatus');
+  if(!builderTarget||!builderParts.length)return;
+  const correct=builderSelected.join('')===builderParts.join('');
+  if(status)status.textContent=correct?'✅ Correct! +10 XP':'❌ Not quite. The formula is: '+builderTarget.formula;
+  if(correct)awardXP(10,'formula-builder');
+}
 
 let toastTimer=null;
 function showToast(msg,duration=2000){

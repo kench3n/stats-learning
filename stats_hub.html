@@ -30,6 +30,7 @@
     <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" onclick="goPage('practice')">Practice</button>
     <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" onclick="goPage('review')">Review <span class="review-badge" id="reviewBadge" style="display:none;">0</span></button>
     <button class="nav-tab" id="tab-achievements" role="tab" aria-selected="false" aria-controls="page-achievements" onclick="goPage('achievements')">Achievements</button>
+    <button class="nav-tab" id="tab-flashcards" role="tab" aria-selected="false" aria-controls="page-flashcards" onclick="goPage('flashcards')">Flashcards</button>
   </div>
   <div class="nav-right">
     <div class="progress-pill" role="status" aria-live="polite">Topics: <span id="topicCount">0</span> / <span id="topicTotal">0</span></div>
@@ -429,6 +430,44 @@
   </div>
 </div>
 <script src="scripts/stats_hub.js" defer></script>
+<section class="page" id="page-flashcards" role="tabpanel" aria-labelledby="tab-flashcards">
+  <header class="section-header">
+    <p class="section-tag">Quick Review</p>
+    <h2 class="section-title">Flash<em>cards</em></h2>
+    <p class="section-desc">Tap to flip. Arrow keys to advance. Space to flip.</p>
+  </header>
+  <div class="fc-unit-select">
+    <label for="fcUnitSelect">Unit:</label>
+    <select id="fcUnitSelect" onchange="buildFlashcards(+this.value)"></select>
+    <button class="fc-mode-btn active" id="fcModeFlash" onclick="setFCMode('flash')">Flashcards</button>
+    <button class="fc-mode-btn" id="fcModeMatch" onclick="setFCMode('match')">Match Game</button>
+    <button class="fc-mode-btn" id="fcModeBuild" onclick="setFCMode('build')">Formula Builder</button>
+  </div>
+  <div id="fcFlashMode">
+    <div class="fc-container" id="fcContainer"></div>
+    <div class="fc-controls">
+      <button onclick="fcPrev()" aria-label="Previous card">← Prev</button>
+      <span id="fcProgress">- / -</span>
+      <button onclick="fcNext()" aria-label="Next card">Next →</button>
+    </div>
+    <div class="fc-actions">
+      <button class="fc-know" onclick="fcMark(true)">✓ I know this</button>
+      <button class="fc-unsure" onclick="fcMark(false)">✗ Still learning</button>
+    </div>
+  </div>
+  <div id="fcMatchMode" style="display:none;">
+    <div class="match-board" id="matchBoard"></div>
+    <div class="match-status" id="matchStatus"></div>
+  </div>
+  <div id="fcBuildMode" style="display:none;">
+    <div class="builder-target" id="builderTarget"></div>
+    <div class="builder-pieces" id="builderPieces"></div>
+    <div class="builder-answer" id="builderAnswer"></div>
+    <div class="builder-status" id="builderStatus"></div>
+    <button class="fc-know" onclick="builderCheck()">Check</button>
+    <button class="fc-unsure" onclick="startFormulaBuilder(+document.getElementById('fcUnitSelect').value||1)">New Formula</button>
+  </div>
+</section>
 <section class="page" id="page-achievements" role="tabpanel" aria-labelledby="tab-achievements">
   <header class="section-header">
     <p class="section-tag">Your Progress</p>
