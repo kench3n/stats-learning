@@ -1,95 +1,87 @@
-# Changelog — Stats Learning Hub
+# Stats Learning Hub — Changelog
 
-## Phase 21 — Test Suite Expansion, Documentation, Benchmarks
-- Added `tests/validate_engagement.js` (24 tests for XP, streaks, milestones, dates)
-- Added `tests/validate_ui_features.js` (20 tests for paths, datasets, tutor KB, NLP)
-- Added `tests/validate_new_units.js` (31 tests for units 12-14 schema)
-- Added `tests/run_extended.js` (runs all 260 tests: 185 original + 75 new)
-- Added `tests/benchmark.js` (bundle size, load time, computation benchmarks)
-- Updated README.md, PHASES.md with current feature set
+All notable changes to this project are documented here.
 
-## Phase 20 — Learning Paths, Goals/Deadlines, Completion Certificates
-- `LEARNING_PATHS` constant with 4 paths: Quick Start, Full Course, Quant Prep, Exam Cram
-- Path progress tracking, step-by-step navigation
-- Custom deadline input with days-remaining countdown and pace calculator
-- Auto-generated printable certificate when all path units are complete
+---
 
-## Phase 19 — AI Tutor, Step-by-Step Solver, NLP Input
-- `TUTOR_KB` (16 entries): slide-out chat panel, local knowledge base
-- `showFB()` extended: problems with `steps[]` reveal solutions progressively
-- NLP input bar: 4 regex patterns (z-score, mean, stdev, median) with solution steps
+## v2.0.0 — 2026-02-17
 
-## Phase 18 — Custom Problem Creator, Deck Sharing, Problem Ratings
-- Custom MC/FR problem creator with full schema (question, choices, explanation, hint)
-- Export/import custom decks as JSON files
-- Per-problem helpful/unclear rating UI
+### 🎓 Learning Features
+- 14 units covering intro stats through Bayesian inference
+- 145+ practice problems with hints and step-by-step explanations
+- 14 interactive Canvas visualizers (one per unit)
+- Spaced repetition review system (SM-2 algorithm)
+- Flashcard mode with flip-style cards
+- Term-definition matching game
+- Drag-and-drop formula builder
+- Natural language problem solver (local regex-based NLP)
+- Custom problem creator with deck export/import
+- Per-problem community ratings (helpful/unclear)
 
-## Phase 17 — Real Datasets, CSV Upload, Live Visualizations
-- 3 built-in datasets: Iris flower, Exam Scores, Housing Prices
-- CSV upload with automatic column detection
-- Live stats panel: mean, SD, min, max updates on data change
+### 🔥 Engagement & ADHD Support
+- XP system with leveling (50 XP per level)
+- Study streaks with daily tracking (current + longest)
+- 15+ achievement badges with milestone detection
+- Daily challenges (3 deterministic problems per day)
+- Weekly auto-scaling problem-count goals
+- Pomodoro study timer (15/25/45 min presets)
+- Focus mode for distraction-free practice
+- Session summaries with accuracy and XP breakdown
+- Daily digest dashboard with single recommended action
+- Weak spot detection (topics with <60% accuracy)
 
-## Phase 16 — Flashcard Mode, Matching Games, Formula Builder
-- Flashcard page: flip-style cards, keyboard navigation (J/K/Space/Arrow)
-- Matching game: terms vs definitions with score tracking
-- Formula builder: drag-and-drop assembly with correctness check
+### 📊 Analytics & Progress
+- Per-unit accuracy tracking with color-coded progress grid
+- Weak spot detection with topic-level analysis
+- Activity heatmap (90-day GitHub-style)
+- XP timeline chart
+- Unit breakdown analytics
+- Study calendar with monthly navigation
 
-## Phase 15 — Analytics Dashboard, PDF Export, Study Calendar
-- Analytics charts: accuracy trend, XP trend, per-unit breakdown (canvas)
-- PDF export of practice session via browser print
-- Calendar view: problem-attempt heatmap by date
+### 🗺️ Quant Roadmap
+- 6 pillars across 3 mastery levels
+- 80+ topics with checkbox tracking
+- Clickable resource links (books, courses, videos)
+- 3 career path guides (Trader, Developer, Researcher)
 
-## Phase 14 — Bookmarks, Notes, Search, Problem Filtering
-- Bookmark any problem (persisted in localStorage)
-- Per-problem freeform notes
-- Search by keyword (live filter)
-- Filter chips: All, Unanswered, Wrong, Bookmarked, Easy, Medium, Hard
+### 🛠️ Platform
+- Offline-first PWA (service worker + self-hosted fonts)
+- Dark/light theme toggle
+- Keyboard shortcuts (1-5 nav, J/K problems, T timer, D theme, ? help)
+- Mobile-optimized bottom nav
+- GitHub Pages auto-deployment via Actions CI/CD
+- Print-friendly practice export (PDF)
+- CSV data upload with live visualization
+- Real dataset library (iris flowers, exam scores, housing prices)
+- AI tutor chat (local 16-entry knowledge base)
+- Learning paths with deadlines and completion certificates
+- Search and filter problems (by keyword, difficulty, status)
+- Bookmarks and per-problem notes
+- Data export/import (full localStorage snapshot as JSON)
 
-## Phase 13 — Daily Challenges, Weekly Goals, Achievement Showcase
-- Daily challenge: 3 random problems, refreshes daily
-- Weekly goals: configurable problem-count targets with progress ring
-- Achievements page: stats summary, badge gallery, activity heatmap
+### 🧪 Quality
+- 185 core tests (HTML, problems, math, visualizers)
+- 75 additional tests (engagement, UI features, new units) = 260 total
+- Performance benchmarks (load time, computation, bundle size)
+- WCAG AA accessibility (ARIA labels, focus indicators, skip links)
 
-## Phase 12 — Units 12-14: ANOVA, Nonparametric, Bayesian
-- 30 new problems: 10 each for ANOVA, Nonparametric Tests, Bayesian Statistics
-- 3 new canvas visualizers: F-distribution, rank visualization, Bayesian posterior
-- `MAX_UNIT` dynamic constant replaces all hardcoded `u<=11` loops
+### 📖 Documentation
+- ARCHITECTURE.md — system design guide
+- CONTRIBUTING.md — developer onboarding
+- CHANGELOG.md — complete project history
+- PHASES.md — development phase tracker (Phases 1-22)
+- QA_CHECKLIST.md — manual QA verification guide
 
-## Phase 11 — Weak Spot Detection, Focus Mode, Session Summary
-- `analyzeWeakSpots()`: flags topics with <60% accuracy in a dedicated panel
-- Focus Mode: hides nav/roadmap/achievements for distraction-free practice
-- Session summary modal: per-session accuracy, XP earned, problems attempted
+---
 
-## Phase 10 — PWA Install, Mobile Optimization, Offline Indicator
-- Web App Manifest + Service Worker for offline caching
-- PWA install prompt (bottom banner with dismiss)
-- Offline/online status indicator
-- Mobile-optimized touch targets and viewport handling
+## v1.0.0 — Initial Release
 
-## Phase 9 — Formula Reference, Hint System, Celebration Animations
-- Per-unit formula reference panel (collapsible)
-- Per-problem hints (shown on wrong answer)
-- Confetti animation on correct answers
-
-## Phase 8 — Pomodoro Timer, Dark/Light Theme, Keyboard Shortcuts
-- 25-minute Pomodoro timer with pause/reset
-- Dark/light theme toggle (T key)
-- Full keyboard shortcuts: J/K for navigation, Enter/Space for submit, H for hints
-
-## Phase 7 — Daily Digest, GitHub Pages Deploy, Cross-Links
-- Daily digest panel (streak, XP, level, cards due, badges)
-- GitHub Actions CI/CD pipeline for automated tests and Pages deploy
-- Practice ↔ Visualizer cross-links (jump from problem to relevant viz)
-
-## Phase 6 — XP, Streaks, Milestones, Spaced Repetition
-- XP system with difficulty-weighted awards and level progression
-- Daily streak tracking (current + longest)
-- 10+ milestone badges with localStorage persistence
-- SM-2 spaced repetition review queue with due-card counter
-
-## Phases 1-5 — Core Build
-- Multi-unit architecture (allProbs, UNIT_META, setUnit)
-- 14 units with 145+ practice problems
-- 14 interactive canvas visualizers
-- Quant Roadmap (6 pillars × 3 levels, checkbox tracking)
-- Test suite: 185 tests across 4 validation files
+- Phase 1: Core expansion (11 units, 65 problems, multi-unit architecture)
+- Phase 2: Interactive visualizers (10 canvas-based visualizers)
+- Phase 3: Content expansion (115 problems, hints, formulas)
+- Phase 4: Accessibility, keyboard shortcuts, dark theme, Pomodoro
+- Phase 5: Product readiness (CI/CD, offline, print, docs)
+- Phase 6: XP, streaks, milestones, spaced repetition
+- Phase 7: Daily digest, GitHub Pages deploy, cross-links
+- Phase 8: Pomodoro enhancements, theme, keyboard shortcuts
+- Phase 9: Formula reference, hints, celebration animations
