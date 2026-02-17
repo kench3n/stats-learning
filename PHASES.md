@@ -24,9 +24,9 @@
 
 ---
 
-## Phase 2: Visualizer Upgrades & Bug Fixes (CURRENT)
+## Phase 2: Visualizer Upgrades & Bug Fixes (COMPLETE)
 
-### Status: COMPLETE
+### Status: DONE
 
 ### IN SCOPE
 1. Upgrade 10 placeholder visualizers to full interactive versions with proper math
@@ -54,9 +54,9 @@
 
 ---
 
-## Phase 3: Content Expansion (PLANNED)
+## Phase 3: Content Expansion (COMPLETE)
 
-### Status: COMPLETE
+### Status: DONE — 115 total problems
 
 ### IN SCOPE
 1. Expand to 10 problems per unit (Units 2-11): 50 additional problems
@@ -72,9 +72,9 @@
 
 ---
 
-## Phase 4: Accessibility & Polish (PLANNED)
+## Phase 4: Accessibility & Polish (COMPLETE)
 
-### Status: NOT STARTED
+### Status: DONE — WCAG AA compliant
 
 ### IN SCOPE
 1. Keyboard accessibility: home cards, roadmap checkboxes, choice buttons
@@ -94,9 +94,9 @@
 
 ---
 
-## Phase 5: Product Readiness (PLANNED)
+## Phase 5: Product Readiness (COMPLETE)
 
-### Status: NOT STARTED
+### Status: DONE — CI, offline, print, docs
 
 ### IN SCOPE
 1. Performance optimization (lazy loading visualizers)
