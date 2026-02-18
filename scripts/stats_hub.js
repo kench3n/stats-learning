@@ -1377,6 +1377,7 @@ function loadFormulaPin(){
 var stepHintProgress={};
 function showHint(id){
   if(typeof document==='undefined')return;
+  if(examModeActive){showToast('Hints disabled in Exam Mode');return;}
   const ht=document.getElementById('ht-'+id);
   const hb=document.getElementById('hb-'+id);
   if(hb)hb.style.display='none';
@@ -2213,7 +2214,26 @@ function updateDailyDigest(){
   }
 }
 
+var examModeActive=false;
+function toggleExamMode(){
+  if(typeof document==='undefined')return;
+  examModeActive=!examModeActive;
+  var btn=document.getElementById('examModeBtn');
+  if(btn)btn.classList.toggle('active',examModeActive);
+  if(examModeActive){showToast('Exam Mode ON — feedback hidden until you finish');}
+  else{
+    showToast('Exam Mode OFF — showing feedback');
+    // Re-render feedback for answered problems
+    activeProbs.forEach(function(p){
+      if(answered[p.id]!==undefined){
+        if(p.type==='mc'){var ok=(+answered[p.id])===p.ans;showFB(p.id,ok,ok?p.ex:'Correct: '+p.ch[p.ans]+'. '+p.ex);}
+        else{var v=parseFloat(answered[p.id]);var ok2=Math.abs(v-p.ans)<=(p.tol||0.1);showFB(p.id,ok2,ok2?p.ex:'Correct: '+p.ans+'. '+p.ex);}
+      }
+    });
+  }
+}
 function showFB(id,ok,ex,userAnswerLabel){
+  if(examModeActive)return;
   const fb=document.getElementById('fb-'+id),pc=document.getElementById('pc-'+id),b=document.getElementById('fbx-'+id);
   if(!fb||!pc||!b)return;
   fb.classList.add('show');
