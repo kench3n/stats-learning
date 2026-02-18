@@ -1313,6 +1313,7 @@ function ansMC(id,ch){
   updatePracticeNavBadge();
   checkUnitCompletion(currentUnit);
   updateMasteryBadge(currentUnit);
+  if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
 function ansFR(id){
@@ -1340,6 +1341,21 @@ function ansFR(id){
   updatePracticeNavBadge();
   checkUnitCompletion(currentUnit);
   updateMasteryBadge(currentUnit);
+  if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
+}
+
+function autoScrollToNext(currentId){
+  if(typeof document==='undefined')return;
+  var probs=activeProbs||[];
+  var idx=probs.findIndex(function(p){return p.id===currentId;});
+  if(idx<0)return;
+  for(var i=idx+1;i<probs.length;i++){
+    if(answered[probs[i].id]===undefined){
+      var el=document.getElementById('pc-'+probs[i].id);
+      if(el&&typeof el.scrollIntoView==='function')el.scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+  }
 }
 
 function findProblemById(probId){
