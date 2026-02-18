@@ -177,6 +177,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .rm-search-input:focus{outline:none;border-color:var(--cyan);}
 .rm-search-clear{position:absolute;right:30px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;}
 .rm-search-clear:hover{color:var(--fg);}
+.rm-export-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:11px;padding:4px 10px;margin-left:8px;white-space:nowrap;font-family:'Space Mono',monospace;transition:border-color 0.2s,color 0.2s;}
+.rm-export-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 .ti mark{background:color-mix(in srgb,var(--amber) 30%,transparent);color:var(--text);border-radius:2px;}
 .section-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 .section-title{font-family:'Instrument Serif',serif;font-size:clamp(32px,4.5vw,50px);font-weight:400;letter-spacing:-1px;margin-bottom:6px;}

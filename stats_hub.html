@@ -207,7 +207,7 @@
       <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> New 6th pillar: Infrastructure &amp; Systems</li>
     </ul>
   </div>
-  <div class="rm-search-wrap"><input type="text" id="rmSearch" placeholder="Search topics..." oninput="searchRoadmapTopics(this.value)" class="rm-search-input" aria-label="Search roadmap topics"><button class="rm-search-clear" id="rmSearchClear" onclick="clearRoadmapSearch()" style="display:none;">×</button></div>
+  <div class="rm-search-wrap"><input type="text" id="rmSearch" placeholder="Search topics..." oninput="searchRoadmapTopics(this.value)" class="rm-search-input" aria-label="Search roadmap topics"><button class="rm-search-clear" id="rmSearchClear" onclick="clearRoadmapSearch()" style="display:none;">×</button><button class="rm-export-btn" onclick="exportRoadmapProgress()" title="Export progress as JSON">Export Progress</button></div>
   <div class="sub-tabs" id="roadmapTabs" role="tablist" aria-label="Roadmap levels">
     <button class="sub-tab active" id="rm-tab-l1" role="tab" aria-selected="true" aria-controls="rm-l1" onclick="showSub('rm','l1',this)">Level 1</button>
     <button class="sub-tab" id="rm-tab-l2" role="tab" aria-selected="false" aria-controls="rm-l2" onclick="showSub('rm','l2',this)">Level 2</button>

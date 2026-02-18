@@ -652,6 +652,22 @@ function clearRoadmapSearch(){
   var inp=document.getElementById('rmSearch');if(inp){inp.value='';if(typeof inp.focus==='function')inp.focus();}
   searchRoadmapTopics('');
 }
+function exportRoadmapProgress(){
+  if(typeof document==='undefined')return;
+  var topics=getTopicState();
+  var notes=getTopicNotes();
+  var checkedTopics=Object.keys(topics).filter(function(k){return topics[k];});
+  var data={exportedAt:new Date().toISOString(),checkedTopics:checkedTopics,topicNotes:notes,totalChecked:checkedTopics.length};
+  var json=JSON.stringify(data,null,2);
+  if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Export unavailable');return;}
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='roadmap-progress.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Roadmap progress exported!');
+}
 function getTopicState(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
 function saveTopicState(s){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topics',JSON.stringify(s))}
 function getTopicNotes(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topic-notes')||'{}')}catch{return{}}}
