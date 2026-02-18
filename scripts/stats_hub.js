@@ -2341,7 +2341,7 @@ function updateReviewBadge(){
       var daysUntil=Math.round((new Date(dueDate)-new Date(today))/(1000*60*60*24));
       var dueLabel=daysUntil<=0?'Due today':daysUntil===1?'Due tomorrow':'Due in '+daysUntil+' days';
       var snippet=prob.q.length>60?prob.q.slice(0,60)+'...':prob.q;
-      html+='<div class="review-next-item"><span class="review-next-q">'+snippet+'</span><span class="review-next-due">'+dueLabel+'</span></div>';
+      html+='<div class="review-next-item"><span class="review-next-q">'+_esc(snippet)+'</span><span class="review-next-due">'+_esc(dueLabel)+'</span></div>';
     });
     nextUpEl.innerHTML=html;
   }
