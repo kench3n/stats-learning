@@ -5143,7 +5143,7 @@ function buildDailyChallenge(){
   _st._dcProbs=dc.problems;
   _st._dcAnswered={};
 
-  window.dcAnsMC=function(i,j){
+  if(typeof window!=='undefined')window.dcAnsMC=function(i,j){
     if(_st._dcAnswered[i]!==undefined)return;
     _st._dcAnswered[i]=j;
     answeredCount++;
@@ -5162,7 +5162,7 @@ function buildDailyChallenge(){
     checkComplete();
   };
 
-  window.dcAnsFR=function(i){
+  if(typeof window!=='undefined')window.dcAnsFR=function(i){
     if(_st._dcAnswered[i]!==undefined)return;
     const inp=document.getElementById('dc-fi-'+i);
     if(!inp)return;
@@ -5935,7 +5935,7 @@ function startMatchGame(unit){
   render();
 }
 
-window.matchClick=function(side,id){
+if(typeof window!=='undefined')window.matchClick=function(side,id){
   const left=_st._matchLeft;const right=_st._matchRight;const render=_st._matchRender;const status=_st._matchStatus;
   if(!_st.matchSelected){
     _st.matchSelected={side,id};render();return;
@@ -5983,7 +5983,7 @@ function startFormulaBuilder(unit){
   if(statusEl)statusEl.textContent='';
 }
 
-window.builderPick=function(idx){
+if(typeof window!=='undefined')window.builderPick=function(idx){
   if(typeof document==='undefined')return;
   const piece=(_st._builderShuffled||[])[idx]||'';
   _st.builderSelected.push(piece);
@@ -6086,7 +6086,7 @@ function buildCustomProblemList(){
   list.innerHTML=html;
 }
 
-window.deleteCustomProblem=function(idx){
+if(typeof window!=='undefined')window.deleteCustomProblem=function(idx){
   if(typeof localStorage==='undefined')return;
   const customs=getCustomProblems();
   const prob=customs[idx];
