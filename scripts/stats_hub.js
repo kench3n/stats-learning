@@ -5473,7 +5473,7 @@ function calNext(){if(calDate){calDate.setMonth(calDate.getMonth()+1);buildCalen
 
 
 // ===================== PHASE 16: FLASHCARDS, MATCHING, FORMULA BUILDER =====================
-let fcCards=[],fcIndex=0;
+let fcCards=[],fcIndex=0,fcKnownCount=0,fcSeenCount=0;
 let matchSelected=null,matchedPairs=0,matchPairsTotal=0;
 let builderParts=[],builderTarget=null,builderSelected=[];
 
@@ -5506,7 +5506,7 @@ function setFCMode(mode){
 
 function buildFlashcards(unit){
   if(typeof document==='undefined')return;
-  fcCards=[];fcIndex=0;
+  fcCards=[];fcIndex=0;fcKnownCount=0;fcSeenCount=0;
   (FORMULAS[unit]||[]).forEach(f=>{
     fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula'});
   });
@@ -5549,7 +5549,16 @@ function fcNext(){if(fcIndex<fcCards.length-1){fcIndex++;renderFlashcard();}}
 function fcPrev(){if(fcIndex>0){fcIndex--;renderFlashcard();}}
 function fcMark(known){
   if(known)awardXP(2,'flashcard-'+fcIndex);
+  fcSeenCount++;if(known)fcKnownCount++;
+  updateFCSessionStats();
   fcNext();
+}
+function updateFCSessionStats(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('fcSessionStats');if(!el)return;
+  var total=fcCards.length||1;
+  var pct=fcSeenCount>0?Math.round(fcKnownCount/fcSeenCount*100):0;
+  el.innerHTML='<span class="fcs-item">Seen: <b>'+fcSeenCount+'/'+total+'</b></span><span class="fcs-item">Known: <b>'+fcKnownCount+'</b></span><span class="fcs-item">Score: <b>'+pct+'%</b></span>';
 }
 
 function startMatchGame(unit){
