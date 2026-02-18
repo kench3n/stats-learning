@@ -573,6 +573,7 @@ function buildRoadmap(){
   updateRoadmapNavBadge();
   updateRoadmapPct();
   updateLevelRings();
+  buildLevelTimeEstimates();
 }
 
 function updateRoadmapPct(){
@@ -583,6 +584,21 @@ function updateRoadmapPct(){
   var checked=Object.values(state).filter(Boolean).length;
   var pct=total>0?Math.round(checked/total*100):0;
   el.textContent=pct+'% complete';
+}
+function buildLevelTimeEstimates(){
+  if(typeof document==='undefined')return;
+  var state=getTopicState();
+  var hoursPerTopic={l1:2,l2:4,l3:6};
+  ['l1','l2','l3'].forEach(function(lk){
+    var el=document.getElementById('ltr-'+lk);if(!el)return;
+    var cards=typeof RM!=='undefined'&&RM[lk]?RM[lk]:[];
+    var total=0,checked=0;
+    cards.forEach(function(c){(c.topics||[]).forEach(function(t){total++;if(state[t.n])checked++;});});
+    var remaining=total-checked;
+    if(remaining<=0){el.textContent='';return;}
+    var hrs=remaining*hoursPerTopic[lk];
+    el.textContent=' ('+hrs+'h left)';
+  });
 }
 function updateLevelRings(){
   if(typeof document==='undefined')return;
@@ -705,6 +721,7 @@ function toggleTopic(el){
   updateRoadmapNavBadge();
   updateRoadmapPct();
   updateLevelRings();
+  buildLevelTimeEstimates();
   if(checked){
     awardXP(XP_TABLE.topic,'topic');
     recordActivity();
