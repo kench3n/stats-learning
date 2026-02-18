@@ -27,6 +27,85 @@ function _esc(str) {
                     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ===================== EVENT DELEGATION =====================
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+  // Click delegation
+  document.addEventListener('click',function(e){
+    // Stop propagation for marked elements
+    if(e.target.closest&&e.target.closest('[data-stop-propagation]')){e.stopPropagation();return;}
+    var el=e.target.closest?e.target.closest('[data-action]'):null;
+    if(!el)return;
+    var action=el.dataset.action;
+    if(action==='nav'){goPage(el.dataset.page);}
+    else if(action==='sub'){showSub(el.dataset.prefix,el.dataset.sub,el);}
+    else if(action==='filter'){filterProblems(el.dataset.val);}
+    else if(action==='searchChip'){applySearchChip(el.dataset.val);}
+    else if(action==='analytics'){showAnalytics(el.dataset.val,e);}
+    else if(action==='pomoTime'){setPomoTime(+el.dataset.val);}
+    else if(action==='fcMode'){setFCMode(el.dataset.val);}
+    else if(action==='fcMark'){fcMark(el.dataset.val==='true');}
+    else if(action==='formulaNav'){formulaUnitNav(+el.dataset.dir);}
+    else if(action==='exportPracticePDF'){exportPracticePDF(_st.currentUnit);}
+    else if(action==='resetUnit'){resetUnit(_st.currentUnit);}
+    else if(action==='vizPracticeLink'){goPage('practice');setUnit(1);}
+    else if(action==='closeCertModal'){var m=document.getElementById('rmCertModal');if(m)m.style.display='none';}
+    else if(action==='newFormulaBuilder'){startFormulaBuilder(+(document.getElementById('fcUnitSelect')||{}).value||1);}
+    else if(action==='toggleFormulaFavFilter'){toggleFormulaFavFilter(el);}
+    // Simple no-arg function calls
+    else if(typeof window[action]==='function'){window[action]();}
+  });
+  // Keydown delegation (Enter key)
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Enter'||e.key===' '){
+      var el=e.target.closest?e.target.closest('[data-action]'):null;
+      if(el&&el.getAttribute('role')==='button'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.click();return;}
+    }
+    if(e.key==='Enter'){
+      var el2=e.target.closest?e.target.closest('[data-action-enter]'):null;
+      if(el2){var fn=el2.dataset.actionEnter;if(typeof window[fn]==='function')window[fn]();}
+    }
+  });
+  // Input delegation (oninput)
+  document.addEventListener('input',function(e){
+    var action=e.target.dataset?e.target.dataset.action:null;
+    if(!action)return;
+    if(action==='binSlider'){var bv=document.getElementById('binCountVal');if(bv)bv.textContent=e.target.value;drawHist();}
+    else if(action==='drawNorm'){drawNorm();}
+    else if(action==='drawComp'){drawComp();}
+    else if(action==='drawBox'){drawBox();}
+    else if(action==='loadPreset'){loadPreset();}
+    else if(action==='searchRoadmap'){searchRoadmapTopics(e.target.value);}
+    else if(action==='searchProblems'){searchProblems();}
+    else if(action==='filterFormulas'){filterFormulas(e.target.value);}
+    else if(action==='saveSessionNotes'){saveSessionNotes();}
+  });
+  // Change delegation (onchange)
+  document.addEventListener('change',function(e){
+    var action=e.target.dataset?e.target.dataset.action:null;
+    if(!action)return;
+    if(action==='setUnit'){setUnit(+e.target.value);}
+    else if(action==='loadDataset'){loadDataset(e.target.value);}
+    else if(action==='updateSessionGoal'){updateSessionGoal();}
+    else if(action==='sortProblems'){sortProblems(e.target.value);}
+    else if(action==='toggleCreateType'){toggleCreateType();}
+    else if(action==='buildFlashcards'){buildFlashcards(+e.target.value);}
+    else if(action==='setGoal'){setGoal();}
+    else if(action==='importProgress'){importProgressJSON(e.target.files[0]);}
+    else if(action==='drawNorm'){drawNorm();}
+    else if(action==='drawBox'){drawBox();}
+    else if(action==='loadPreset'){loadPreset();}
+  });
+  // Submit delegation
+  document.addEventListener('submit',function(e){
+    var form=e.target.closest?e.target.closest('[data-action-submit]'):e.target;
+    if(form&&form.dataset&&form.dataset.actionSubmit){
+      e.preventDefault();
+      var fn=form.dataset.actionSubmit;
+      if(typeof window[fn]==='function')window[fn]();
+    }
+  });
+}
+
 // ===================== APPLICATION STATE =====================
 var _st = {
   _goPageSkipPush: false,

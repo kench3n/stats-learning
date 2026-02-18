@@ -29,14 +29,14 @@
 <nav class="top-nav" aria-label="Main navigation">
   <div class="nav-brand">Stats <em>Hub</em></div>
   <div class="nav-tabs" role="tablist" aria-label="Site sections">
-    <button class="nav-tab active" id="tab-home" role="tab" aria-selected="true" aria-controls="page-home" onclick="goPage('home')">Home</button>
-    <button class="nav-tab" id="tab-roadmap" role="tab" aria-selected="false" aria-controls="page-roadmap" onclick="goPage('roadmap')">Roadmap <span class="nav-badge" id="roadmapNavBadge" style="display:none;">0</span></button>
-    <button class="nav-tab" id="tab-visualizer" role="tab" aria-selected="false" aria-controls="page-visualizer" onclick="goPage('visualizer')">Visualizer</button>
-    <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" onclick="goPage('practice')">Practice <span class="nav-badge" id="practiceNavBadge" style="display:none;">0</span></button>
-    <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" onclick="goPage('review')">Review <span class="review-badge" id="reviewBadge" style="display:none;">0</span></button>
-    <button class="nav-tab" id="tab-achievements" role="tab" aria-selected="false" aria-controls="page-achievements" onclick="goPage('achievements')">Achievements</button>
-    <button class="nav-tab" id="tab-flashcards" role="tab" aria-selected="false" aria-controls="page-flashcards" onclick="goPage('flashcards')">Flashcards</button>
-    <button class="nav-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="page-create" onclick="goPage('create')">Create</button>
+    <button class="nav-tab active" id="tab-home" role="tab" aria-selected="true" aria-controls="page-home" data-action="nav" data-page="home">Home</button>
+    <button class="nav-tab" id="tab-roadmap" role="tab" aria-selected="false" aria-controls="page-roadmap" data-action="nav" data-page="roadmap">Roadmap <span class="nav-badge" id="roadmapNavBadge" style="display:none;">0</span></button>
+    <button class="nav-tab" id="tab-visualizer" role="tab" aria-selected="false" aria-controls="page-visualizer" data-action="nav" data-page="visualizer">Visualizer</button>
+    <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" data-action="nav" data-page="practice">Practice <span class="nav-badge" id="practiceNavBadge" style="display:none;">0</span></button>
+    <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" data-action="nav" data-page="review">Review <span class="review-badge" id="reviewBadge" style="display:none;">0</span></button>
+    <button class="nav-tab" id="tab-achievements" role="tab" aria-selected="false" aria-controls="page-achievements" data-action="nav" data-page="achievements">Achievements</button>
+    <button class="nav-tab" id="tab-flashcards" role="tab" aria-selected="false" aria-controls="page-flashcards" data-action="nav" data-page="flashcards">Flashcards</button>
+    <button class="nav-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="page-create" data-action="nav" data-page="create">Create</button>
   </div>
   <div class="nav-right">
     <div class="progress-pill" role="status" aria-live="polite">Topics: <span id="topicCount">0</span> / <span id="topicTotal">0</span></div>
@@ -53,8 +53,8 @@
       </div>
       <span class="xp-total" id="xpTotal">0 XP</span>
     </div>
-    <button class="reading-mode-btn" id="readingModeBtn" onclick="toggleReadingMode()" aria-label="Toggle reading mode" title="Reading Mode">📖</button>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light/dark theme">🌙</button>
+    <button class="reading-mode-btn" id="readingModeBtn" data-action="toggleReadingMode" aria-label="Toggle reading mode" title="Reading Mode">📖</button>
+    <button class="theme-toggle" id="themeToggle" data-action="toggleTheme" aria-label="Toggle light/dark theme">🌙</button>
   </div>
 </nav>
 
@@ -67,7 +67,7 @@
     <p class="hero-tag">College Intro Statistics</p>
     <h1>Stats Learning <em>Hub</em></h1>
     <p>Your all-in-one tool for learning statistics. Roadmap to track what to learn, interactive visualizations to build intuition, and practice problems to test your understanding.</p>
-    <button class="export-all-btn" onclick="exportAllData()" style="margin-top:12px;">Export All Data</button>
+    <button class="export-all-btn" data-action="exportAllData" style="margin-top:12px;">Export All Data</button>
     <blockquote class="motivational-quote" id="motivationalQuote"></blockquote>
   </header>
   <div class="quick-stats-row" id="quickStatsRow">
@@ -148,19 +148,19 @@
     <div class="active-path" id="activePath" style="display:none;">
       <div class="path-progress-bar"><div class="path-progress-fill" id="pathFill"></div></div>
       <span id="pathStatus">Unit 1 of 5</span>
-      <button class="path-next-btn" id="pathNextBtn" onclick="goToPathUnit()">Continue →</button>
+      <button class="path-next-btn" id="pathNextBtn" data-action="goToPathUnit">Continue →</button>
     </div>
   </div>
   <div class="goal-section" id="goalSection">
     <h3>🎯 Set a Goal</h3>
     <label>I want to finish my path by:
-      <input type="date" id="goalDate" onchange="setGoal()" aria-label="Goal deadline date">
+      <input type="date" id="goalDate" data-action="setGoal" aria-label="Goal deadline date">
     </label>
     <div class="goal-countdown" id="goalCountdown" style="display:none;">
       <span class="goal-days" id="goalDays">0</span> days remaining
       <div class="goal-pace" id="goalPace"></div>
     </div>
-    <button class="cert-btn" onclick="generateCertificate()">🎓 Get Certificate</button>
+    <button class="cert-btn" data-action="generateCertificate">🎓 Get Certificate</button>
   </div>
   <div class="pod-widget" id="podWidget" style="display:none;">
     <div class="pod-header">Problem of the Day</div>
@@ -168,25 +168,25 @@
     <button class="pod-solve-btn" id="podSolveBtn">Solve It →</button>
   </div>
   <div class="home-cards">
-    <div class="home-card card-roadmap" onclick="goPage('roadmap')" role="button" tabindex="0" aria-label="Open Quant Roadmap" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('roadmap')}">
+    <div class="home-card card-roadmap" data-action="nav" data-page="roadmap" role="button" tabindex="0" aria-label="Open Quant Roadmap">
       <div class="card-icon" aria-hidden="true">&#x1f5fa;</div>
       <div class="card-title">Learn</div>
       <div class="card-desc">Quant Roadmap with 6 pillars &amp; 3 levels. Learning paths with deadlines. AI tutor for instant stats help. Custom problem creator.</div>
       <div class="card-meta">Roadmap &middot; Paths &middot; AI Tutor</div>
     </div>
-    <div class="home-card card-viz" onclick="goPage('visualizer')" role="button" tabindex="0" aria-label="Open Interactive Visualizer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('visualizer')}">
+    <div class="home-card card-viz" data-action="nav" data-page="visualizer" role="button" tabindex="0" aria-label="Open Interactive Visualizer">
       <div class="card-icon" aria-hidden="true">&#x1f4ca;</div>
       <div class="card-title">Visualize</div>
       <div class="card-desc">14 real-time canvas visualizers. Upload your own CSV data or use built-in datasets. Live stats panel updates as you explore.</div>
       <div class="card-meta">14 visualizers &middot; CSV upload &middot; Real datasets</div>
     </div>
-    <div class="home-card card-practice" onclick="goPage('practice')" role="button" tabindex="0" aria-label="Open Practice Problems" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('practice')}">
+    <div class="home-card card-practice" data-action="nav" data-page="practice" role="button" tabindex="0" aria-label="Open Practice Problems">
       <div class="card-icon" aria-hidden="true">&#x270f;</div>
       <div class="card-title">Practice</div>
       <div class="card-desc">145+ problems across 14 units with hints and step-by-step solutions. Flashcards, matching games, daily challenges, and spaced repetition review.</div>
       <div class="card-meta">145+ problems &middot; Flashcards &middot; Daily challenges</div>
     </div>
-    <div class="home-card card-achievements" onclick="goPage('achievements')" role="button" tabindex="0" aria-label="Open Achievements" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('achievements')}">
+    <div class="home-card card-achievements" data-action="nav" data-page="achievements" role="button" tabindex="0" aria-label="Open Achievements">
       <div class="card-icon" aria-hidden="true">&#x1f3c6;</div>
       <div class="card-title">Track</div>
       <div class="card-desc">XP, streaks, and 15+ achievement badges. Activity heatmap, analytics charts, and study calendar. Earn certificates when you complete a learning path.</div>
@@ -201,7 +201,7 @@
     <p class="section-tag">An improved learning path</p>
     <h2 class="section-title">The Quant <em>Roadmap</em></h2>
     <p class="section-desc">Six pillars, three levels. Track your progress as you go.</p>
-    <button class="roadmap-export-btn" onclick="exportRoadmapProgress()">Export Progress</button>
+    <button class="roadmap-export-btn" data-action="exportRoadmapProgress">Export Progress</button>
     <span class="roadmap-pct" id="roadmapPct">0%</span>
   </header>
   <div class="improvements-card">
@@ -215,12 +215,12 @@
       <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> New 6th pillar: Infrastructure &amp; Systems</li>
     </ul>
   </div>
-  <div class="rm-search-wrap"><input type="text" id="rmSearch" placeholder="Search topics..." oninput="searchRoadmapTopics(this.value)" class="rm-search-input" aria-label="Search roadmap topics"><button class="rm-search-clear" id="rmSearchClear" onclick="clearRoadmapSearch()" style="display:none;">×</button><button class="rm-export-btn" onclick="exportRoadmapProgress()" title="Export progress as JSON">Export Progress</button></div>
+  <div class="rm-search-wrap"><input type="text" id="rmSearch" placeholder="Search topics..." data-action="searchRoadmap" class="rm-search-input" aria-label="Search roadmap topics"><button class="rm-search-clear" id="rmSearchClear" data-action="clearRoadmapSearch" style="display:none;">×</button><button class="rm-export-btn" data-action="exportRoadmapProgress" title="Export progress as JSON">Export Progress</button></div>
   <div class="sub-tabs" id="roadmapTabs" role="tablist" aria-label="Roadmap levels">
-    <button class="sub-tab active" id="rm-tab-l1" role="tab" aria-selected="true" aria-controls="rm-l1" onclick="showSub('rm','l1',this)">Level 1<span class="level-time-remaining" id="ltr-l1"></span></button>
-    <button class="sub-tab" id="rm-tab-l2" role="tab" aria-selected="false" aria-controls="rm-l2" onclick="showSub('rm','l2',this)">Level 2<span class="level-time-remaining" id="ltr-l2"></span></button>
-    <button class="sub-tab" id="rm-tab-l3" role="tab" aria-selected="false" aria-controls="rm-l3" onclick="showSub('rm','l3',this)">Level 3<span class="level-time-remaining" id="ltr-l3"></span></button>
-    <button class="sub-tab" id="rm-tab-roles" role="tab" aria-selected="false" aria-controls="rm-roles" onclick="showSub('rm','roles',this)">Roles</button>
+    <button class="sub-tab active" id="rm-tab-l1" role="tab" aria-selected="true" aria-controls="rm-l1" data-action="sub" data-prefix="rm" data-sub="l1">Level 1<span class="level-time-remaining" id="ltr-l1"></span></button>
+    <button class="sub-tab" id="rm-tab-l2" role="tab" aria-selected="false" aria-controls="rm-l2" data-action="sub" data-prefix="rm" data-sub="l2">Level 2<span class="level-time-remaining" id="ltr-l2"></span></button>
+    <button class="sub-tab" id="rm-tab-l3" role="tab" aria-selected="false" aria-controls="rm-l3" data-action="sub" data-prefix="rm" data-sub="l3">Level 3<span class="level-time-remaining" id="ltr-l3"></span></button>
+    <button class="sub-tab" id="rm-tab-roles" role="tab" aria-selected="false" aria-controls="rm-roles" data-action="sub" data-prefix="rm" data-sub="roles">Roles</button>
   </div>
   <div id="rm-panels"></div>
 </section>
@@ -234,7 +234,7 @@
   </header>
   <div class="unit-selector">
     <label class="cl" for="vizUnitSelect">UNIT</label>
-    <select id="vizUnitSelect" onchange="setUnit(+this.value)">
+    <select id="vizUnitSelect" data-action="setUnit">
       <option value="1">Unit 1: Descriptive Statistics</option>
       <option value="2">Unit 2: Normal Distribution</option>
       <option value="3">Unit 3: Bivariate Data</option>
@@ -253,7 +253,7 @@
   </div>
   <div class="dataset-selector">
     <label class="cl" for="datasetSelect">DATASET</label>
-    <select id="datasetSelect" onchange="loadDataset(this.value)">
+    <select id="datasetSelect" data-action="loadDataset">
       <option value="">Default (synthetic)</option>
       <option value="iris">Iris Flowers (sepal length)</option>
       <option value="grades">Exam Scores</option>
@@ -269,18 +269,18 @@
   </div>
   <div class="viz-history-row" id="vizHistoryRow" style="display:none;"></div>
   <div class="viz-unit-info" id="vizUnitInfo">
-    <button class="viz-unit-info-toggle" onclick="toggleVizInfo()">&#8505; Unit Info &#9656;</button>
+    <button class="viz-unit-info-toggle" data-action="toggleVizInfo">&#8505; Unit Info &#9656;</button>
     <div class="viz-unit-info-body" id="vizUnitInfoBody" style="display:none;"></div>
   </div>
   <div class="sub-tabs" id="vizTabs" role="tablist" aria-label="Visualizer tools">
-    <button class="sub-tab active" id="viz-tab-hist" role="tab" aria-selected="true" aria-controls="viz-hist" onclick="showSub('viz','hist',this)">Histogram</button>
-    <button class="sub-tab" id="viz-tab-box" role="tab" aria-selected="false" aria-controls="viz-box" onclick="showSub('viz','box',this)">Boxplot</button>
-    <button class="sub-tab" id="viz-tab-norm" role="tab" aria-selected="false" aria-controls="viz-norm" onclick="showSub('viz','norm',this)">Normal Curve</button>
-    <button class="sub-tab" id="viz-tab-comp" role="tab" aria-selected="false" aria-controls="viz-comp" onclick="showSub('viz','comp',this)">Compare</button>
+    <button class="sub-tab active" id="viz-tab-hist" role="tab" aria-selected="true" aria-controls="viz-hist" data-action="sub" data-prefix="viz" data-sub="hist">Histogram</button>
+    <button class="sub-tab" id="viz-tab-box" role="tab" aria-selected="false" aria-controls="viz-box" data-action="sub" data-prefix="viz" data-sub="box">Boxplot</button>
+    <button class="sub-tab" id="viz-tab-norm" role="tab" aria-selected="false" aria-controls="viz-norm" data-action="sub" data-prefix="viz" data-sub="norm">Normal Curve</button>
+    <button class="sub-tab" id="viz-tab-comp" role="tab" aria-selected="false" aria-controls="viz-comp" data-action="sub" data-prefix="viz" data-sub="comp">Compare</button>
   </div>
   <div class="viz-screenshot-row">
-    <button class="viz-screenshot-btn" onclick="saveVizScreenshot()" title="Save current visualizer as PNG">📷 Save as PNG</button>
-    <button class="viz-fullscreen-btn" onclick="toggleVizFullscreen()" title="Fullscreen visualizer">⛶ Fullscreen</button>
+    <button class="viz-screenshot-btn" data-action="saveVizScreenshot" title="Save current visualizer as PNG">📷 Save as PNG</button>
+    <button class="viz-fullscreen-btn" data-action="toggleVizFullscreen" title="Fullscreen visualizer">⛶ Fullscreen</button>
   </div>
   <div id="viz-panels">
     <!-- Histogram -->
@@ -298,14 +298,14 @@
           <div class="sc"><div class="sv sv-orange" id="hRange">—</div><div class="sl">Range</div></div>
         </div>
         <div class="controls">
-          <div class="cg"><label class="cl" for="histPreset">Preset</label><select id="histPreset" onchange="loadPreset()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="left">Left skewed</option><option value="bimodal">Bimodal</option><option value="uniform">Uniform</option></select></div>
-          <div class="cg"><label class="cl" for="binSlider">Bins <span class="sv-val" id="binCountVal">10</span></label><input type="range" id="binSlider" min="5" max="40" value="10" oninput="document.getElementById('binCountVal').textContent=this.value;drawHist()"></div>
-          <div class="cg"><label class="cl" for="sizeSlider">Sample size</label><input type="range" id="sizeSlider" min="20" max="500" value="100" oninput="loadPreset()"></div>
+          <div class="cg"><label class="cl" for="histPreset">Preset</label><select id="histPreset" data-action="loadPreset"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="left">Left skewed</option><option value="bimodal">Bimodal</option><option value="uniform">Uniform</option></select></div>
+          <div class="cg"><label class="cl" for="binSlider">Bins <span class="sv-val" id="binCountVal">10</span></label><input type="range" id="binSlider" min="5" max="40" value="10" data-action="binSlider"></div>
+          <div class="cg"><label class="cl" for="sizeSlider">Sample size</label><input type="range" id="sizeSlider" min="20" max="500" value="100" data-action="loadPreset"></div>
         </div>
         <div class="data-row">
           <input type="text" id="customData" placeholder="Or enter your own: 2, 5, 7, 3, 9, 12..." aria-label="Custom data input">
-          <button class="btn-a" onclick="loadCustom()" style="padding:8px 16px;border-radius:6px;cursor:pointer;border:1px solid rgba(6,182,212,0.3);background:var(--cyan-g);color:var(--cyan);font-size:13px;">Load</button>
-          <button class="viz-download-btn" onclick="downloadVizData()" title="Download current dataset as CSV">Download CSV</button>
+          <button class="btn-a" data-action="loadCustom" style="padding:8px 16px;border-radius:6px;cursor:pointer;border:1px solid rgba(6,182,212,0.3);background:var(--cyan-g);color:var(--cyan);font-size:13px;">Load</button>
+          <button class="viz-download-btn" data-action="downloadVizData" title="Download current dataset as CSV">Download CSV</button>
         </div>
       </div>
       <div class="explain"><h3>What to notice</h3><p>The <strong style="color:var(--cyan)">mean</strong> is pulled toward the tail in skewed data. The <strong style="color:var(--amber)">median</strong> resists outliers. When mean > median → right-skewed. When mean < median → left-skewed.</p><div class="formula">Mean = Σxᵢ / n &nbsp;&nbsp; Median = middle value when sorted</div></div>
@@ -326,8 +326,8 @@
           <div class="sc"><div class="sv sv-green" id="bIQR">—</div><div class="sl">IQR</div></div>
         </div>
         <div class="controls">
-          <div class="cg"><label class="cl" for="boxPreset">Dataset</label><select id="boxPreset" onchange="drawBox()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="outliers">Has outliers</option></select></div>
-          <div class="cg"><label class="cl" for="outlierSlider">Add extreme value</label><input type="range" id="outlierSlider" min="0" max="100" value="0" oninput="drawBox()"></div>
+          <div class="cg"><label class="cl" for="boxPreset">Dataset</label><select id="boxPreset" data-action="drawBox"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="outliers">Has outliers</option></select></div>
+          <div class="cg"><label class="cl" for="outlierSlider">Add extreme value</label><input type="range" id="outlierSlider" min="0" max="100" value="0" data-action="drawBox"></div>
         </div>
         <div class="legend"><div class="leg-i"><div class="leg-d" style="background:var(--cyan)" aria-hidden="true"></div>Box (Q1–Q3)</div><div class="leg-i"><div class="leg-d" style="background:var(--amber)" aria-hidden="true"></div>Median</div><div class="leg-i"><div class="leg-d" style="background:var(--dim)" aria-hidden="true"></div>Whiskers</div><div class="leg-i"><div class="leg-d" style="background:var(--pink);border-radius:50%" aria-hidden="true"></div>Outliers</div></div>
       </div>
@@ -341,11 +341,11 @@
         <div class="viz-desc">Adjust μ and σ. The shaded regions show the 68-95-99.7 rule.</div>
         <canvas id="normCanvas" height="340" aria-label="Normal distribution visualization" role="img"></canvas>
         <div class="controls">
-          <div class="cg"><label class="cl" for="muSlider">μ (mean) <span class="sv-val" id="muVal">0</span></label><input type="range" id="muSlider" min="-4" max="4" value="0" step="0.1" oninput="drawNorm()"></div>
-          <div class="cg"><label class="cl" for="sigSlider">σ (std dev) <span class="sv-val" id="sigVal">1</span></label><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" oninput="drawNorm()"></div>
-          <div class="cg"><label class="cl" for="normRegion">Region</label><select id="normRegion" onchange="drawNorm()"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option><option value="range">Z Range</option></select></div>
-          <div class="cg" id="zGrp" style="display:none"><label class="cl" for="zSlider">z <span class="sv-val" id="zVal">1.96</span></label><input type="range" id="zSlider" min="0" max="4" value="1.96" step="0.01" oninput="drawNorm()"></div>
-          <div class="cg" id="zRangeGrp" style="display:none"><label class="cl">z1 <span class="sv-val" id="z1Val">-1.00</span></label><input type="range" id="z1Slider" min="-4" max="4" value="-1" step="0.01" oninput="drawNorm()"><label class="cl">z2 <span class="sv-val" id="z2Val">1.00</span></label><input type="range" id="z2Slider" min="-4" max="4" value="1" step="0.01" oninput="drawNorm()"></div>
+          <div class="cg"><label class="cl" for="muSlider">μ (mean) <span class="sv-val" id="muVal">0</span></label><input type="range" id="muSlider" min="-4" max="4" value="0" step="0.1" data-action="drawNorm"></div>
+          <div class="cg"><label class="cl" for="sigSlider">σ (std dev) <span class="sv-val" id="sigVal">1</span></label><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" data-action="drawNorm"></div>
+          <div class="cg"><label class="cl" for="normRegion">Region</label><select id="normRegion" data-action="drawNorm"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option><option value="range">Z Range</option></select></div>
+          <div class="cg" id="zGrp" style="display:none"><label class="cl" for="zSlider">z <span class="sv-val" id="zVal">1.96</span></label><input type="range" id="zSlider" min="0" max="4" value="1.96" step="0.01" data-action="drawNorm"></div>
+          <div class="cg" id="zRangeGrp" style="display:none"><label class="cl">z1 <span class="sv-val" id="z1Val">-1.00</span></label><input type="range" id="z1Slider" min="-4" max="4" value="-1" step="0.01" data-action="drawNorm"><label class="cl">z2 <span class="sv-val" id="z2Val">1.00</span></label><input type="range" id="z2Slider" min="-4" max="4" value="1" step="0.01" data-action="drawNorm"></div>
         </div>
         <div class="stats-row" style="margin-top:14px" aria-label="Normal distribution statistics">
           <div class="sc"><div class="sv sv-cyan" id="nArea">68.3%</div><div class="sl">Shaded area</div></div>
@@ -363,10 +363,10 @@
         <div class="viz-desc">Same mean, different spread? Same spread, different center? See how they're independent.</div>
         <canvas id="compCanvas" height="320" aria-label="Distribution comparison visualization" role="img"></canvas>
         <div class="controls">
-          <div class="cg"><label class="cl" for="muAS">A: μ <span class="sv-val" id="muA">0</span></label><input type="range" id="muAS" min="-4" max="4" value="0" step="0.1" oninput="drawComp()"></div>
-          <div class="cg"><label class="cl" for="sigAS">A: σ <span class="sv-val" id="sigA">1</span></label><input type="range" id="sigAS" min="0.3" max="3" value="1" step="0.1" oninput="drawComp()"></div>
-          <div class="cg"><label class="cl" for="muBS">B: μ <span class="sv-val" id="muB">2</span></label><input type="range" id="muBS" min="-4" max="4" value="2" step="0.1" oninput="drawComp()"></div>
-          <div class="cg"><label class="cl" for="sigBS">B: σ <span class="sv-val" id="sigB">0.7</span></label><input type="range" id="sigBS" min="0.3" max="3" value="0.7" step="0.1" oninput="drawComp()"></div>
+          <div class="cg"><label class="cl" for="muAS">A: μ <span class="sv-val" id="muA">0</span></label><input type="range" id="muAS" min="-4" max="4" value="0" step="0.1" data-action="drawComp"></div>
+          <div class="cg"><label class="cl" for="sigAS">A: σ <span class="sv-val" id="sigA">1</span></label><input type="range" id="sigAS" min="0.3" max="3" value="1" step="0.1" data-action="drawComp"></div>
+          <div class="cg"><label class="cl" for="muBS">B: μ <span class="sv-val" id="muB">2</span></label><input type="range" id="muBS" min="-4" max="4" value="2" step="0.1" data-action="drawComp"></div>
+          <div class="cg"><label class="cl" for="sigBS">B: σ <span class="sv-val" id="sigB">0.7</span></label><input type="range" id="sigBS" min="0.3" max="3" value="0.7" step="0.1" data-action="drawComp"></div>
         </div>
         <div class="legend" style="margin-top:14px"><div class="leg-i"><div class="leg-d" style="background:var(--cyan)" aria-hidden="true"></div>Distribution A</div><div class="leg-i"><div class="leg-d" style="background:var(--pink)" aria-hidden="true"></div>Distribution B</div></div>
         <div class="compare-stats-table" id="compareStatsTable"></div>
@@ -377,7 +377,7 @@
   <div id="viz-dynamic" style="display:none" role="tabpanel" aria-live="polite"></div>
   <div class="viz-data-summary" id="vizDataSummary"></div>
   <div class="viz-practice-link">
-    <button class="viz-practice-btn" onclick="goPage('practice');setUnit(1);">Practice Unit 1: Descriptive Statistics →</button>
+    <button class="viz-practice-btn" data-action="vizPracticeLink">Practice Unit 1: Descriptive Statistics →</button>
   </div>
 </section>
 
@@ -387,16 +387,16 @@
     <p class="section-tag" id="practiceUnitTag">Unit 1 — Descriptive Statistics</p>
     <h2 class="section-title">Practice <em>Problems</em></h2>
     <p class="section-desc">Practice problems from easy to hard. Work them by hand, then check.</p>
-    <button class="focus-btn" id="focusBtn" onclick="toggleFocusMode()" aria-label="Toggle focus mode">🎯 Focus Mode</button>
-    <button class="export-pdf-btn" onclick="exportPracticePDF(currentUnit)" aria-label="Export problems as PDF">🖨 Export PDF</button>
-    <button class="export-unit-btn" onclick="exportUnitProblems()" aria-label="Export unit problems as JSON">📥 Export Problems</button>
-    <button class="rand-prob-btn" onclick="jumpToRandomProblem()" aria-label="Jump to random unsolved problem">🎲 Random</button>
-    <button class="kb-help-btn" id="kbHelpBtn" onclick="toggleKBHelp()" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">⌨️</button>
-    <button class="exam-mode-btn" id="examModeBtn" onclick="toggleExamMode()" title="Toggle exam mode">Exam Mode</button>
+    <button class="focus-btn" id="focusBtn" data-action="toggleFocusMode" aria-label="Toggle focus mode">🎯 Focus Mode</button>
+    <button class="export-pdf-btn" data-action="exportPracticePDF" aria-label="Export problems as PDF">🖨 Export PDF</button>
+    <button class="export-unit-btn" data-action="exportUnitProblems" aria-label="Export unit problems as JSON">📥 Export Problems</button>
+    <button class="rand-prob-btn" data-action="jumpToRandomProblem" aria-label="Jump to random unsolved problem">🎲 Random</button>
+    <button class="kb-help-btn" id="kbHelpBtn" data-action="toggleKBHelp" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">⌨️</button>
+    <button class="exam-mode-btn" id="examModeBtn" data-action="toggleExamMode" title="Toggle exam mode">Exam Mode</button>
     <div class="kb-help-panel" id="kbHelpPanel" style="display:none;"><div class="kb-help-title">Keyboard Shortcuts</div><div class="kb-shortcut-row"><span class="kb-key">j / k</span><span class="kb-desc">Next / prev problem</span></div><div class="kb-shortcut-row"><span class="kb-key">h</span><span class="kb-desc">Show hint</span></div><div class="kb-shortcut-row"><span class="kb-key">b</span><span class="kb-desc">Toggle bookmark</span></div><div class="kb-shortcut-row"><span class="kb-key">Enter</span><span class="kb-desc">Submit answer</span></div><div class="kb-shortcut-row"><span class="kb-key">Esc</span><span class="kb-desc">Close panel</span></div></div>
   </header>
   <div class="progress-panel" id="progressPanel">
-    <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>
+    <button class="progress-toggle" id="progressToggle" aria-expanded="true" data-action="toggleProgressPanel">Progress Overview &#9662;</button>
     <div class="progress-grid" id="progressGrid" role="status" aria-live="polite"></div>
     <div class="topic-heatmap" id="topicHeatmap"></div>
     <div class="diff-chart-row" id="diffChartRow" style="display:none;text-align:center;padding:8px 0 4px;">
@@ -405,7 +405,7 @@
     </div>
     <div class="session-goal-bar" id="sessionGoalBar">
       <label class="cl" for="sessionGoal">Session Goal:</label>
-      <select id="sessionGoal" onchange="updateSessionGoal()">
+      <select id="sessionGoal" data-action="updateSessionGoal">
         <option value="0">No goal</option>
         <option value="5">5 problems</option>
         <option value="10">10 problems</option>
@@ -421,17 +421,17 @@
       <span class="goal-progress-text" id="goalProgressText"></span>
     </div>
     <div class="progress-actions" id="progressActions">
-      <button class="share-btn" onclick="exportProgressJSON()">Export JSON</button>
-      <button class="share-btn" onclick="copyProgressSummary()">Copy Summary</button>
+      <button class="share-btn" data-action="exportProgressJSON">Export JSON</button>
+      <button class="share-btn" data-action="copyProgressSummary">Copy Summary</button>
       <label class="share-btn import-label">
-        Import <input type="file" id="importFile" accept=".json" onchange="importProgressJSON(this.files[0])" hidden>
+        Import <input type="file" id="importFile" accept=".json" data-action="importProgress" hidden>
       </label>
-      <button class="share-btn" onclick="printProblemSet()">Print Set</button>
-      <button class="share-btn" onclick="exportNotes()">Export Notes</button>
-      <button class="share-btn" onclick="exportBookmarks()">Export Bookmarks</button>
-      <button class="share-btn" onclick="exportAllData()">Export All Data</button>
-      <button class="share-btn" onclick="toggleCompareMode()" id="compareModeBtn">Compare Mode</button>
-      <button class="reset-btn" onclick="resetAllProgress()">Reset All Progress</button>
+      <button class="share-btn" data-action="printProblemSet">Print Set</button>
+      <button class="share-btn" data-action="exportNotes">Export Notes</button>
+      <button class="share-btn" data-action="exportBookmarks">Export Bookmarks</button>
+      <button class="share-btn" data-action="exportAllData">Export All Data</button>
+      <button class="share-btn" data-action="toggleCompareMode" id="compareModeBtn">Compare Mode</button>
+      <button class="reset-btn" data-action="resetAllProgress">Reset All Progress</button>
     </div>
     <div class="milestone-shelf" id="milestoneShelf">
       <h3 class="milestone-title">Badges</h3>
@@ -444,7 +444,7 @@
   </div>
   <div class="unit-selector">
     <label class="cl" for="unitSelect">UNIT</label>
-    <select id="unitSelect" onchange="setUnit(+this.value)">
+    <select id="unitSelect" data-action="setUnit">
       <option value="1">Unit 1: Descriptive Statistics</option>
       <option value="2">Unit 2: Normal Distribution</option>
       <option value="3">Unit 3: Bivariate Data</option>
@@ -460,72 +460,72 @@
       <option value="13">Unit 13: Nonparametric Tests</option>
       <option value="14">Unit 14: Bayesian Statistics</option>
     </select>
-    <button class="unit-info-btn" onclick="showUnitInfo()" title="Unit overview" aria-label="Unit overview">i</button>
+    <button class="unit-info-btn" data-action="showUnitInfo" title="Unit overview" aria-label="Unit overview">i</button>
   </div>
   <div class="jump-bar">
-    <input type="number" id="jumpInput" class="jump-input" placeholder="Go to #..." min="1" aria-label="Jump to problem by ID" onkeydown="if(event.key==='Enter')jumpToProblem()">
-    <button class="jump-btn" onclick="jumpToProblem()">Go</button>
+    <input type="number" id="jumpInput" class="jump-input" placeholder="Go to #..." min="1" aria-label="Jump to problem by ID" data-action-enter="jumpToProblem">
+    <button class="jump-btn" data-action="jumpToProblem">Go</button>
   </div>
   <div class="score-bar" role="status" aria-live="polite">
     <div class="score-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="score-fill" id="scoreFill"></div></div>
     <div class="score-text" id="scoreText">0 / 15</div>
     <span class="session-time" id="sessionTime">0s</span>
     <span class="prob-counter" id="probCounter"></span>
-    <button class="reset-btn reset-unit-btn" onclick="resetUnit(currentUnit)">Reset Unit</button>
+    <button class="reset-btn reset-unit-btn" data-action="resetUnit">Reset Unit</button>
   </div>
   <div class="search-bar" id="searchBar">
-  <input type="text" id="searchInput" placeholder="Search problems..." oninput="searchProblems()" aria-label="Search problems">
-  <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+  <input type="text" id="searchInput" placeholder="Search problems..." data-action="searchProblems" aria-label="Search problems">
+  <button class="search-clear" id="searchClear" data-action="clearSearch" style="display:none;">✕</button>
 </div>
 <div class="search-suggestions" id="searchSuggestions">
-  <button class="search-chip" onclick="applySearchChip('Hypothesis Test')">Hypothesis Test</button>
-  <button class="search-chip" onclick="applySearchChip('Confidence Interval')">Confidence Interval</button>
-  <button class="search-chip" onclick="applySearchChip('Normal Distribution')">Normal Distribution</button>
-  <button class="search-chip" onclick="applySearchChip('Regression')">Regression</button>
+  <button class="search-chip" data-action="searchChip" data-val="Hypothesis Test">Hypothesis Test</button>
+  <button class="search-chip" data-action="searchChip" data-val="Confidence Interval">Confidence Interval</button>
+  <button class="search-chip" data-action="searchChip" data-val="Normal Distribution">Normal Distribution</button>
+  <button class="search-chip" data-action="searchChip" data-val="Regression">Regression</button>
 </div>
 <div class="sort-bar">
   <span class="mastery-badge" id="masteryBadge" data-level="novice">Novice</span>
   <label class="cl" for="problemSort">Sort:</label>
-  <select id="problemSort" onchange="sortProblems(this.value)">
+  <select id="problemSort" data-action="sortProblems">
     <option value="default">Default</option>
     <option value="easy-first">Easy → Hard</option>
     <option value="hard-first">Hard → Easy</option>
     <option value="id-asc">ID (Asc)</option>
     <option value="id-desc">ID (Desc)</option>
   </select>
-  <button class="expand-all-btn" id="expandAllBtn" onclick="toggleExpandAll()">Expand All</button>
+  <button class="expand-all-btn" id="expandAllBtn" data-action="toggleExpandAll">Expand All</button>
 </div>
-<div class="topic-focus-bar" id="topicFocusBar" style="display:none;"><span class="topic-focus-label" id="topicFocusLabel"></span><button class="topic-focus-clear" onclick="clearTopicFocus()">✕ Clear topic filter</button></div>
+<div class="topic-focus-bar" id="topicFocusBar" style="display:none;"><span class="topic-focus-label" id="topicFocusLabel"></span><button class="topic-focus-clear" data-action="clearTopicFocus">✕ Clear topic filter</button></div>
 <div class="filter-bar" id="filterBar">
-  <button class="filter-chip active" onclick="filterProblems('all')" data-filter="all">All</button>
-  <button class="filter-chip" onclick="filterProblems('unanswered')" data-filter="unanswered">Unanswered</button>
-  <button class="filter-chip" onclick="filterProblems('wrong')" data-filter="wrong">Wrong</button>
-  <button class="filter-chip" onclick="filterProblems('bookmarked')" data-filter="bookmarked">★ Bookmarked</button>
-  <button class="filter-chip" onclick="filterProblems('easy')" data-filter="easy">Easy</button>
-  <button class="filter-chip" onclick="filterProblems('medium')" data-filter="medium">Medium</button>
-  <button class="filter-chip" onclick="filterProblems('hard')" data-filter="hard">Hard</button>
-  <button class="fav-filter-btn" id="favFilterBtn" onclick="toggleFavFilter()" title="Toggle favorites-only overlay">★ Favorites</button>
+  <button class="filter-chip active" data-action="filter" data-val="all" data-filter="all">All</button>
+  <button class="filter-chip" data-action="filter" data-val="unanswered" data-filter="unanswered">Unanswered</button>
+  <button class="filter-chip" data-action="filter" data-val="wrong" data-filter="wrong">Wrong</button>
+  <button class="filter-chip" data-action="filter" data-val="bookmarked" data-filter="bookmarked">★ Bookmarked</button>
+  <button class="filter-chip" data-action="filter" data-val="easy" data-filter="easy">Easy</button>
+  <button class="filter-chip" data-action="filter" data-val="medium" data-filter="medium">Medium</button>
+  <button class="filter-chip" data-action="filter" data-val="hard" data-filter="hard">Hard</button>
+  <button class="fav-filter-btn" id="favFilterBtn" data-action="toggleFavFilter" title="Toggle favorites-only overlay">★ Favorites</button>
 </div>
 <div class="hint-usage-info" id="hintUsageInfo"><span class="hint-usage-label" id="hintUsageLabel"></span></div>
 <div class="tag-filter-bar" id="tagFilterBar" style="display:none;"></div>
 <div class="nlp-bar" id="nlpBar">
-  <input type="text" id="nlpInput" placeholder="Try: 'What is the z-score if x=85, mean=70, stdev=5?'" onkeydown="if(event.key==='Enter')solveNLP()" aria-label="Natural language problem input">
-  <button onclick="solveNLP()">Solve</button>
+  <input type="text" id="nlpInput" placeholder="Try: 'What is the z-score if x=85, mean=70, stdev=5?'" data-action-enter="solveNLP" aria-label="Natural language problem input">
+  <button data-action="solveNLP">Solve</button>
 </div>
 <div class="nlp-history" id="nlpHistory"></div>
 <div class="nlp-result" id="nlpResult" style="display:none;"></div>
 <div class="formula-panel" id="formulaPanel">
   <div class="formula-search-wrap">
-    <input type="search" id="formulaSearch" placeholder="Search formulas..." oninput="filterFormulas(this.value)" aria-label="Search formulas">
-    <button class="formula-search-clear" id="formulaSearchClear" onclick="clearFormulaSearch()" aria-label="Clear formula search" style="display:none;">×</button>
+    <input type="search" id="formulaSearch" placeholder="Search formulas..." data-action="filterFormulas" aria-label="Search formulas">
+    <button class="formula-search-clear" id="formulaSearchClear" data-action="clearFormulaSearch" aria-label="Clear formula search" style="display:none;">×</button>
   </div>
   <div class="formula-history-row" id="formulaHistoryRow" style="display:none;"></div>
-  <button class="formula-fav-filter" id="formulaFavFilter" onclick="toggleFormulaFavFilter(this)">☆ Favorites</button>
-  <button class="formula-toggle" id="formulaToggle" onclick="toggleFormulas()" aria-expanded="false">
+  <button class="formula-fav-filter" id="formulaFavFilter" data-action="toggleFormulaFavFilter">☆ Favorites</button>
+  <button class="formula-toggle" id="formulaToggle" data-action="toggleFormulas" aria-expanded="false">
     📐 Formulas <span id="formulaArrow">▸</span>
   </button>
-  <button class="formula-pin-btn" id="formulaPinBtn" onclick="toggleFormulaPin()" title="Pin formula panel open">📌</button>
-  <div class="formula-unit-nav-row"><button class="formula-unit-nav" id="formulaUnitPrev" onclick="formulaUnitNav(-1)" title="Previous unit formulas">◀</button><div class="formula-unit-label" id="formulaUnitLabel"></div><button class="formula-unit-nav" id="formulaUnitNext" onclick="formulaUnitNav(1)" title="Next unit formulas">▶</button><button class="formula-copy-all-btn" onclick="copyAllFormulas()" title="Copy all formulas">Copy All</button></div>
+  <button class="formula-pin-btn" id="formulaPinBtn" data-action="toggleFormulaPin" title="Pin formula panel open">📌</button>
+  <div class="formula-unit-nav-row"><button class="formula-unit-nav" id="formulaUnitPrev" data-action="formulaNav" data-dir="-1" title="Previous unit formulas">◀</button><div class="formula-unit-label" id="formulaUnitLabel"></div><button class="formula-unit-nav" id="formulaUnitNext" data-action="formulaNav" data-dir="1" title="Next unit formulas">▶</button><button class="formula-copy-all-btn" data-action="copyAllFormulas" title="Copy all formulas">Copy All</button></div>
   <div class="formula-recent-row" id="formulaRecentRow" style="display:none;"></div>
   <div class="formula-content" id="formulaContent" style="display:none;"></div>
   <div class="formula-resize-handle" id="formulaResizeHandle" title="Drag to resize formula panel"></div>
@@ -533,7 +533,7 @@
 <div class="unit-xp-bar-row" id="unitXPBarRow" style="display:none;"><div class="unit-xp-bar-track"><div class="unit-xp-bar-fill" id="unitXPBarFill"></div></div><span class="unit-xp-bar-text" id="unitXPBarText">0 XP earned</span></div>
 <div class="diff-insight" id="diffInsight"></div>
 <div class="problems" id="probContainer" aria-label="Practice problems"></div>
-<div class="session-notes-panel" id="sessionNotesPanel"><label class="cl" for="sessionNotes">Session Notes</label><textarea id="sessionNotes" placeholder="Session notes…" oninput="saveSessionNotes()" aria-label="Session notes"></textarea></div>
+<div class="session-notes-panel" id="sessionNotesPanel"><label class="cl" for="sessionNotes">Session Notes</label><textarea id="sessionNotes" placeholder="Session notes…" data-action="saveSessionNotes" aria-label="Session notes"></textarea></div>
 </section>
 
 <!-- ==================== REVIEW ==================== -->
@@ -562,7 +562,7 @@
   <div id="reviewNextUp" class="review-next-up"></div>
 
   <div id="reviewContainer">
-    <button class="start-review-btn" id="startReviewBtn" onclick="startReview()">
+    <button class="start-review-btn" id="startReviewBtn" data-action="startReview">
       Start Review Session
     </button>
   </div>
@@ -586,19 +586,19 @@
 </footer>
 
 <div class="pomo-widget" id="pomoWidget">
-  <button class="pomo-toggle" id="pomoToggle" onclick="togglePomoPanel()" aria-label="Toggle study timer">⏱</button>
+  <button class="pomo-toggle" id="pomoToggle" data-action="togglePomoPanel" aria-label="Toggle study timer">⏱</button>
   <div class="pomo-panel" id="pomoPanel" style="display:none;">
     <div class="pomo-display" id="pomoDisplay">25:00</div>
     <div class="pomo-label" id="pomoLabel">Focus Time</div>
     <div class="pomo-controls">
-      <button onclick="startPomo()" id="pomoStart">Start</button>
-      <button onclick="pausePomo()" id="pomoPause" style="display:none;">Pause</button>
-      <button onclick="resetPomo()" id="pomoReset">Reset</button>
+      <button data-action="startPomo" id="pomoStart">Start</button>
+      <button data-action="pausePomo" id="pomoPause" style="display:none;">Pause</button>
+      <button data-action="resetPomo" id="pomoReset">Reset</button>
     </div>
     <div class="pomo-presets">
-      <button onclick="setPomoTime(15)" class="pomo-preset">15m</button>
-      <button onclick="setPomoTime(25)" class="pomo-preset active">25m</button>
-      <button onclick="setPomoTime(45)" class="pomo-preset">45m</button>
+      <button data-action="pomoTime" data-val="15" class="pomo-preset">15m</button>
+      <button data-action="pomoTime" data-val="25" class="pomo-preset active">25m</button>
+      <button data-action="pomoTime" data-val="45" class="pomo-preset">45m</button>
     </div>
     <div class="pomo-stats">
       <span id="pomoSessions">0</span> sessions today
@@ -606,8 +606,8 @@
     <div class="pomodoro-history" id="pomodoroHistory"></div>
   </div>
 </div>
-<div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none;" onclick="toggleShortcutsHelp()">
-  <div class="shortcuts-modal" onclick="event.stopPropagation();">
+<div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none;" data-action="toggleShortcutsHelp">
+  <div class="shortcuts-modal" data-stop-propagation="true">
     <h3>Keyboard Shortcuts</h3>
     <div class="shortcut-section">Navigation</div>
     <div class="shortcut-row"><kbd>1</kbd>&ndash;<kbd>5</kbd> Home / Roadmap / Visualizer / Practice / Review</div>
@@ -625,8 +625,8 @@
     <div class="shortcut-row"><kbd>D</kbd> Toggle Theme</div>
     <div class="shortcut-row"><kbd>?</kbd> This Help</div>
     <div class="shortcut-row"><kbd>Esc</kbd> Close Panel / Exit Focus</div>
-    <button class="shortcut-dl-btn" onclick="downloadShortcutCheatsheet()">&#8595; Download Cheatsheet</button>
-    <button onclick="toggleShortcutsHelp()">Close</button>
+    <button class="shortcut-dl-btn" data-action="downloadShortcutCheatsheet">&#8595; Download Cheatsheet</button>
+    <button data-action="toggleShortcutsHelp">Close</button>
   </div>
 </div>
 <script src="scripts/stats_hub.js" defer></script>
@@ -637,10 +637,10 @@
     <p class="section-desc">Create problems to reinforce your learning.</p>
   </header>
   <div class="deck-actions">
-    <button class="share-btn" onclick="exportCustomDeck()">📤 Export Deck</button>
-    <button class="share-btn" onclick="importCustomDeck()">📥 Import Deck</button>
+    <button class="share-btn" data-action="exportCustomDeck">📤 Export Deck</button>
+    <button class="share-btn" data-action="importCustomDeck">📥 Import Deck</button>
   </div>
-  <form class="create-form" id="createForm" onsubmit="event.preventDefault();saveCustomProblem();">
+  <form class="create-form" id="createForm" data-action-submit="saveCustomProblem">
     <div class="cf-row">
       <label class="cf-label">Unit:
         <select id="cpUnit"></select>
@@ -649,7 +649,7 @@
         <select id="cpDiff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
       </label>
       <label class="cf-label">Type:
-        <select id="cpType" onchange="toggleCreateType()"><option value="mc">Multiple Choice</option><option value="fr">Free Response</option></select>
+        <select id="cpType" data-action="toggleCreateType"><option value="mc">Multiple Choice</option><option value="fr">Free Response</option></select>
       </label>
     </div>
     <label class="cf-label">Topic: <input type="text" id="cpTopic" required placeholder="e.g., Z-score calculation"></label>
@@ -684,23 +684,23 @@
   </header>
   <div class="fc-unit-select">
     <label for="fcUnitSelect">Unit:</label>
-    <select id="fcUnitSelect" onchange="buildFlashcards(+this.value)"></select>
-    <button class="fc-mode-btn active" id="fcModeFlash" onclick="setFCMode('flash')">Flashcards</button>
-    <button class="fc-mode-btn" id="fcModeMatch" onclick="setFCMode('match')">Match Game</button>
-    <button class="fc-mode-btn" id="fcModeBuild" onclick="setFCMode('build')">Formula Builder</button>
+    <select id="fcUnitSelect" data-action="buildFlashcards"></select>
+    <button class="fc-mode-btn active" id="fcModeFlash" data-action="fcMode" data-val="flash">Flashcards</button>
+    <button class="fc-mode-btn" id="fcModeMatch" data-action="fcMode" data-val="match">Match Game</button>
+    <button class="fc-mode-btn" id="fcModeBuild" data-action="fcMode" data-val="build">Formula Builder</button>
   </div>
   <div id="fcFlashMode">
     <div class="fc-session-stats" id="fcSessionStats"></div>
     <div class="fc-progress-bar"><div class="fc-progress-fill" id="fcProgressFill" style="width:0%"></div></div>
     <div class="fc-container" id="fcContainer"></div>
     <div class="fc-controls">
-      <button onclick="fcPrev()" aria-label="Previous card">← Prev</button>
+      <button data-action="fcPrev" aria-label="Previous card">← Prev</button>
       <span id="fcProgress">- / -</span>
-      <button onclick="fcNext()" aria-label="Next card">Next →</button>
+      <button data-action="fcNext" aria-label="Next card">Next →</button>
     </div>
     <div class="fc-actions">
-      <button class="fc-know" onclick="fcMark(true)">✓ I know this</button>
-      <button class="fc-unsure" onclick="fcMark(false)">✗ Still learning</button>
+      <button class="fc-know" data-action="fcMark" data-val="true">✓ I know this</button>
+      <button class="fc-unsure" data-action="fcMark" data-val="false">✗ Still learning</button>
     </div>
     <div class="fc-kb-hints">
       <span class="fc-kb-hint"><kbd>Space</kbd> flip</span>
@@ -717,8 +717,8 @@
     <div class="builder-pieces" id="builderPieces"></div>
     <div class="builder-answer" id="builderAnswer"></div>
     <div class="builder-status" id="builderStatus"></div>
-    <button class="fc-know" onclick="builderCheck()">Check</button>
-    <button class="fc-unsure" onclick="startFormulaBuilder(+document.getElementById('fcUnitSelect').value||1)">New Formula</button>
+    <button class="fc-know" data-action="builderCheck">Check</button>
+    <button class="fc-unsure" data-action="newFormulaBuilder">New Formula</button>
   </div>
 </section>
 <section class="page" id="page-achievements" role="tabpanel" aria-labelledby="tab-achievements">
@@ -740,7 +740,7 @@
     <h3 class="achieve-section-title">❄️ Streak Freeze</h3>
     <p class="sf-desc">Protect your streak for 1 day by spending 100 XP.</p>
     <div id="sfStatus"></div>
-    <button class="sf-btn" id="sfBtn" onclick="activateStreakFreeze()">Activate Freeze (100 XP)</button>
+    <button class="sf-btn" id="sfBtn" data-action="activateStreakFreeze">Activate Freeze (100 XP)</button>
   </div>
   <div class="achieve-history" id="achieveHistory">
     <h3 class="achieve-section-title">Activity Heatmap (Last 90 Days)</h3>
@@ -749,45 +749,45 @@
   <div class="analytics-section">
     <h3 class="achieve-section-title">📈 Learning Analytics</h3>
     <div class="analytics-tabs">
-      <button class="analytics-tab active" onclick="showAnalytics('accuracy',event)">Accuracy</button>
-      <button class="analytics-tab" onclick="showAnalytics('xp',event)">XP Over Time</button>
-      <button class="analytics-tab" onclick="showAnalytics('units',event)">Unit Breakdown</button>
+      <button class="analytics-tab active" data-action="analytics" data-val="accuracy">Accuracy</button>
+      <button class="analytics-tab" data-action="analytics" data-val="xp">XP Over Time</button>
+      <button class="analytics-tab" data-action="analytics" data-val="units">Unit Breakdown</button>
     </div>
     <canvas id="analyticsCanvas" height="220" style="width:100%;max-width:600px;display:block;margin-top:12px;" aria-label="Analytics chart" role="img"></canvas>
   </div>
   <div class="calendar-section">
     <h3 class="achieve-section-title">📅 Study Calendar</h3>
     <div class="cal-nav">
-      <button onclick="calPrev()">◀</button>
+      <button data-action="calPrev">◀</button>
       <span id="calMonth"></span>
-      <button onclick="calNext()">▶</button>
+      <button data-action="calNext">▶</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
   </div>
   <div style="text-align:center;margin:16px 0;">
-    <button class="cert-btn" onclick="generateCertificate()">🎓 Get Certificate</button>
+    <button class="cert-btn" data-action="generateCertificate">🎓 Get Certificate</button>
   </div>
   <div id="generalCertArea" style="text-align:center;margin:8px 0;"></div>
 </section>
 <div class="install-banner" id="installBanner" style="display:none;">
   <span class="install-text">📱 Install Stats Hub for offline access</span>
-  <button class="install-btn" id="installBtn" onclick="installPWA()">Install</button>
-  <button class="install-dismiss" onclick="dismissInstall()" aria-label="Dismiss">✕</button>
+  <button class="install-btn" id="installBtn" data-action="installPWA">Install</button>
+  <button class="install-dismiss" data-action="dismissInstall" aria-label="Dismiss">✕</button>
 </div>
 <div class="tutor-panel" id="tutorPanel" style="display:none;">
   <div class="tutor-header">
     <span>🤖 Stats Tutor</span>
-    <button onclick="toggleTutor()" aria-label="Close tutor">✕</button>
+    <button data-action="toggleTutor" aria-label="Close tutor">✕</button>
   </div>
   <div class="tutor-messages" id="tutorMessages"></div>
   <div class="tutor-input-row">
-    <input type="text" id="tutorInput" placeholder="Ask a stats question..." onkeydown="if(event.key==='Enter')sendTutorMessage()" aria-label="Tutor input">
-    <button onclick="sendTutorMessage()">Send</button>
+    <input type="text" id="tutorInput" placeholder="Ask a stats question..." data-action-enter="sendTutorMessage" aria-label="Tutor input">
+    <button data-action="sendTutorMessage">Send</button>
   </div>
 </div>
-<button class="tutor-toggle" id="tutorToggle" onclick="toggleTutor()" aria-label="Open stats tutor">🤖</button>
+<button class="tutor-toggle" id="tutorToggle" data-action="toggleTutor" aria-label="Open stats tutor">🤖</button>
 <div id="a11yAnnounce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
-<div class="cert-modal" id="rmCertModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="rmCertTitle"><div class="cert-body"><div class="cert-icon">🎓</div><h2 class="cert-title" id="rmCertTitle">Roadmap Complete!</h2><p class="cert-desc">You've checked every topic in the Quant Roadmap. Outstanding work!</p><button class="cert-close-btn" onclick="document.getElementById('rmCertModal').style.display='none'">Close</button></div></div>
+<div class="cert-modal" id="rmCertModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="rmCertTitle"><div class="cert-body"><div class="cert-icon">🎓</div><h2 class="cert-title" id="rmCertTitle">Roadmap Complete!</h2><p class="cert-desc">You've checked every topic in the Quant Roadmap. Outstanding work!</p><button class="cert-close-btn" data-action="closeCertModal">Close</button></div></div>
 </body>
 </html>
 
