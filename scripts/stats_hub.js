@@ -871,7 +871,7 @@ function checkRoadmapComplete(){
   if(checked>=total&&total>0){
     _storageRawSave('sh-cert-shown','1');
     var modal=document.getElementById('rmCertModal');
-    if(modal)modal.style.display='flex';
+    if(modal){modal.style.display='flex';_trapFocus(modal,modal.querySelector('.cert-body')||modal);}
   }
 }
 function searchRoadmapTopics(q){
@@ -1871,9 +1871,9 @@ var buildProblems=function(unit=_st.currentUnit){
       Object.keys(dvotes).forEach(function(pid){
         var row=document.getElementById('dvr-'+pid);
         if(!row)return;
-        row.querySelectorAll('.diff-vote-btn').forEach(function(b){b.classList.remove('active');});
+        row.querySelectorAll('.diff-vote-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-pressed','false');});
         var active=row.querySelector('[data-vote="'+dvotes[pid]+'"]');
-        if(active)active.classList.add('active');
+        if(active){active.classList.add('active');active.setAttribute('aria-pressed','true');}
       });
     }catch(e){}
   }
@@ -1969,9 +1969,9 @@ function voteDiff(probId,vote){
   if(typeof document==='undefined')return;
   var row=document.getElementById('dvr-'+probId);
   if(!row)return;
-  row.querySelectorAll('.diff-vote-btn').forEach(function(b){b.classList.remove('active');});
+  row.querySelectorAll('.diff-vote-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-pressed','false');});
   var active=row.querySelector('[data-vote="'+vote+'"]');
-  if(active)active.classList.add('active');
+  if(active){active.classList.add('active');active.setAttribute('aria-pressed','true');}
 }
 function _recordAnswerHistory(probId,val,ok){
   if(typeof localStorage==='undefined')return;
@@ -4671,12 +4671,12 @@ function toggleExpandAll(){
   if(anyCollapsed){
     // Expand all
     cards.forEach(function(c){c.classList.remove('pc-collapsed');var b=c.querySelector('.card-collapse-btn');if(b)b.textContent='▾';});
-    if(btn)btn.textContent='Collapse All';
+    if(btn){btn.textContent='Collapse All';btn.setAttribute('aria-expanded','true');}
     _storageSave('sh-collapsed-'+unit,[]);
   }else{
     // Collapse all
     cards.forEach(function(c){c.classList.add('pc-collapsed');var b=c.querySelector('.card-collapse-btn');if(b)b.textContent='▸';});
-    if(btn)btn.textContent='Expand All';
+    if(btn){btn.textContent='Expand All';btn.setAttribute('aria-expanded','false');}
     var ids=Array.from(cards).map(function(c){return c.dataset.id;}).filter(Boolean);
     if(typeof localStorage!=='undefined')try{_storageSave('sh-collapsed-'+unit,ids);}catch(e){}
   }
@@ -4969,7 +4969,7 @@ function buildStreakHeatmap(){
       var level=count===0?0:count===1?1:count<=3?2:3;
       var isFuture=d>today;
       var _hmTitle=iso+(count?' — '+count+' problem'+(count>1?'s':'')+' solved':': no activity');
-      html+='<div class="hm-day" data-level="'+(isFuture?'future':level)+'" title="'+_hmTitle+'"></div>';
+      html+='<div class="hm-day" data-level="'+(isFuture?'future':level)+'" title="'+_hmTitle+'"><span class="sr-only">'+_hmTitle+'</span></div>';
       d.setDate(d.getDate()+1);
     }
     html+='</div>';
@@ -5433,8 +5433,11 @@ function updateBookmarkUI(probId){
   const btn=document.getElementById('bm-'+probId);
   if(!btn)return;
   const bm=getBookmarks();
-  btn.textContent=bm[probId]?'★':'☆';
-  btn.classList.toggle('bookmarked',!!bm[probId]);
+  const isBookmarked=!!bm[probId];
+  btn.textContent=isBookmarked?'★':'☆';
+  btn.classList.toggle('bookmarked',isBookmarked);
+  btn.setAttribute('aria-label',isBookmarked?'Remove bookmark':'Bookmark problem');
+  btn.setAttribute('aria-pressed',isBookmarked?'true':'false');
 }
 
 function printProblemSet(){
@@ -5651,7 +5654,7 @@ function toggleFavFilter(){
   if(typeof document==='undefined')return;
   _st.favFilterActive=!_st.favFilterActive;
   var btn=document.getElementById('favFilterBtn');
-  if(btn)btn.classList.toggle('active',_st.favFilterActive);
+  if(btn){btn.classList.toggle('active',_st.favFilterActive);btn.setAttribute('aria-pressed',_st.favFilterActive?'true':'false');}
   // Re-apply current filter
   var cur=document.querySelector('.filter-chip.active');
   var curFilter=cur?cur.getAttribute('data-filter'):'all';

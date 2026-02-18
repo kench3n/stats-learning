@@ -381,7 +381,7 @@
     <div class="kb-help-panel" id="kbHelpPanel" role="region" aria-label="Keyboard shortcuts" style="display:none;"><div class="kb-help-title">Keyboard Shortcuts</div><div class="kb-shortcut-row"><span class="kb-key">j / k</span><span class="kb-desc">Next / prev problem</span></div><div class="kb-shortcut-row"><span class="kb-key">h</span><span class="kb-desc">Show hint</span></div><div class="kb-shortcut-row"><span class="kb-key">b</span><span class="kb-desc">Toggle bookmark</span></div><div class="kb-shortcut-row"><span class="kb-key">Enter</span><span class="kb-desc">Submit answer</span></div><div class="kb-shortcut-row"><span class="kb-key">Esc</span><span class="kb-desc">Close panel</span></div></div>
   </header>
   <div class="progress-panel" id="progressPanel">
-    <button class="progress-toggle" id="progressToggle" aria-expanded="true" data-action="toggleProgressPanel">Progress Overview &#9662;</button>
+    <button class="progress-toggle" id="progressToggle" aria-expanded="true" aria-controls="progressGrid" data-action="toggleProgressPanel">Progress Overview &#9662;</button>
     <div class="progress-grid" id="progressGrid" role="status" aria-live="polite"></div>
     <div class="topic-heatmap" id="topicHeatmap"></div>
     <div class="diff-chart-row" id="diffChartRow" style="display:none;text-align:center;padding:8px 0 4px;">
@@ -463,7 +463,7 @@
     <option value="id-asc">ID (Asc)</option>
     <option value="id-desc">ID (Desc)</option>
   </select>
-  <button class="expand-all-btn" id="expandAllBtn" data-action="toggleExpandAll">Expand All</button>
+  <button class="expand-all-btn" id="expandAllBtn" data-action="toggleExpandAll" aria-expanded="true">Expand All</button>
 </div>
 <div class="topic-focus-bar" id="topicFocusBar" style="display:none;"><span class="topic-focus-label" id="topicFocusLabel"></span><button class="topic-focus-clear" data-action="clearTopicFocus">✕ Clear topic filter</button></div>
 <div class="filter-bar" id="filterBar">
@@ -474,7 +474,7 @@
   <button class="filter-chip" data-action="filter" data-val="easy" data-filter="easy" aria-pressed="false">Easy</button>
   <button class="filter-chip" data-action="filter" data-val="medium" data-filter="medium" aria-pressed="false">Medium</button>
   <button class="filter-chip" data-action="filter" data-val="hard" data-filter="hard" aria-pressed="false">Hard</button>
-  <button class="fav-filter-btn" id="favFilterBtn" data-action="toggleFavFilter" title="Toggle favorites-only overlay">★ Favorites</button>
+  <button class="fav-filter-btn" id="favFilterBtn" data-action="toggleFavFilter" title="Toggle favorites-only overlay" aria-pressed="false">★ Favorites</button>
 </div>
 <div class="hint-usage-info" id="hintUsageInfo"><span class="hint-usage-label" id="hintUsageLabel"></span></div>
 <div class="tag-filter-bar" id="tagFilterBar" style="display:none;"></div>
@@ -666,11 +666,13 @@
   <div class="analytics-section">
     <h3 class="achieve-section-title">📈 Learning Analytics</h3>
     <div class="analytics-tabs" role="tablist" aria-label="Analytics views">
-      <button class="analytics-tab active" data-action="analytics" data-val="accuracy" role="tab" aria-selected="true">Accuracy</button>
-      <button class="analytics-tab" data-action="analytics" data-val="xp" role="tab" aria-selected="false">XP Over Time</button>
-      <button class="analytics-tab" data-action="analytics" data-val="units" role="tab" aria-selected="false">Unit Breakdown</button>
+      <button class="analytics-tab active" data-action="analytics" data-val="accuracy" role="tab" aria-selected="true" aria-controls="analyticsPanel">Accuracy</button>
+      <button class="analytics-tab" data-action="analytics" data-val="xp" role="tab" aria-selected="false" aria-controls="analyticsPanel">XP Over Time</button>
+      <button class="analytics-tab" data-action="analytics" data-val="units" role="tab" aria-selected="false" aria-controls="analyticsPanel">Unit Breakdown</button>
     </div>
+    <div id="analyticsPanel" role="tabpanel">
     <canvas id="analyticsCanvas" height="220" style="width:100%;max-width:600px;display:block;margin-top:12px;" aria-label="Analytics chart" role="img"></canvas>
+    </div>
   </div>
   <div class="calendar-section">
     <h3 class="achieve-section-title">📅 Study Calendar</h3>
