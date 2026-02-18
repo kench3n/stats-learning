@@ -900,6 +900,11 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .search-chip{padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
 .search-chip:hover{border-color:var(--cyan);color:var(--cyan);}
 
+.topic-focus-bar{display:flex;align-items:center;gap:8px;max-width:780px;margin:0 auto 8px;padding:0 24px;}
+.topic-focus-label{font-size:12px;color:var(--amber);font-family:'Space Mono',monospace;}
+.topic-focus-clear{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 8px;}
+.topic-focus-clear:hover{border-color:var(--amber);color:var(--amber);}
+.pc-topic:hover{text-decoration:underline;color:var(--cyan);}
 .filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;max-width:780px;margin-left:auto;margin-right:auto;padding:0 24px;}
 .filter-chip{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
 .filter-chip:hover{border-color:var(--cyan);color:var(--cyan);}
