@@ -1325,3 +1325,12 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .mastery-badge[data-level="expert"]{color:var(--purple);border-color:var(--purple);}
 .mastery-badge[data-level="master"]{color:var(--amber);border-color:var(--amber);}
 .formula-unit-label{font-size:11px;color:var(--muted);padding:4px 0 2px;text-transform:uppercase;letter-spacing:0.05em;}
+.answer-hist-modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;min-width:260px;max-width:380px;}
+.ahm-title{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text);}
+.ah-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;font-family:'Space Mono',monospace;}
+.ah-row:last-of-type{border-bottom:none;}
+.ah-when{color:var(--muted);font-size:11px;flex:1;}
+.ah-val{color:var(--text);flex:2;}
+.ah-status{font-size:14px;flex-shrink:0;}
+.ah-ok{color:var(--green);}
+.ah-wrong{color:var(--pink);}

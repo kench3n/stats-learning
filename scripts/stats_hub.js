@@ -1511,7 +1511,7 @@ buildProblems=function(unit=currentUnit){
   let html='';
   activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="focusedProblemId='${p.id}'" onblur="focusedProblemId=null"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="focusedProblemId='${p.id}'" onblur="focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -1667,11 +1667,38 @@ function voteDiff(probId,vote){
   var active=row.querySelector('[data-vote="'+vote+'"]');
   if(active)active.classList.add('active');
 }
+function _recordAnswerHistory(probId,val,ok){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var key='sh-answers-history-'+probId;
+    var hist=JSON.parse(localStorage.getItem(key)||'[]');
+    hist.push({time:Date.now(),val:String(val),correct:ok});
+    if(hist.length>10)hist=hist.slice(-10);
+    localStorage.setItem(key,JSON.stringify(hist));
+  }catch(e){}
+}
+function showAnswerHistory(probId){
+  if(typeof document==='undefined')return;
+  var hist=[];
+  try{hist=JSON.parse(localStorage.getItem('sh-answers-history-'+probId)||'[]');}catch(e){}
+  var now=Date.now();
+  function _ago(t){var s=Math.round((now-t)/1000);if(s<60)return s+'s ago';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago';}
+  var rows=hist.slice(-5).reverse().map(function(h){
+    return '<div class="ah-row"><span class="ah-when">'+_ago(h.time)+'</span><span class="ah-val">'+h.val+'</span><span class="ah-status '+(h.correct?'ah-ok':'ah-wrong')+'">'+(h.correct?'✓':'✗')+'</span></div>';
+  }).join('');
+  if(!rows)rows='<div class="ah-row" style="color:var(--muted)">No attempts yet</div>';
+  var overlay=document.createElement('div');
+  overlay.className='overlay-backdrop';
+  overlay.innerHTML='<div class="answer-hist-modal"><div class="ahm-title">Problem #'+probId+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
+}
 function ansMC(id,ch){
   if(answered[id]!==undefined)return;
   if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
-  answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
+  const ok=ch===p.ans;_recordAnswerHistory(id,ch,ok);
+  answered[id]=ch;if(ok)pScore++;
   if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans){el.classList.add('right');if(!ok)el.classList.add('flash-correct');}else if(j===ch&&!ok){el.classList.add('wrong');el.classList.add('flash-wrong');}});
   var _ansLabel=ok?null:('ABCD'[ch]+'. '+p.ch[ch]);
@@ -1701,7 +1728,8 @@ function ansFR(id){
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   const inp=document.getElementById('fi-'+id);if(!inp)return;
   const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
-  answered[id]=v;const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
+  const ok=Math.abs(v-p.ans)<=(p.tol||0.1);_recordAnswerHistory(id,v,ok);
+  answered[id]=v;if(ok)pScore++;
   if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
   showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex,ok?null:String(v));
