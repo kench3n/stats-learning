@@ -560,6 +560,32 @@ function updateRoadmapNavBadge(){
   badge.style.display=remaining>0?'':'none';
 }
 
+function searchRoadmapTopics(q){
+  if(typeof document==='undefined')return;
+  var clr=document.getElementById('rmSearchClear');if(clr)clr.style.display=q?'':'none';
+  var query=(q||'').toLowerCase().trim();
+  document.querySelectorAll('.ti').forEach(function(el){
+    var tn=el.querySelector('.tn');if(!tn)return;
+    var text=tn.getAttribute('data-raw')||tn.textContent;
+    if(!tn.getAttribute('data-raw'))tn.setAttribute('data-raw',tn.textContent);
+    var matches=!query||text.toLowerCase().indexOf(query)>=0;
+    el.style.display=matches?'':'none';
+    if(matches&&query){
+      tn.innerHTML=text.replace(new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+    } else {
+      tn.textContent=text;
+    }
+  });
+  document.querySelectorAll('.pillar-card').forEach(function(card){
+    var visible=Array.from(card.querySelectorAll('.ti')).some(function(ti){return ti.style.display!=='none';});
+    card.style.display=(query&&!visible)?'none':'';
+  });
+}
+function clearRoadmapSearch(){
+  if(typeof document==='undefined')return;
+  var inp=document.getElementById('rmSearch');if(inp){inp.value='';if(typeof inp.focus==='function')inp.focus();}
+  searchRoadmapTopics('');
+}
 function getTopicState(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
 function saveTopicState(s){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topics',JSON.stringify(s))}
 function toggleTopic(el){
