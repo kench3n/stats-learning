@@ -94,7 +94,7 @@ function goPage(id){
     var bc=document.getElementById('breadcrumb');if(!bc)return;
     var names={home:'Home',roadmap:'Roadmap',visualizer:'Visualizer',practice:'Practice',review:'Review',achievements:'Achievements',flashcards:'Flashcards',create:'Create'};
     var label=names[id]||id;
-    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+_st.currentUnit+(typeof UNIT_META!=='undefined'&&UNIT_META[_st.currentUnit]?' – '+UNIT_META[_st.currentUnit].name:'');
+    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+_esc(_st.currentUnit)+(typeof UNIT_META!=='undefined'&&UNIT_META[_st.currentUnit]?' – '+_esc(UNIT_META[_st.currentUnit].name):'');
     bc.innerHTML=label;
   })();
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -1874,7 +1874,7 @@ function showAnswerHistory(probId){
   if(!rows)rows='<div class="ah-row" style="color:var(--muted)">No attempts yet</div>';
   var overlay=document.createElement('div');
   overlay.className='overlay-backdrop';
-  overlay.innerHTML='<div class="answer-hist-modal"><div class="ahm-title">Problem #'+probId+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
+  overlay.innerHTML='<div class="answer-hist-modal"><div class="ahm-title">Problem #'+_esc(probId)+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
   document.body.appendChild(overlay);
 }
@@ -2169,7 +2169,7 @@ function endReview(){
     var modal=document.createElement('div');
     modal.className='session-modal';
     modal.onclick=function(e){e.stopPropagation();};
-    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_st.reviewSessionCorrect+'/'+total+' correct ('+pct+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
+    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_esc(_st.reviewSessionCorrect)+'/'+_esc(total)+' correct ('+_esc(pct)+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
     var _closeBtn=modal.querySelector('#reviewChartClose');
     if(_closeBtn)_closeBtn.onclick=function(){overlay.remove();};
     overlay.appendChild(modal);
@@ -2407,8 +2407,8 @@ function showUnitInfo(){
   var modal=document.createElement('div');
   modal.className='unit-info-modal';
   modal.onclick=function(e){e.stopPropagation();};
-  var topicList=topics.map(function(t){return '<li>'+t+'</li>';}).join('');
-  modal.innerHTML='<div class="unit-info-header"><strong>Unit '+unit+': '+meta.name+'</strong></div>'+
+  var topicList=topics.map(function(t){return '<li>'+_esc(t)+'</li>';}).join('');
+  modal.innerHTML='<div class="unit-info-header"><strong>Unit '+_esc(unit)+': '+_esc(meta.name)+'</strong></div>'+
     '<div class="unit-info-stat-row"><span>'+probs.length+' problems</span><span class="ui-easy">'+easy+' easy</span><span class="ui-med">'+med+' medium</span><span class="ui-hard">'+hard+' hard</span></div>'+
     '<div class="unit-info-topics"><div class="unit-info-label">Topics covered:</div><ul class="unit-info-topic-list">'+topicList+'</ul></div>'+
     '<button id="unitInfoClose" class="unit-info-close">Close</button>';
@@ -2420,7 +2420,7 @@ function showUnitInfo(){
 function setUnit(n){
   if(!UNIT_META[n])return;
   _st.currentUnit=n;
-  if(typeof document!=='undefined'){var bc=document.getElementById('breadcrumb');if(bc&&bc.textContent.startsWith('Practice')){var unitName=UNIT_META[n]?UNIT_META[n].name:'';bc.innerHTML='Practice <span class="breadcrumb-sep">›</span> Unit '+n+(unitName?' – '+unitName:'');}};
+  if(typeof document!=='undefined'){var bc=document.getElementById('breadcrumb');if(bc&&bc.textContent.startsWith('Practice')){var unitName=UNIT_META[n]?UNIT_META[n].name:'';bc.innerHTML='Practice <span class="breadcrumb-sep">›</span> Unit '+_esc(n)+(unitName?' – '+_esc(unitName):'');}};
   _storageRawSave('sh-filter-unit',String(n));
   const sel=document.getElementById('unitSelect');if(sel)sel.value=String(n);
   const vsel=document.getElementById('vizUnitSelect');if(vsel)vsel.value=String(n);
@@ -2671,10 +2671,10 @@ function buildVizUnitInfo(unit){
   var probs=allProbs[unit]||[];
   var topics=[...new Set(probs.map(function(p){return p.topic;}))].slice(0,6);
   var xpAvail=probs.reduce(function(sum,p){return sum+(p.diff==='easy'?XP_TABLE.easy:p.diff==='medium'?XP_TABLE.medium:XP_TABLE.hard);},0);
-  body.innerHTML='<div class="vui-name">Unit '+unit+': '+name+'</div>'
+  body.innerHTML='<div class="vui-name">Unit '+_esc(unit)+': '+_esc(name)+'</div>'
     +'<div class="vui-row"><span class="vui-label">Problems:</span><span class="vui-val">'+probs.length+'</span></div>'
     +'<div class="vui-row"><span class="vui-label">XP Available:</span><span class="vui-val">'+xpAvail+'</span></div>'
-    +'<div class="vui-row"><span class="vui-label">Topics:</span><span class="vui-val">'+topics.join(', ')+'</span></div>';
+    +'<div class="vui-row"><span class="vui-label">Topics:</span><span class="vui-val">'+_esc(topics.join(', '))+'</span></div>';
 }
 function buildVizDataSummary(unit){
   if(typeof document==='undefined')return;
@@ -3596,7 +3596,7 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
   modal.onclick=function(e){e.stopPropagation();};
   var pct=answeredCount?Math.round(correctCount/answeredCount*100):0;
   var timeStr=elapsed>=60?Math.floor(elapsed/60)+'m '+(elapsed%60)+'s':elapsed+'s';
-  modal.innerHTML='<h3>Unit '+unit+' Summary</h3>'
+  modal.innerHTML='<h3>Unit '+_esc(unit)+' Summary</h3>'
     +'<div class="session-stats">'
     +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">_st.answered</span></div>'
     +'<div class="session-stat"><span class="session-num">'+correctCount+'</span><span class="session-label">correct</span></div>'
@@ -4912,7 +4912,7 @@ function buildXPNextLevel(){
   var xpInLevel=total%XP_PER_LEVEL;
   var xpToNext=XP_PER_LEVEL-xpInLevel;
   var pct=Math.round(xpInLevel/XP_PER_LEVEL*100);
-  el.innerHTML='<div class="xnl-text">Level '+cur+' → Level '+(cur+1)+': <b>'+xpToNext+' XP to go!</b></div><div class="xnl-bar"><div class="xnl-fill" style="width:'+pct+'%"></div></div>';
+  el.innerHTML='<div class="xnl-text">Level '+_esc(cur)+' → Level '+_esc(cur+1)+': <b>'+_esc(xpToNext)+' XP to go!</b></div><div class="xnl-bar"><div class="xnl-fill" style="width:'+pct+'%"></div></div>';
 }
 function buildStreakMilestones(){
   if(typeof document==='undefined')return;
@@ -4945,7 +4945,7 @@ function buildProblemOfTheDay(){
   var idx=dayMs%allProbsList.length;
   var prob=allProbsList[idx];
   var pid=prob.id,punit=prob.unit;
-  el.innerHTML='<div class="potd-header">Problem of the Day</div><div class="potd-question">'+prob.q+'</div><button class="potd-btn" onclick="goPage(\'practice\');setUnit('+punit+');setTimeout(function(){var e=document.getElementById(\'pc-'+pid+'\');if(e){e.scrollIntoView({behavior:\'smooth\',block:\'center\'});}},500);">Go Solve \u2192</button>';
+  el.innerHTML='<div class="potd-header">Problem of the Day</div><div class="potd-question">'+_esc(prob.q)+'</div><button class="potd-btn" onclick="goPage(\'practice\');setUnit('+punit+');setTimeout(function(){var e=document.getElementById(\'pc-'+pid+'\');if(e){e.scrollIntoView({behavior:\'smooth\',block:\'center\'});}},500);">Go Solve \u2192</button>';
 }
 function buildDailyChallenge(){
   if(typeof document==='undefined')return;
@@ -5251,7 +5251,7 @@ function buildAchievementsPage(){
     var overallAcc=totalQuestions>0?totalCorrect/totalQuestions:0;
     var unitsCompleted=Object.keys(summary).filter(function(u){var r=summary[u];return r&&r.total>0;}).length;
     if(overallAcc>=0.70){
-      gcArea.innerHTML='<button class="cert-btn" onclick="generateGeneralCertificate('+Math.round(overallAcc*100)+','+unitsCompleted+')">🎓 Generate Certificate</button>';
+      gcArea.innerHTML='<button class="cert-btn" onclick="generateGeneralCertificate('+_esc(Math.round(overallAcc*100))+','+_esc(unitsCompleted)+')">🎓 Generate Certificate</button>';
     } else {
       gcArea.innerHTML='<p style="font-size:12px;color:var(--muted);font-family:Space Mono,monospace;">'+(Math.round(overallAcc*100))+'% overall &mdash; reach 70% to unlock completion certificate</p>';
     }
@@ -5705,7 +5705,7 @@ function renderFlashcard(){
   if(!container)return;
   if(!_st.fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
   const card=_st.fcCards[_st.fcIndex];
-  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+card.front+'</div><div class="fc-back" style="display:none;">'+card.back+'</div></div>';
+  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+_esc(card.front)+'</div><div class="fc-back" style="display:none;">'+_esc(card.back)+'</div></div>';
   setElText('fcProgress',(_st.fcIndex+1)+' / '+_st.fcCards.length);
   var fill=document.getElementById('fcProgressFill');
   if(fill&&_st.fcCards.length>0)fill.style.width=Math.round((_st.fcIndex+1)/_st.fcCards.length*100)+'%';
@@ -5826,7 +5826,7 @@ function startFormulaBuilder(unit){
   _st.builderParts=_st.builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
   _st.builderSelected=[];
   const shuffled=[...builderParts].sort(()=>Math.random()-0.5);
-  target.innerHTML='Build the formula for: <strong>'+_st.builderTarget.name+'</strong>';
+  target.innerHTML='Build the formula for: <strong>'+_esc(_st.builderTarget.name)+'</strong>';
   if(piecesEl){
     window._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
   }
