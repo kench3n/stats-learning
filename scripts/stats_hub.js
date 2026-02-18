@@ -4624,7 +4624,8 @@ function buildStreakHeatmap(){
       var count=activity[iso]||0;
       var level=count===0?0:count===1?1:count<=3?2:3;
       var isFuture=d>today;
-      html+='<div class="hm-day" data-level="'+(isFuture?'future':level)+'" title="'+iso+(count?' — '+count+' session'+(count>1?'s':''):'')+'"></div>';
+      var _hmTitle=iso+(count?' — '+count+' problem'+(count>1?'s':'')+' solved':': no activity');
+      html+='<div class="hm-day" data-level="'+(isFuture?'future':level)+'" title="'+_hmTitle+'"></div>';
       d.setDate(d.getDate()+1);
     }
     html+='</div>';
