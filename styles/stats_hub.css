@@ -900,6 +900,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 /* ===== PHASE 15: ANALYTICS, PDF EXPORT, CALENDAR ===== */
 .export-pdf-btn{background:none;border:1px solid var(--cyan);border-radius:6px;padding:6px 14px;color:var(--cyan);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;margin-top:8px;}
 .export-pdf-btn:hover{background:var(--cyan);color:var(--bg);}
+.export-unit-btn{background:none;border:1px solid var(--muted);border-radius:6px;padding:6px 14px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;margin-top:8px;}
+.export-unit-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 
 .analytics-section{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);max-width:1100px;margin-left:auto;margin-right:auto;}
 .analytics-tabs{display:flex;gap:8px;margin-bottom:12px;}

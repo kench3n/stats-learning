@@ -5150,6 +5150,20 @@ function showToast(msg,duration=2000){
   const ann=document.getElementById('a11yAnnounce');if(ann)ann.textContent=msg;
 }
 
+function exportUnitProblems(){
+  if(typeof document==='undefined')return;
+  var probs=allProbs[currentUnit]||[];
+  if(!probs.length){showToast('No problems to export');return;}
+  var json=JSON.stringify({unit:currentUnit,name:typeof UNIT_META!=='undefined'&&UNIT_META[currentUnit]?UNIT_META[currentUnit].name:'',exported:new Date().toISOString(),problems:probs},null,2);
+  if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Export unavailable');return;}
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='unit-'+currentUnit+'-problems.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Exported unit '+currentUnit+' problems');
+}
 function exportProgressJSON(){
   if(typeof document==='undefined')return;
   if(typeof localStorage==='undefined')return;
