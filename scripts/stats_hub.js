@@ -2111,8 +2111,8 @@ function showReviewCard(){
   if(!card)return;
 
   const pid=String(prob.id);
-  let html='<div class="review-q">'+prob.q+'</div>';
-  if(prob.data)html+='<div class="review-data">'+prob.data+'</div>';
+  let html='<div class="review-q">'+_esc(prob.q)+'</div>';
+  if(prob.data)html+='<div class="review-data">'+_esc(prob.data)+'</div>';
 
   if(prob.type==='mc'){
     html+='<div class="choices">';
