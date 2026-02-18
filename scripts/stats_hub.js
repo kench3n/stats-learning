@@ -5943,7 +5943,7 @@ window.matchClick=function(side,id){
 
 function startFormulaBuilder(unit){
   if(typeof document==='undefined')return;
-  const target=document.getElementById('_st.builderTarget');
+  const target=document.getElementById('builderTarget');
   const piecesEl=document.getElementById('builderPieces');
   const ansEl=document.getElementById('builderAnswer');
   const statusEl=document.getElementById('builderStatus');
@@ -5953,7 +5953,7 @@ function startFormulaBuilder(unit){
   _st.builderTarget=formulas[Math.floor(Math.random()*formulas.length)];
   _st.builderParts=_st.builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
   _st.builderSelected=[];
-  const shuffled=[...builderParts].sort(()=>Math.random()-0.5);
+  const shuffled=[..._st.builderParts].sort(()=>Math.random()-0.5);
   target.innerHTML='Build the formula for: <strong>'+_esc(_st.builderTarget.name)+'</strong>';
   if(piecesEl){
     window._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
