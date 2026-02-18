@@ -1610,16 +1610,23 @@ function refreshGoalProgress(){
   if(typeof document==='undefined')return;
   var progress=document.getElementById('goalProgress');
   var text=document.getElementById('goalProgressText');
+  var ring=document.getElementById('goalRing');
+  var ringFill=document.getElementById('goalRingFill');
+  var ringText=document.getElementById('goalRingText');
   if(!progress||!text)return;
   var goal=0;
   if(typeof localStorage!=='undefined')try{goal=parseInt(localStorage.getItem('sh-session-goal'))||0;}catch(e){}
-  if(!goal){progress.style.display='none';text.textContent='';return;}
+  if(!goal){progress.style.display='none';if(ring)ring.style.display='none';text.textContent='';return;}
   var answered=0;
   if(typeof sessionData!=='undefined')answered=sessionData.problemsAnswered||0;
   var pct=Math.min(Math.round(answered/goal*100),100);
-  progress.style.display='';
-  progress.max=100;
-  progress.value=pct;
+  progress.style.display='none';
+  if(ring){
+    ring.style.display='';
+    var circ=150.8;
+    if(ringFill)ringFill.setAttribute('stroke-dashoffset',String(Math.round(circ*(1-pct/100)*10)/10));
+    if(ringText)ringText.textContent=pct+'%';
+  }
   text.textContent=answered+' / '+goal;
   if(answered>=goal&&goal>0&&pct===100){
     if(typeof showToast!=='undefined'&&!document.getElementById('goalProgress').dataset.toasted){document.getElementById('goalProgress').dataset.toasted='1';showToast('Session goal reached! Great work.');}

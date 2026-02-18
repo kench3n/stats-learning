@@ -404,6 +404,11 @@
         <option value="20">20 problems</option>
       </select>
       <progress id="goalProgress" max="100" value="0" style="display:none;width:100px;" aria-label="Session goal progress"></progress>
+      <svg class="goal-ring" id="goalRing" width="60" height="60" viewBox="0 0 60 60" style="display:none;" aria-label="Session goal ring">
+        <circle class="goal-ring-track" cx="30" cy="30" r="24" fill="none" stroke-width="6"/>
+        <circle class="goal-ring-fill" id="goalRingFill" cx="30" cy="30" r="24" fill="none" stroke-width="6" stroke-dasharray="150.8" stroke-dashoffset="150.8" transform="rotate(-90 30 30)"/>
+        <text class="goal-ring-text" id="goalRingText" x="30" y="34" text-anchor="middle" font-size="10">0%</text>
+      </svg>
       <span class="goal-progress-text" id="goalProgressText"></span>
     </div>
     <div class="progress-actions" id="progressActions">
