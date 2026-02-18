@@ -839,3 +839,85 @@ Add a bins count input/slider to the histogram visualizer so users can change th
 - Guard with typeof document
 - CSS: `#histBins` styling consistent with other range inputs
 
+
+### TASK: practice-answer-history
+Show the user's previous answer attempt in the feedback box when they answer a problem wrong.
+- In `ansMC()` and `ansFR()`: before showing feedback, check if `answered[id]` already existed; if so, note it was re-attempted
+- Modify the feedback box HTML: if there was a previous answer, show "Previous answer: X" in a muted line above the feedback
+- Track attempts count in `wrongAttempts[id]` (already exists) and show attempt number
+- CSS: `.fb-prev-answer { font-size:11px; color:var(--muted); margin-bottom:4px; }`
+
+### TASK: practice-session-summary
+Show a session summary modal when the user resets the unit, showing stats from the session.
+- When `resetUnit(unit)` is called, before clearing, capture stats: how many answered, correct, time elapsed
+- Show `<div class="session-summary-modal" id="sessionSummaryModal" style="display:none;">` with counts
+- `showSessionSummary(answered, correct, time)`: populates and shows the modal
+- `closeSessionSummary()`: hides modal and proceeds with actual reset
+- The reset should wait for user to close summary (or have a "Reset and Continue" button)
+- CSS: `.session-summary-modal`, `.session-summary-body`, `.summary-stat`
+
+### TASK: formula-panel-search-history
+Show the last 3 formula search queries as clickable suggestion chips below the search input.
+- Save search queries to `sh-formula-searches` localStorage array (max 5) when `filterFormulas()` is called with a non-empty query
+- `buildFormulaSearchHistory()`: reads saved queries, shows as clickable `<button class="formula-history-chip">` elements
+- Clicking a chip sets the search input value and calls `filterFormulas()`
+- Call from `buildFormulas()` to render history chips
+- CSS: `.formula-history-row`, `.formula-history-chip`
+
+### TASK: practice-wrong-highlight
+After answering wrong on MC, briefly flash the chosen choice red and the correct choice green.
+- In `ansMC()` when wrong: add `.flash-wrong` class to selected choice and `.flash-correct` to correct choice after 500ms
+- CSS animation: `@keyframes flashWrong { 0%,100% { background:inherit } 50% { background:var(--red) } }` for 1s
+- CSS: `.flash-wrong { animation: flashWrong 0.5s; }`, `.flash-correct { animation: flashCorrect 0.5s; }` 
+- After 500ms remove classes (prevent persisting animation state)
+
+### TASK: home-motivational-streak-message
+Show a personalized message based on current streak on the home page.
+- `buildStreakMessage()`: reads streak data, generates message based on streak length
+  - 0 days: "Start your streak today!"
+  - 1-2 days: "Great start! Keep it up!"
+  - 3-6 days: "You're building momentum! X days strong."
+  - 7-13 days: "One week strong! Keep the streak alive."
+  - 14+: "Impressive! X days straight — you're unstoppable."
+- HTML: `<div class="streak-message" id="streakMessage"></div>` in home stats area
+- Call from `goPage('home')`
+- CSS: `.streak-message { font-size:13px; color:var(--amber); text-align:center; padding:6px 0; }`
+
+### TASK: visualizer-tab-memory
+Remember the last active visualizer sub-tab (Histogram/Boxplot/Normal/Compare) and restore it when returning to the visualizer page.
+- In `showSub('viz', key, btn)`: save `key` to `sh-viz-tab` localStorage
+- In `goPage('visualizer')` or `setUnit()`: read `sh-viz-tab` and call `showSub('viz', saved, btn)` if a saved tab exists
+- Guard with typeof localStorage and typeof document
+- The existing `showSub` function already handles tab switching
+
+### TASK: practice-score-celebration
+When the user achieves 100% on a unit (all problems correct), show a large confetti burst and toast message.
+- In `updatePracticeNavBadge()` or after `ansMC/ansFR`: check if all `activeProbs` are answered correctly
+- `checkUnitComplete()`: reads answered state, counts correct vs total; if 100%, shows `showConfetti()` (already exists) and shows toast "🏆 Perfect score on Unit N!"
+- Save `sh-unit-perfect-${unit}` to avoid showing multiple times
+- Guard with typeof document
+
+### TASK: formula-panel-keyword-tags
+Add keyword tags below each formula for better discoverability.
+- In formula data, formulas already have `name` and `formula` fields
+- In `buildFormulas(unit)`: for each formula, add `<div class="formula-tags">` with 2-3 auto-generated keyword tags extracted from the formula name (split by spaces, filter stop words)
+- Tags are small chips that are also searchable
+- `filterFormulas()` should also match against tags
+- CSS: `.formula-tags`, `.formula-tag`
+
+### TASK: roadmap-topic-notes
+Allow users to add a short note to any checked roadmap topic.
+- Clicking a checked topic's note icon opens an inline input
+- `<span class="topic-note-icon" onclick="editTopicNote('${t.n}')">📝</span>` next to each `.tn` element
+- `editTopicNote(name)`: shows inline `<input>` next to topic, saves to `sh-topic-notes` localStorage object on blur
+- `getTopicNotes()` / `saveTopicNotes()`: read/write `sh-topic-notes`
+- CSS: `.topic-note-icon`, `.topic-note-input`
+
+### TASK: daily-streak-freeze
+Show a "streak freeze" indicator if user missed yesterday but used a freeze.
+- `checkStreakFreeze()`: if streak was broken due to missing yesterday, check `sh-streak-freeze` (max 2 allowed per month)
+- If freeze available: restore streak and decrement freeze count, show toast "Streak Freeze used! Streak preserved."
+- `buildFreezeInfo()`: shows remaining freezes in streak display area with snowflake icon
+- HTML: `<span class="freeze-info" id="freezeInfo"></span>` next to streak display on home
+- CSS: `.freeze-info { font-size:11px; color:var(--cyan); }`
+
