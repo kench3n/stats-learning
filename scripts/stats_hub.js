@@ -1264,6 +1264,7 @@ buildProblems=function(unit=currentUnit){
   updateMasteryBadge(unit);
   buildUnitXPBar(unit);
   buildDiffInsight(unit);
+  updateFilterCounts(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
@@ -4515,6 +4516,31 @@ function applySearchChip(term){
   if(input){input.value=term;searchProblems();}
 }
 
+function updateFilterCounts(unit){
+  if(typeof document==='undefined')return;
+  var probs=allProbs[unit]||[];
+  var state=getPracticeState(unit);
+  var ans=state.answered&&typeof state.answered==='object'?state.answered:{};
+  var bm=getBookmarks();
+  var counts={
+    all:probs.length,
+    unanswered:probs.filter(function(p){return ans[p.id]===undefined;}).length,
+    wrong:probs.filter(function(p){
+      if(ans[p.id]===undefined)return false;
+      if(p.type==='mc')return(+ans[p.id])!==p.ans;
+      var v=parseFloat(ans[p.id]);return!Number.isFinite(v)||Math.abs(v-p.ans)>(p.tol||0.1);
+    }).length,
+    bookmarked:probs.filter(function(p){return!!bm[p.id];}).length,
+    easy:probs.filter(function(p){return p.diff==='easy';}).length,
+    medium:probs.filter(function(p){return p.diff==='medium';}).length,
+    hard:probs.filter(function(p){return p.diff==='hard';}).length
+  };
+  var labels={all:'All',unanswered:'Unanswered',wrong:'Wrong',bookmarked:'★ Bookmarked',easy:'Easy',medium:'Medium',hard:'Hard'};
+  document.querySelectorAll('.filter-chip').forEach(function(chip){
+    var f=chip.getAttribute('data-filter');
+    if(f&&counts[f]!==undefined)chip.textContent=labels[f]+' ('+counts[f]+')';
+  });
+}
 function filterProblems(filter){
   if(typeof document==='undefined')return;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
