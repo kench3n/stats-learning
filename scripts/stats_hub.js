@@ -1430,7 +1430,7 @@ function ansMC(id,ch){
   const p=activeProbs.find(x=>x.id===id);if(!p)return;
   answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
   if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
-  p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
+  p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans){el.classList.add('right');if(!ok)el.classList.add('flash-correct');}else if(j===ch&&!ok){el.classList.add('wrong');el.classList.add('flash-wrong');}});
   var _ansLabel=ok?null:('ABCD'[ch]+'. '+p.ch[ch]);
   showFB(id,ok,p.ex,_ansLabel);
   addToReview(p.id,ok);
