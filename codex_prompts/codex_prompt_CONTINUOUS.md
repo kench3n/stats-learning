@@ -921,3 +921,81 @@ Show a "streak freeze" indicator if user missed yesterday but used a freeze.
 - HTML: `<span class="freeze-info" id="freezeInfo"></span>` next to streak display on home
 - CSS: `.freeze-info { font-size:11px; color:var(--cyan); }`
 
+
+
+### TASK: practice-timer-warning
+Show a visual warning when problem timer exceeds the expected time (e.g. yellow at 2x, red at 3x expected time).
+- Each problem has an estimated solve time: easy=1min, medium=3min, hard=5min
+- In the per-problem timer update loop, compare elapsed seconds to the expected time
+- Add `.timer-warn` class (amber color) when elapsed > expected, `.timer-over` class (red) when elapsed > 2x expected
+- CSS: `.timer-warn { color:var(--amber) !important; }`, `.timer-over { color:var(--red) !important; animation: pulse 1s infinite; }`
+- Guard with typeof document
+
+### TASK: home-weekly-stats-chart
+Show a mini bar chart of problems solved per day for the last 7 days on the home page.
+- Read `sh-activity` localStorage (date → count object) for the last 7 days
+- HTML: `<canvas id="weeklyStatsChart" width="280" height="60"></canvas>` in home stats area, below streak heatmap
+- Draw bars using 2D canvas context — one bar per day, scaled to max count, with today highlighted
+- Guard all canvas/document calls
+- CSS: `#weeklyStatsChart { display:block; margin:8px auto; }`
+
+### TASK: practice-random-problem
+Add a "Random Problem" button that jumps to a random unsolved problem in the current unit.
+- HTML: `<button class="rand-prob-btn" onclick="jumpToRandomProblem()">🎲 Random</button>` in the practice header area
+- `jumpToRandomProblem()`: filters `activeProbs` for problems not in `answered`, picks a random one, scrolls it into view
+- If all solved: show toast "All problems solved! Great job."
+- CSS: `.rand-prob-btn` — styled like a small secondary button
+
+### TASK: formula-panel-copy-all
+Add a "Copy All" button to the formula panel that copies all current unit's formulas to clipboard.
+- HTML: `<button class="formula-copy-all-btn" onclick="copyAllFormulas()" title="Copy all formulas">Copy All</button>` in formula panel header
+- `copyAllFormulas()`: joins all formula names and equations into a text block, copies to clipboard via navigator.clipboard or fallback
+- Show toast "Formulas copied!" on success
+- CSS: `.formula-copy-all-btn` — small secondary button
+
+### TASK: practice-hint-usage-tracker
+Track and display how many hints the user has used per unit.
+- `sh-hint-usage` localStorage object: `{unitKey: count}` where unitKey is `unit-${n}`
+- In `showHint(id)`: increment `sh-hint-usage` for currentUnit
+- `buildHintUsageInfo()`: reads hint usage for currentUnit, shows e.g. "Hints used: 3" in a small label in the filter bar area
+- Call from `buildProblems()` after building filter counts
+- CSS: `.hint-usage-label { font-size:11px; color:var(--muted); margin-left:auto; }`
+
+### TASK: home-xp-breakdown
+Show a breakdown of XP earned by category on the home page.
+- `buildXPBreakdown()`: reads `sh-xp` history, groups XP earned by reason prefix (practice, streak, topic, review, pomo)
+- HTML: `<div class="xp-breakdown" id="xpBreakdown"></div>` in home stats area
+- Each category shows icon + total XP earned: e.g. "✅ Practice: 120 XP", "🔥 Streak: 45 XP"
+- Call from `goPage('home')`
+- CSS: `.xp-breakdown`, `.xp-breakdown-row`, `.xp-cat-label`, `.xp-cat-amount`
+
+### TASK: roadmap-export-progress
+Add an "Export Progress" button to the roadmap that downloads a JSON file of checked topics and notes.
+- HTML: `<button class="rm-export-btn" onclick="exportRoadmapProgress()">Export Progress</button>` in the roadmap header
+- `exportRoadmapProgress()`: reads `sh-topics` (checked map) and `sh-topic-notes`, combines into JSON, downloads as `roadmap-progress.json`
+- Use Blob + URL.createObjectURL + anchor click pattern (guard with typeof Blob)
+- CSS: `.rm-export-btn` — small secondary button
+
+### TASK: visualizer-data-download
+Add a "Download Data" button to the visualizer that downloads the current dataset as CSV.
+- HTML: `<button class="viz-download-btn" onclick="downloadVizData()">Download CSV</button>` in the visualizer controls area
+- `downloadVizData()`: reads `histData` (the current dataset array), formats as CSV (one value per line), downloads as `unit-${n}-data.csv`
+- Use Blob + URL.createObjectURL pattern (guard typeof Blob)
+- CSS: `.viz-download-btn` — small secondary button
+
+### TASK: practice-problem-rating-display
+Show the community rating (average stars) next to each problem's difficulty badge.
+- Problems already have a rating system (`sh-ratings` localStorage, `toggleRating()` function)
+- `buildRatingDisplay(id)`: computes the average star rating for problem `id` from stored ratings (stored as `ratings[id]` integer 1-5)
+- In problem card HTML in `buildProblems()`: add `<span class="prob-rating-display" id="prd-${p.id}"></span>` after the difficulty badge
+- After building problems, call `updateAllRatingDisplays()` which calls `buildRatingDisplay` for each problem
+- CSS: `.prob-rating-display { font-size:10px; color:var(--amber); }`
+
+### TASK: home-study-plan-widget
+Show a simple weekly study plan widget on the home page.
+- `buildStudyPlan()`: generates a 7-day plan based on current progress (what units are weak, what topics are unchecked)
+- HTML: `<div class="study-plan" id="studyPlan"></div>` in home page
+- Each day: day name + suggested activity (e.g. "Mon: Review Unit 3 • Tue: Practice Unit 5 formulas")
+- Use `Object.keys(allProbs)` and `getStreakData()` to personalize suggestions
+- Call from `goPage('home')`
+- CSS: `.study-plan`, `.sp-day`, `.sp-task`
