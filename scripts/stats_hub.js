@@ -1334,6 +1334,20 @@ function buildHintUsageInfo(){
   }catch(e){}
 }
 
+var _sessionNotesTimer=null;
+function saveSessionNotes(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('sessionNotes');if(!el)return;
+  if(_sessionNotesTimer)clearTimeout(_sessionNotesTimer);
+  _sessionNotesTimer=setTimeout(function(){
+    try{localStorage.setItem('sh-session-notes-'+currentUnit,el.value);}catch(e){}
+  },500);
+}
+function loadSessionNotes(unit){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('sessionNotes');if(!el)return;
+  try{el.value=localStorage.getItem('sh-session-notes-'+unit)||'';}catch(e){}
+}
 // ===================== CELEBRATIONS =====================
 function spawnConfetti(){
   if(typeof document==='undefined')return;
@@ -1579,6 +1593,7 @@ buildProblems=function(unit=currentUnit){
   buildDiffInsight(unit);
   updateFilterCounts(unit);
   buildHintUsageInfo();
+  loadSessionNotes(unit);
   _saveRecentUnit(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
