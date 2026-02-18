@@ -1404,6 +1404,8 @@ buildProblems=function(unit=currentUnit){
         const id=entry.target.dataset.id;
         if(entry.isIntersecting&&!probTimers[id]){
           probTimerStart[id]=Date.now();
+          var _prob=activeProbs.find(function(x){return String(x.id)===id;});
+          var _expSecs=_prob?(_prob.diff==='easy'?60:_prob.diff==='medium'?180:300):180;
           probTimers[id]=setInterval(function(){
             if(typeof document==='undefined')return;
             const el=document.getElementById('timer-'+id);
@@ -1411,6 +1413,8 @@ buildProblems=function(unit=currentUnit){
             const secs=Math.floor((Date.now()-probTimerStart[id])/1000);
             const m=Math.floor(secs/60),s=secs%60;
             el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
+            el.classList.toggle('timer-warn',secs>=_expSecs&&secs<_expSecs*2);
+            el.classList.toggle('timer-over',secs>=_expSecs*2);
           },1000);
         }
       });
