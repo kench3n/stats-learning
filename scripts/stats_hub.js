@@ -34,7 +34,7 @@ function goPage(id){
   _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakHeatmap();buildMotivationalQuote();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -1312,6 +1312,7 @@ buildProblems=function(unit=currentUnit){
   buildUnitXPBar(unit);
   buildDiffInsight(unit);
   updateFilterCounts(unit);
+  _saveRecentUnit(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
@@ -4039,6 +4040,31 @@ function buildRecentActivity(){
     var statusText=a.ok?'Correct':'Wrong';
     var unitName=typeof UNIT_META!=='undefined'&&UNIT_META[a.unit]?'Unit '+a.unit:('Unit '+a.unit);
     html+='<div class="ra-row"><span class="ra-id">#'+a.id+'</span><span class="ra-unit">'+unitName+'</span><span class="ra-status '+statusCls+'">'+statusText+'</span></div>';
+  });
+  el.innerHTML=html;
+}
+function _saveRecentUnit(unit){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var list=JSON.parse(localStorage.getItem('sh-recent-units')||'[]');
+    if(!Array.isArray(list))list=[];
+    list=list.filter(function(u){return u!==unit;});
+    list.unshift(unit);
+    list=list.slice(0,5);
+    localStorage.setItem('sh-recent-units',JSON.stringify(list));
+  }catch(e){}
+}
+function buildRecentUnits(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('recentUnitsRow');if(!el)return;
+  var list=[];
+  try{list=JSON.parse(localStorage.getItem('sh-recent-units')||'[]');}catch(e){}
+  if(!Array.isArray(list)||!list.length){el.style.display='none';return;}
+  el.style.display='';
+  var html='<span class="ru-label">Recent:</span>';
+  list.forEach(function(u){
+    var name=typeof UNIT_META!=='undefined'&&UNIT_META[u]?UNIT_META[u].name:'Unit '+u;
+    html+='<button class="recent-unit-chip" onclick="goPage(\'practice\');setUnit('+u+')">U'+u+': '+name+'</button>';
   });
   el.innerHTML=html;
 }
