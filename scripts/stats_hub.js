@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();buildStudyPlan();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();buildStudyPlan();buildPomoStats();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4377,6 +4377,26 @@ function buildRecentUnits(){
   });
   el.innerHTML=html;
 }
+function buildPomoStats(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('pomoStats');if(!el)return;
+  var today=todayStr();
+  var pomo={};
+  try{pomo=JSON.parse(localStorage.getItem('sh-pomo')||'{}');}catch(e){}
+  var log=[];
+  try{log=JSON.parse(localStorage.getItem('sh-pomodoro-log')||'[]');}catch(e){}
+  var todayCount=pomo[today]||0;
+  // Last 7 days stats
+  var weekMins=0,weekSessions=0;
+  var weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-6);
+  var weekStr=weekAgo.toISOString().slice(0,10);
+  if(Array.isArray(log)){log.forEach(function(entry){if(entry.date>=weekStr){weekMins+=(entry.minutes||0);weekSessions++;}});}
+  var html='<div class="pomo-stat-item"><span class="pomo-stat-icon">\u23f0</span><span class="pomo-stat-val">'+todayCount+'</span><span class="pomo-stat-label">today</span></div>'
+    +'<div class="pomo-stat-item"><span class="pomo-stat-icon">\ud83d\udcc5</span><span class="pomo-stat-val">'+weekSessions+'</span><span class="pomo-stat-label">this week</span></div>'
+    +'<div class="pomo-stat-item"><span class="pomo-stat-icon">\ud83d\udd52</span><span class="pomo-stat-val">'+weekMins+'</span><span class="pomo-stat-label">minutes</span></div>';
+  el.innerHTML=html;
+}
+
 function buildXPBreakdown(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('xpBreakdown');if(!el)return;
