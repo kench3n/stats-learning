@@ -3285,6 +3285,9 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
       var _prob=typeof activeProbs!=='undefined'?activeProbs.find(function(x){return String(x.id)===String(focusedProblemId);}):null;
       if(_prob&&_prob.type==='mc'&&_idx<_prob.ch.length){ansMC(_prob.id,_idx);return;}
     }
+    if(_isPractice&&focusedProblemId!==null&&(e.key==='b'||e.key==='B')){
+      toggleBookmark(String(focusedProblemId));return;
+    }
     if(e.key==='1'){goPage('home');}
     else if(e.key==='2'){goPage('roadmap');}
     else if(e.key==='3'){goPage('visualizer');}
