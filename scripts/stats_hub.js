@@ -497,8 +497,12 @@ function buildRoadmap(){
       <div class="pillar-grid">`;
     cards.forEach(c=>{
       html+=`<div class="pillar-card" data-p="${c.p}"><div class="ph"><div class="pi">${c.icon}</div><span class="pt">${c.time}</span></div><div class="pn-row"><div class="pn">${c.name}</div></div><div class="pg">${c.goal}</div><div class="tl">`;
+      const _tnotes=getTopicNotes();
       c.topics.forEach(t=>{
-        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}</div>`;
+        var _noteText=_tnotes[t.n]||'';
+        var _safeN=t.n.replace(/"/g,'&quot;');
+        var _noteStyle=_noteText?'':'display:none';
+        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" onclick="editTopicNote(this.dataset.tn,event)" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_noteText}</span></div>`;
       });
       html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)">Resources ↓</button></div><div class="res-panel">`;
       (c.res||[]).forEach(r=>{
@@ -607,6 +611,29 @@ function clearRoadmapSearch(){
 }
 function getTopicState(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
 function saveTopicState(s){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topics',JSON.stringify(s))}
+function getTopicNotes(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topic-notes')||'{}')}catch{return{}}}
+function saveTopicNotes(n){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topic-notes',JSON.stringify(n))}
+function editTopicNote(name,e){
+  if(e&&typeof e.stopPropagation==='function')e.stopPropagation();
+  if(typeof document==='undefined')return;
+  var ti=null;
+  document.querySelectorAll('.ti').forEach(function(el){var tn=el.querySelector('.tn');if(tn&&tn.textContent===name)ti=el;});
+  if(!ti)return;
+  var existing=ti.querySelector('.topic-note-input');if(existing){existing.focus();return;}
+  var notes=getTopicNotes();
+  var inp=document.createElement('input');
+  inp.className='topic-note-input';inp.type='text';inp.placeholder='Add note\u2026';inp.value=notes[name]||'';
+  inp.onclick=function(ev){if(ev&&typeof ev.stopPropagation==='function')ev.stopPropagation();};
+  inp.onkeydown=function(ev){if(ev&&(ev.key==='Enter'||ev.key==='Escape'))inp.blur();if(ev&&typeof ev.stopPropagation==='function')ev.stopPropagation();};
+  inp.onblur=function(){
+    var n2=getTopicNotes();var v=inp.value.trim();
+    if(v)n2[name]=v;else delete n2[name];
+    saveTopicNotes(n2);inp.remove();
+    var noteEl=ti.querySelector('.topic-note-text');
+    if(noteEl){noteEl.textContent=v;noteEl.style.display=v?'':'none';}
+  };
+  ti.appendChild(inp);inp.focus();
+}
 function toggleTopic(el){
   const checked=el.classList.toggle('chk');
   el.classList.toggle('done',checked);
