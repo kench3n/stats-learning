@@ -5688,9 +5688,25 @@ function flipCard(){
 
 function fcNext(){if(fcIndex<fcCards.length-1){fcIndex++;renderFlashcard();}}
 function fcPrev(){if(fcIndex>0){fcIndex--;renderFlashcard();}}
+function _fcUpdateSRS(card,known){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var srs=JSON.parse(localStorage.getItem('sh-srs')||'{}');
+    var key=card.type==='formula'?'formula-'+(card.front||'').slice(0,20):'problem-'+(card.front||'').slice(0,20);
+    if(known){
+      var prev=srs[key]||{interval:0};
+      var newInterval=prev.interval?Math.min(prev.interval*2,30):1;
+      srs[key]={interval:newInterval,lastSeen:new Date().toISOString().slice(0,10)};
+    }else{
+      srs[key]={interval:0,lastSeen:new Date().toISOString().slice(0,10)};
+    }
+    localStorage.setItem('sh-srs',JSON.stringify(srs));
+  }catch(e){}
+}
 function fcMark(known){
   if(known)awardXP(2,'flashcard-'+fcIndex);
   fcSeenCount++;if(known)fcKnownCount++;
+  if(fcCards[fcIndex])_fcUpdateSRS(fcCards[fcIndex],known);
   updateFCSessionStats();
   fcNext();
 }
