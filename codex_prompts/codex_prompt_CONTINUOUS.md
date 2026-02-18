@@ -999,3 +999,82 @@ Show a simple weekly study plan widget on the home page.
 - Use `Object.keys(allProbs)` and `getStreakData()` to personalize suggestions
 - Call from `goPage('home')`
 - CSS: `.study-plan`, `.sp-day`, `.sp-task`
+
+
+### TASK: practice-keyboard-shortcuts-help
+Add a keyboard shortcuts help tooltip/panel for the practice page.
+- HTML: `<button class="kb-help-btn" id="kbHelpBtn" onclick="toggleKBHelp()" title="Keyboard shortcuts">⌨️</button>` in practice header
+- `toggleKBHelp()`: shows/hides a floating panel listing shortcuts: j/k (next/prev), h (hint), b (bookmark), Enter (submit), Esc (close)
+- HTML panel: `<div class="kb-help-panel" id="kbHelpPanel" style="display:none;">` with a table of shortcuts
+- CSS: `.kb-help-btn`, `.kb-help-panel`, `.kb-shortcut-row`
+
+### TASK: home-pomodoro-stats
+Show Pomodoro session stats on home page (today's sessions, total minutes, sessions this week).
+- Read `sh-pomo` (date→count) and `sh-pomodoro-log` localStorage for data
+- `buildPomoStats()`: calculates today's count, total sessions this week, total minutes this week
+- HTML: `<div class="pomo-stats" id="pomoStats"></div>` in home stats section
+- Each stat: sessions icon + count (today), clock icon + minutes (week), calendar icon + sessions (week)
+- Call from `goPage('home')`
+- CSS: `.pomo-stats`, `.pomo-stat-item`
+
+### TASK: practice-problem-share-url
+When clicking the problem link button, copy a deep link URL that includes the problem ID as a hash.
+- `copyProblemLink(id)`: constructs `window.location.href` + `#problem-${id}`, copies to clipboard
+- On page load, check `window.location.hash` for `#problem-${id}` and scroll to/highlight that problem
+- Add `checkDeepLink()` function called from `DOMContentLoaded`
+- Update toast to say "Link copied! Share to jump directly to this problem."
+
+### TASK: formula-panel-pinned-favorites
+Add a "Pinned Favorites" section at the top of the formula panel showing only favorited formulas.
+- `buildPinnedFormulas(unit)`: reads `sh-formula-favs`, filters current unit's formulas to only favorites
+- If any favorites exist, prepend a `<div class="pinned-formulas" id="pinnedFormulas">` section with a "⭐ Pinned" header
+- Show pinned formulas before the full formula list
+- Call from `buildFormulas(unit)`
+- CSS: `.pinned-formulas`, `.pinned-formula-row`
+
+### TASK: roadmap-topic-time-estimate
+Show estimated hours remaining for unchecked topics in each roadmap level.
+- `buildLevelTimeEstimates()`: for each level (L1/L2/L3), count unchecked topics, multiply by estimated hours per topic (L1=2h, L2=4h, L3=6h per topic)
+- HTML: Add `<span class="level-time-remaining" id="ltr-l1/l2/l3">` to each level tab
+- Update estimates when topics are toggled
+- Call from `buildRoadmap()` and `toggleTopic()`
+- CSS: `.level-time-remaining { font-size:9px; color:var(--muted); }`
+
+### TASK: practice-problem-difficulty-vote
+Add difficulty voting buttons to each problem (Too Easy / Just Right / Too Hard) that update the displayed difficulty label.
+- Already implemented as `voteDiff()` — check if `.diff-vote-row` is rendered; if so, SKIP
+- If not, add `<div class="diff-vote-row" id="dvr-${p.id}">` with three vote buttons
+- Store votes in `sh-diff-votes` localStorage, compute community consensus
+- Show vote counts next to each button
+- CSS: `.diff-vote-count`
+
+### TASK: home-unit-progress-overview
+Show a mini progress bar for each unit on the home page, indicating how many problems have been solved.
+- `buildUnitProgressOverview()`: for each unit 1-MAX_UNIT, read `sh-practice-${n}` to get answered count vs total
+- HTML: `<div class="unit-progress-overview" id="unitProgressOverview"></div>` in home stats area
+- Each unit: unit name + mini progress bar + "X/Y" count
+- Click on unit chip navigates to that unit's practice page
+- Call from `goPage('home')`
+- CSS: `.unit-progress-overview`, `.upo-item`, `.upo-bar`, `.upo-fill`, `.upo-label`
+
+### TASK: flashcard-keyboard-navigation
+Add keyboard navigation to flashcards: space/enter to flip, arrow keys for next/prev, 1-5 to rate.
+- In `goPage('flashcard')` or flashcard init: add keydown listener for `space`/`enter` (flip), `ArrowRight`/`ArrowLeft` (next/prev), `1-5` (set confidence rating)
+- Remove listener when leaving flashcard page (`goPage` cleanup)
+- Show visual indicator of keyboard shortcuts in flashcard UI
+- Guard with typeof document
+
+### TASK: practice-session-goal-progress-ring
+Replace the plain session goal text display with a circular progress ring SVG.
+- HTML: Add `<svg class="goal-ring" id="goalRing" width="60" height="60" viewBox="0 0 60 60">` with two circles (track + fill)
+- In `refreshGoalProgress()`: update the ring's `stroke-dasharray` and `stroke-dashoffset`
+- Keep the existing `#sessionGoal` input and `#goalText` text, add the ring alongside
+- CSS: `.goal-ring`, `.goal-ring-track`, `.goal-ring-fill`
+
+### TASK: visualizer-comparison-stats
+Below the Compare visualizer, show a summary table comparing stats of both distributions.
+- `buildComparisonStats()`: reads both datasets (Group A and Group B from compare tab), computes mean/stdev/median/IQR for each
+- HTML: `<div class="compare-stats-table" id="compareStatsTable"></div>` below the compare canvas
+- Show side-by-side stats table: Metric | Group A | Group B
+- Call when compare tab is active and data changes
+- CSS: `.compare-stats-table`, `.cst-row`, `.cst-header`
