@@ -637,8 +637,10 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .formula-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
 .formula-row:last-child{border-bottom:none;}
 .formula-name{color:var(--text);font-size:13px;font-weight:600;}
-.formula-eq{color:var(--amber);font-family:'Space Mono',monospace;font-size:13px;}
+.formula-eq{color:var(--amber);font-family:'Space Mono',monospace;font-size:13px;cursor:pointer;}
 .formula-name mark,.formula-eq mark{background:var(--amber);color:var(--bg);border-radius:2px;padding:0 2px;font-style:normal;}
+@keyframes formulaFlash{0%{background:var(--amber);color:var(--bg);}100%{background:none;color:var(--amber);}}
+.formula-eq-flash{animation:formulaFlash 0.6s ease;border-radius:3px;}
 
 /* ===================== HINT SYSTEM ===================== */
 .hint-row{margin:8px 0;}

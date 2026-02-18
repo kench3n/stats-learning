@@ -844,6 +844,15 @@ const FORMULAS={
   ],
 };
 
+function quickCopyFormula(el){
+  if(typeof navigator==='undefined'||typeof navigator.clipboard==='undefined')return;
+  var text=el.getAttribute('data-raw')||el.textContent||'';
+  navigator.clipboard.writeText(text).then(function(){
+    showToast('Formula copied!');
+    el.classList.add('formula-eq-flash');
+    if(typeof setTimeout==='function')setTimeout(function(){el.classList.remove('formula-eq-flash');},600);
+  }).catch(function(){});
+}
 function copyFormula(btn){
   if(typeof document==='undefined')return;
   var row=btn.closest('.formula-row');
@@ -895,7 +904,7 @@ function buildFormulas(unit){
   let html='';
   formulas.forEach(f=>{
     var favs2=[];if(typeof localStorage!=='undefined'){try{var _fp=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp))favs2=_fp;}catch(e){}}const isFav=favs2.indexOf(f.name)>=0;
-html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button></div>`;
+html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button></div>`;
   });
   content.innerHTML=html;
   // Restore saved height
