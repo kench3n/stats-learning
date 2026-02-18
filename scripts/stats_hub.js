@@ -409,6 +409,37 @@ function buildFreezeInfo(){
   else{el.textContent='\u2744\ufe0f x'+d.count;}
 }
 
+function buildTopicHeatmap(unit){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('topicHeatmap');if(!el)return;
+  var probs=allProbs[unit]||[];
+  if(!probs.length){el.innerHTML='';return;}
+  var state=getPracticeState(unit);
+  var ans=state.answered||{};
+  // Group by topic
+  var topics={};
+  probs.forEach(function(p){
+    if(!topics[p.topic])topics[p.topic]={total:0,correct:0,wrong:0};
+    topics[p.topic].total++;
+    if(ans[p.id]!==undefined){
+      var ok=p.type==='mc'?(+ans[p.id])===p.ans:Math.abs(parseFloat(ans[p.id])-p.ans)<=(p.tol||0.1);
+      if(ok)topics[p.topic].correct++;else topics[p.topic].wrong++;
+    }
+  });
+  var html='<div class="th-title">Topic Performance</div><div class="th-grid">';
+  Object.keys(topics).forEach(function(t){
+    var d=topics[t];
+    var cls='th-gray';
+    if(d.correct+d.wrong>0){
+      if(d.wrong===0)cls='th-green';
+      else if(d.correct===0)cls='th-red';
+      else cls='th-amber';
+    }
+    html+='<div class="th-cell '+cls+'" title="'+t+': '+d.correct+'/'+d.total+' correct"></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
 function buildRecentBadges(){
   if(typeof document==='undefined')return;
   var el=document.getElementById('recentBadges');if(!el)return;
@@ -1692,6 +1723,7 @@ buildProblems=function(unit=currentUnit){
   buildDiffInsight(unit);
   updateFilterCounts(unit);
   buildHintUsageInfo();
+  buildTopicHeatmap(unit);
   loadSessionNotes(unit);
   _saveRecentUnit(unit);
   buildTagFilter();
