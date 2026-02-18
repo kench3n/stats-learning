@@ -4682,7 +4682,7 @@ function buildTagFilter(){
 function toggleTag(btn,topic){
   if(_st.activeTags.has(topic))_st.activeTags.delete(topic);
   else _st.activeTags.add(topic);
-  if(typeof localStorage!=='undefined')try{_storageSave('sh-active-tags',[...activeTags]);}catch(e){}
+  if(typeof localStorage!=='undefined')try{_storageSave('sh-active-tags',[..._st.activeTags]);}catch(e){}
   applyTagFilter();
   buildTagFilter();
 }
