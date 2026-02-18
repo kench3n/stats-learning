@@ -181,6 +181,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sub-tab:first-child{border-radius:6px 0 0 6px;}.sub-tab:last-child{border-radius:0 6px 6px 0;}
 .sub-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border-h);}
 .sub-tab:hover{color:var(--text);}
+.level-ring{vertical-align:middle;margin-left:4px;}
 
 .sub-panel{display:none;max-width:1400px;margin:0 auto;padding:0 24px 80px;animation:fadeUp 0.35s ease;}
 .sub-panel.active{display:block;}

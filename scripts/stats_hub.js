@@ -518,6 +518,7 @@ function buildRoadmap(){
   updateTopicProgress();
   updateRoadmapNavBadge();
   updateRoadmapPct();
+  updateLevelRings();
 }
 
 function updateRoadmapPct(){
@@ -528,6 +529,25 @@ function updateRoadmapPct(){
   var checked=Object.values(state).filter(Boolean).length;
   var pct=total>0?Math.round(checked/total*100):0;
   el.textContent=pct+'% complete';
+}
+function updateLevelRings(){
+  if(typeof document==='undefined')return;
+  var state=getTopicState();
+  ['l1','l2','l3'].forEach(function(lk){
+    var btn=document.getElementById('rm-tab-'+lk);if(!btn)return;
+    var cards=RM[lk]||[];
+    var total=0,done=0;
+    cards.forEach(function(c){
+      total+=c.topics.length;
+      c.topics.forEach(function(t){if(state[t.n])done++;});
+    });
+    var pct=total>0?done/total:0;
+    var r=10,circ=2*Math.PI*r,dash=Math.round(circ*pct),gap=Math.round(circ-dash);
+    var label=btn.textContent.replace(/\s*\(.*\)/,'').trim().replace(/<[^>]+>/g,'');
+    // Use textContent but insert SVG via innerHTML
+    var lk_label={'l1':'Level 1','l2':'Level 2','l3':'Level 3'}[lk]||lk;
+    btn.innerHTML=lk_label+' <svg class="level-ring" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="'+r+'" fill="none" stroke="var(--border)" stroke-width="2"/><circle cx="12" cy="12" r="'+r+'" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-dasharray="'+dash+' '+gap+'" stroke-linecap="round" transform="rotate(-90 12 12)"/></svg>';
+  });
 }
 function updateRoadmapNavBadge(){
   if(typeof document==='undefined')return;
@@ -553,6 +573,7 @@ function toggleTopic(el){
   updateTopicProgress();
   updateRoadmapNavBadge();
   updateRoadmapPct();
+  updateLevelRings();
   if(checked){
     awardXP(XP_TABLE.topic,'topic');
     recordActivity();
