@@ -777,7 +777,7 @@ function buildRoadmap(){
         var _noteText=_tnotes[t.n]||'';
         var _safeN=t.n.replace(/"/g,'&quot;');
         var _noteStyle=_noteText?'':'display:none';
-        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" onclick="editTopicNote(this.dataset.tn,event)" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_esc(_noteText)}</span></div>`;
+        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" role="button" tabindex="0" aria-label="Add note for topic" onclick="editTopicNote(this.dataset.tn,event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editTopicNote(this.dataset.tn,event);}" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_esc(_noteText)}</span></div>`;
       });
       html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)">Resources ↓</button></div><div class="res-panel">`;
       (c.res||[]).forEach(r=>{
@@ -4168,7 +4168,7 @@ function updateWeakSpots(){
   if(!spots.length){list.innerHTML='<div class="weakspot-empty">No weak spots detected. Keep it up!</div>';return;}
   let h='';
   spots.slice(0,3).forEach(s=>{
-    h+=`<div class="weakspot-card" onclick="goPage('practice');setUnit(${s.unit});">
+    h+=`<div class="weakspot-card" role="button" tabindex="0" aria-label="Practice Unit ${s.unit}: ${_esc(s.name)}" onclick="goPage('practice');setUnit(${s.unit});" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPage('practice');setUnit(${s.unit});}}">
       <div class="weakspot-unit">Unit ${s.unit}: ${s.name}</div>
       <div class="weakspot-bar"><div class="weakspot-fill" style="width:${s.pct}%;"></div></div>
       <div class="weakspot-detail">${s.correct}/${s.total} correct &middot; ${s.wrong} wrong &middot; ${s.unanswered} unanswered</div>
@@ -5128,7 +5128,7 @@ function buildDailyChallenge(){
     html+='<div class="dc-problem" id="dcp-'+i+'"><div class="dc-q">'+(i+1)+'. ['+_esc(p.topic)+'] '+_esc(p.q)+'</div>';
     if(p.type==='mc'){
       p.ch.forEach((ch,j)=>{
-        html+='<div class="dc-ch" id="dc-ch-'+i+'-'+j+'" onclick="dcAnsMC('+i+','+j+')">'+_esc(ch)+'</div>';
+        html+='<div class="dc-ch" id="dc-ch-'+i+'-'+j+'" role="button" tabindex="0" onclick="dcAnsMC('+i+','+j+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();dcAnsMC('+i+','+j+');}">'+_esc(ch)+'</div>';
       });
     }else{
       html+='<div class="dc-fr"><input type="text" id="dc-fi-'+i+'" placeholder="Your answer..." aria-label="Answer for daily challenge question '+(i+1)+'" onkeydown="if(event.key===&quot;Enter&quot;)dcAnsFR('+i+')"><button onclick="dcAnsFR('+i+')">Check</button></div>';
@@ -6471,7 +6471,7 @@ function buildPathGrid(){
   Object.keys(LEARNING_PATHS).forEach(function(id){
     const p=LEARNING_PATHS[id];
     const isActive=active&&active.pathId===id;
-    html+='<div class="path-card'+(isActive?' path-card-active':'')+'" onclick="selectPath(&quot;'+id+'&quot;)">';
+    html+='<div class="path-card'+(isActive?' path-card-active':'')+'" role="button" tabindex="0" aria-pressed="'+(isActive?'true':'false')+'" onclick="selectPath(&quot;'+id+'&quot;)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectPath(\''+id+'\');}">';
     html+='<div class="path-card-icon">'+p.icon+'</div>';
     html+='<div class="path-card-name">'+p.name+'</div>';
     html+='<div class="path-card-desc">'+p.desc+'</div>';
