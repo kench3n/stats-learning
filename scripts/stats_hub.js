@@ -976,10 +976,37 @@ function toggleFormulas(){
   const a=document.getElementById('formulaArrow');
   const t=document.getElementById('formulaToggle');
   if(!c)return;
+  // If pinned, don't collapse
+  var pinned=typeof localStorage!=='undefined'&&localStorage.getItem('sh-formula-pinned')==='1';
+  if(pinned&&c.style.display!=='none')return; // prevent collapsing when pinned
   const show=c.style.display==='none';
   c.style.display=show?'':'none';
   if(a)a.textContent=show?'▾':'▸';
-  if(t)t.setAttribute('aria-expanded',String(show));
+  if(t&&typeof t.setAttribute==='function')t.setAttribute('aria-expanded',String(show));
+}
+function toggleFormulaPin(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var pinned=localStorage.getItem('sh-formula-pinned')==='1';
+  pinned=!pinned;
+  try{localStorage.setItem('sh-formula-pinned',pinned?'1':'0');}catch(e){}
+  var btn=document.getElementById('formulaPinBtn');
+  if(btn)btn.classList.toggle('pinned',pinned);
+  if(pinned){
+    // Auto-open the panel when pinning
+    var c=document.getElementById('formulaContent');var a=document.getElementById('formulaArrow');
+    if(c&&c.style.display==='none'){c.style.display='';if(a)a.textContent='▾';}
+    showToast('Formula panel pinned open.');
+  }else{
+    showToast('Formula panel unpinned.');
+  }
+}
+function loadFormulaPin(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var pinned=localStorage.getItem('sh-formula-pinned')==='1';
+  if(!pinned)return;
+  var btn=document.getElementById('formulaPinBtn');if(btn)btn.classList.add('pinned');
+  var c=document.getElementById('formulaContent');var a=document.getElementById('formulaArrow');
+  if(c){c.style.display='';if(a)a.textContent='▾';}
 }
 
 // ===================== HINT SYSTEM =====================
@@ -1039,6 +1066,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     buildRoadmap();buildProblems();loadPreset();
     initFormulaResize();
     initStickyProgress();
+    loadFormulaPin();
     updateStreakDisplay();
     updateXPDisplay();
     updateMilestoneDisplay();
