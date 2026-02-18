@@ -741,6 +741,20 @@ let histData=[];
 function genData(type,n){const d=[];if(type==='symmetric')for(let i=0;i<n;i++)d.push(randn()*15+50);else if(type==='right')for(let i=0;i<n;i++)d.push(Math.exp(randn()*0.5+2));else if(type==='left')for(let i=0;i<n;i++)d.push(100-Math.exp(randn()*0.5+2));else if(type==='bimodal')for(let i=0;i<n;i++)d.push(Math.random()<0.5?randn()*8+30:randn()*8+70);else if(type==='uniform')for(let i=0;i<n;i++)d.push(rand(10,90));return d;}
 function loadPreset(){histData=genData(document.getElementById('histPreset').value,+document.getElementById('sizeSlider').value);drawHist();}
 function loadCustom(){const nums=document.getElementById('customData').value.split(/[,\s]+/).map(Number).filter(v=>!isNaN(v));if(nums.length>1){histData=nums;drawHist();}}
+function downloadVizData(){
+  if(typeof document==='undefined')return;
+  var data=typeof histData!=='undefined'&&histData.length?histData:[];
+  if(!data.length){showToast('No data to download');return;}
+  var csv='value\n'+data.map(function(v){return String(v);}).join('\n');
+  if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Download unavailable');return;}
+  var blob=new Blob([csv],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='unit-'+currentUnit+'-data.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Downloaded '+data.length+' values as CSV');
+}
 function drawHist(){
   if(!histData.length)return;const c=document.getElementById('histCanvas'),ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=300*dpr;ctx.scale(dpr,dpr);const W=c.offsetWidth,H=300;ctx.clearRect(0,0,W,H);
   const bins=+document.getElementById('binSlider').value;const mn=Math.min(...histData),mx=Math.max(...histData);const bw=(mx-mn)/bins||1;const counts=new Array(bins).fill(0);histData.forEach(v=>{let b=Math.min(Math.floor((v-mn)/bw),bins-1);counts[b]++;});const maxC=Math.max(...counts);
