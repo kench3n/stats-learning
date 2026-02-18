@@ -310,6 +310,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .viz-screenshot-row{text-align:right;max-width:1100px;margin:0 auto 8px;padding:0 24px;}
 .viz-screenshot-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;}
 .viz-screenshot-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.viz-fullscreen-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;margin-left:6px;}
+.viz-fullscreen-btn:hover{border-color:var(--purple);color:var(--purple);}
 
 /* Roles */
 .roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;max-width:1100px;margin:0 auto;}

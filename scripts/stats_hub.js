@@ -2079,6 +2079,20 @@ function copyVizLink(){
   var href=(typeof window!=='undefined'&&window.location)?window.location.href:'';
   navigator.clipboard.writeText(href).then(function(){showToast('Link copied!');}).catch(function(){showToast('Could not copy link');});
 }
+function toggleVizFullscreen(){
+  if(typeof document==='undefined')return;
+  var panel=document.querySelector('#viz-panels .sub-panel.active');if(!panel)return;
+  if(typeof document.fullscreenEnabled!=='undefined'&&document.fullscreenEnabled){
+    if(!document.fullscreenElement){
+      if(panel.requestFullscreen)panel.requestFullscreen();
+      else if(panel.webkitRequestFullscreen)panel.webkitRequestFullscreen();
+    }else{
+      if(document.exitFullscreen)document.exitFullscreen();
+    }
+  }else{
+    showToast('Fullscreen not supported in this browser.');
+  }
+}
 function saveVizScreenshot(){
   if(typeof document==='undefined')return;
   // Find the active sub-panel canvas
