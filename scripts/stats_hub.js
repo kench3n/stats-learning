@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -409,6 +409,23 @@ function buildFreezeInfo(){
   else{el.textContent='\u2744\ufe0f x'+d.count;}
 }
 
+function buildRecentBadges(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('recentBadges');if(!el)return;
+  var earned=getMilestones();
+  var now=Date.now();
+  function _daysAgo(dateStr){var d=new Date(dateStr);var diff=Math.round((now-d.getTime())/(1000*60*60*24));return diff===0?'today':diff===1?'yesterday':diff+'d ago';}
+  var recent=Object.keys(earned).map(function(id){
+    var m=typeof MILESTONES!=='undefined'?MILESTONES.find(function(x){return x.id===id;}):null;
+    return m?{id:id,icon:m.icon,name:m.name,when:earned[id]}:null;
+  }).filter(Boolean).sort(function(a,b){return b.when>a.when?1:b.when<a.when?-1:0;}).slice(0,3);
+  if(!recent.length){el.innerHTML='';return;}
+  var html='<div class="rb-title">Recent Badges</div>';
+  recent.forEach(function(b){
+    html+='<div class="rb-item"><span class="rb-icon">'+b.icon+'</span><span class="rb-name">'+b.name+'</span><span class="rb-when">'+_daysAgo(b.when)+'</span></div>';
+  });
+  el.innerHTML=html;
+}
 function buildLongestStreak(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('longestStreak');if(!el)return;

@@ -1344,3 +1344,10 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .fav-filter-btn.active{border-color:var(--amber);color:var(--amber);}
 .fav-filter-btn:hover{border-color:var(--amber);color:var(--amber);}
 .roadmap-list mark{background:color-mix(in srgb,var(--cyan) 20%,transparent);border-radius:2px;}
+.recent-badges{margin:10px 0;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;}
+.rb-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono',monospace;margin-bottom:8px;}
+.rb-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);}
+.rb-item:last-child{border-bottom:none;}
+.rb-icon{font-size:18px;flex-shrink:0;}
+.rb-name{flex:1;color:var(--text);font-family:'Space Mono',monospace;}
+.rb-when{color:var(--muted);font-size:10px;}
