@@ -1071,6 +1071,25 @@ function toggleFormulaFavFilter(btn){
     row.style.display=(name&&favs.indexOf(name.textContent)>=0)?'':'none';
   });
 }
+function buildPinnedFormulas(unit,container){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var existing=container?container.previousElementSibling:null;
+  if(existing&&existing.classList&&existing.classList.contains('pinned-formulas'))existing.remove();
+  var favs=[];
+  try{favs=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');}catch(e){}
+  if(!Array.isArray(favs)||!favs.length)return;
+  var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[unit]?FORMULAS[unit]:[];
+  var pinned=formulas.filter(function(f){return favs.indexOf(f.name)>=0;});
+  if(!pinned.length)return;
+  var div=document.createElement('div');
+  div.className='pinned-formulas';
+  var html='<div class="pinned-header">\u2b50 Pinned</div>';
+  pinned.forEach(function(f){
+    html+='<div class="pinned-formula-row"><span class="formula-name">'+f.name+'</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">'+f.formula+'</span></div>';
+  });
+  div.innerHTML=html;
+  if(container&&container.parentNode)container.parentNode.insertBefore(div,container);
+}
 function buildFormulas(unit){
   if(typeof document==='undefined')return;
   const content=document.getElementById('formulaContent');
@@ -1079,6 +1098,7 @@ function buildFormulas(unit){
   if(lbl){var un=typeof UNIT_META!=='undefined'&&UNIT_META[unit]?UNIT_META[unit].name:'';lbl.textContent=un?'Unit '+unit+': '+un:'';};
   const formulas=FORMULAS[unit]||[];
   if(!formulas.length){content.innerHTML='';return;}
+  buildPinnedFormulas(unit,content);
   let html='';
   const _FTAG_STOP=['of','the','and','for','a','an','in','to','with','by','on','at','is','are','from','or','if'];
   function _formulaTags(name){
