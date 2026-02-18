@@ -1,3 +1,192 @@
+// ===================== UTILITIES =====================
+function _storage(key, fallback) {
+  if (typeof localStorage === 'undefined') return fallback;
+  try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; }
+  catch { return fallback; }
+}
+function _storageSave(key, val) {
+  if (typeof localStorage === 'undefined') return;
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+}
+function _storageRaw(key, fallback) {
+  if (typeof localStorage === 'undefined') return fallback;
+  try { var v = localStorage.getItem(key); return v !== null ? v : fallback; } catch { return fallback; }
+}
+function _storageRawSave(key, val) {
+  if (typeof localStorage === 'undefined') return;
+  try { localStorage.setItem(key, String(val)); } catch (e) {}
+}
+function _debounce(fn, ms) {
+  var t; return function() { var args = arguments, ctx = this; clearTimeout(t); t = setTimeout(function() { fn.apply(ctx, args); }, ms); };
+}
+function _throttle(fn, ms) {
+  var last = 0; return function() { var now = Date.now(); if (now - last >= ms) { last = now; fn.apply(this, arguments); } };
+}
+function _esc(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ===================== MODAL FOCUS MANAGEMENT =====================
+function _trapFocus(overlay, modal) {
+  if (typeof document === 'undefined') return;
+  var prev = document.activeElement;
+  var focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (focusable.length) focusable[0].focus();
+  var _onKey = function(e) {
+    if (e.key === 'Escape') { overlay.remove(); if (prev && prev.focus) prev.focus(); overlay.removeEventListener('keydown', _onKey); return; }
+    if (e.key !== 'Tab' || !focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+    else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+  };
+  overlay.addEventListener('keydown', _onKey);
+  var _origRemove = overlay.remove.bind(overlay);
+  overlay.remove = function() { _origRemove(); if (prev && prev.focus) prev.focus(); };
+}
+
+// ===================== DEBOUNCED STORAGE SAVE =====================
+var _pendingSaves={};
+function _storageSaveSoon(key,val){
+  _pendingSaves[key]=val;
+  _flushSaves();
+}
+var _flushSaves=_debounce(function(){
+  var keys=Object.keys(_pendingSaves);
+  for(var i=0;i<keys.length;i++){_storageSave(keys[i],_pendingSaves[keys[i]]);}
+  _pendingSaves={};
+},300);
+// ===================== DEBOUNCED DRAW WRAPPERS =====================
+var _drawNormD=_debounce(function(){if(typeof drawNorm==='function')drawNorm();},16);
+var _drawCompD=_debounce(function(){if(typeof drawComp==='function')drawComp();},16);
+var _drawBoxD=_debounce(function(){if(typeof drawBox==='function')drawBox();},16);
+var _drawHistD=_debounce(function(){if(typeof drawHist==='function')drawHist();},16);
+// ===================== EVENT DELEGATION =====================
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+  // Click delegation
+  document.addEventListener('click',function(e){
+    // Stop propagation for marked elements
+    if(e.target.closest&&e.target.closest('[data-stop-propagation]')){e.stopPropagation();return;}
+    var el=e.target.closest?e.target.closest('[data-action]'):null;
+    if(!el)return;
+    var action=el.dataset.action;
+    if(action==='nav'){goPage(el.dataset.page);}
+    else if(action==='sub'){showSub(el.dataset.prefix,el.dataset.sub,el);}
+    else if(action==='filter'){filterProblems(el.dataset.val);}
+    else if(action==='searchChip'){applySearchChip(el.dataset.val);}
+    else if(action==='analytics'){showAnalytics(el.dataset.val,e);}
+    else if(action==='pomoTime'){setPomoTime(+el.dataset.val);}
+    else if(action==='fcMode'){setFCMode(el.dataset.val);}
+    else if(action==='fcMark'){fcMark(el.dataset.val==='true');}
+    else if(action==='formulaNav'){formulaUnitNav(+el.dataset.dir);}
+    else if(action==='exportPracticePDF'){exportPracticePDF(_st.currentUnit);}
+    else if(action==='resetUnit'){resetUnit(_st.currentUnit);}
+    else if(action==='vizPracticeLink'){goPage('practice');setUnit(1);}
+    else if(action==='closeCertModal'){var m=document.getElementById('rmCertModal');if(m)m.style.display='none';}
+    else if(action==='newFormulaBuilder'){startFormulaBuilder(+(document.getElementById('fcUnitSelect')||{}).value||1);}
+    else if(action==='toggleFormulaFavFilter'){toggleFormulaFavFilter(el);}
+    // Simple no-arg function calls
+    else if(typeof window[action]==='function'){window[action]();}
+  });
+  // Keydown delegation (Enter key)
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Enter'||e.key===' '){
+      var el=e.target.closest?e.target.closest('[data-action]'):null;
+      if(el&&el.getAttribute('role')==='button'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.click();return;}
+    }
+    if(e.key==='Enter'){
+      var el2=e.target.closest?e.target.closest('[data-action-enter]'):null;
+      if(el2){var fn=el2.dataset.actionEnter;if(typeof window[fn]==='function')window[fn]();}
+    }
+  });
+  // Input delegation (oninput)
+  document.addEventListener('input',function(e){
+    var action=e.target.dataset?e.target.dataset.action:null;
+    if(!action)return;
+    if(action==='binSlider'){var bv=document.getElementById('binCountVal');if(bv)bv.textContent=e.target.value;_drawHistD();}
+    else if(action==='drawNorm'){_drawNormD();}
+    else if(action==='drawComp'){_drawCompD();}
+    else if(action==='drawBox'){_drawBoxD();}
+    else if(action==='loadPreset'){loadPreset();}
+    else if(action==='searchRoadmap'){searchRoadmapTopics(e.target.value);}
+    else if(action==='searchProblems'){searchProblems();}
+    else if(action==='filterFormulas'){filterFormulas(e.target.value);}
+    else if(action==='saveSessionNotes'){saveSessionNotes();}
+  });
+  // Change delegation (onchange)
+  document.addEventListener('change',function(e){
+    var action=e.target.dataset?e.target.dataset.action:null;
+    if(!action)return;
+    if(action==='setUnit'){setUnit(+e.target.value);}
+    else if(action==='loadDataset'){loadDataset(e.target.value);}
+    else if(action==='updateSessionGoal'){updateSessionGoal();}
+    else if(action==='sortProblems'){sortProblems(e.target.value);}
+    else if(action==='toggleCreateType'){toggleCreateType();}
+    else if(action==='buildFlashcards'){buildFlashcards(+e.target.value);}
+    else if(action==='setGoal'){setGoal();}
+    else if(action==='importProgress'){importProgressJSON(e.target.files[0]);}
+    else if(action==='drawNorm'){drawNorm();}
+    else if(action==='drawBox'){drawBox();}
+    else if(action==='loadPreset'){loadPreset();}
+  });
+  // Submit delegation
+  document.addEventListener('submit',function(e){
+    var form=e.target.closest?e.target.closest('[data-action-submit]'):e.target;
+    if(form&&form.dataset&&form.dataset.actionSubmit){
+      e.preventDefault();
+      var fn=form.dataset.actionSubmit;
+      if(typeof window[fn]==='function')window[fn]();
+    }
+  });
+}
+
+// ===================== APPLICATION STATE =====================
+var _st = {
+  _goPageSkipPush: false,
+  histData: [],
+  activeDataset: null,
+  stepHintProgress: {},
+  _sessionNotesTimer: null,
+  answered: {},
+  pScore: 0,
+  currentUnit: 1,
+  activeProbs: [],
+  probTimers: {},
+  probTimerStart: {},
+  wrongAttempts: {},
+  vizDrawn: {},
+  practiceSessionStart: 0,
+  practiceSessionInterval: null,
+  focusedProblemId: null,
+  reviewQueue: [],
+  reviewIndex: 0,
+  reviewSessionCorrect: 0,
+  reviewSessionByUnit: {},
+  examModeActive: false,
+  pomoState: {running:false,seconds:25*60,total:25*60,interval:null,sessionsToday:0},
+  deferredPrompt: null,
+  focusModeActive: false,
+  sessionData: {startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0},
+  activeTags: new Set(),
+  _statsAnimated: false,
+  _activeTopic: null,
+  favFilterActive: false,
+  calDate: typeof Date!=='undefined'?new Date():null,
+  fcCards: [],
+  fcIndex: 0,
+  fcKnownCount: 0,
+  fcSeenCount: 0,
+  matchSelected: null,
+  matchedPairs: 0,
+  matchPairsTotal: 0,
+  builderParts: [],
+  builderTarget: null,
+  builderSelected: [],
+  toastTimer: null,
+  stepProgress: {},
+  intervals: []
+};
+
 // ===================== NAVIGATION =====================
 function syncTabState(tabBar,activeTab){
   if(!tabBar)return;
@@ -8,10 +197,9 @@ function syncTabState(tabBar,activeTab){
   });
 }
 
-var _goPageSkipPush=false;
 function goPage(id){
   if(typeof document==='undefined')return;
-  if(id!=='practice'&&practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
+  if(id!=='practice'&&_st.practiceSessionInterval){clearInterval(_st.practiceSessionInterval);_st.practiceSessionInterval=null;}
   const nextPage=document.getElementById('page-'+id);
   if(!nextPage)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -19,7 +207,7 @@ function goPage(id){
     var bc=document.getElementById('breadcrumb');if(!bc)return;
     var names={home:'Home',roadmap:'Roadmap',visualizer:'Visualizer',practice:'Practice',review:'Review',achievements:'Achievements',flashcards:'Flashcards',create:'Create'};
     var label=names[id]||id;
-    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+currentUnit+(typeof UNIT_META!=='undefined'&&UNIT_META[currentUnit]?' – '+UNIT_META[currentUnit].name:'');
+    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+_esc(_st.currentUnit)+(typeof UNIT_META!=='undefined'&&UNIT_META[_st.currentUnit]?' – '+_esc(UNIT_META[_st.currentUnit].name):'');
     bc.innerHTML=label;
   })();
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -28,23 +216,23 @@ function goPage(id){
   const activeTab=document.getElementById('tab-'+id)||[...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id);
   if(activeTab){activeTab.classList.add('active');syncTabState(navTabs,activeTab);}
   if(typeof window!=='undefined'&&typeof window.scrollTo==='function')window.scrollTo(0,0);
-  if(typeof window!=='undefined'&&typeof history!=='undefined'&&history.pushState&&!_goPageSkipPush){
+  if(typeof window!=='undefined'&&typeof history!=='undefined'&&history.pushState&&!_st._goPageSkipPush){
     history.pushState({page:id},'','#/'+id);
   }
-  _goPageSkipPush=false;
+  _st._goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{
-    var savedVizTab=typeof localStorage!=='undefined'?localStorage.getItem('sh-viz-tab'):null;
+    var savedVizTab=_storageRaw('sh-viz-tab',null);
     if(savedVizTab){var tabBtn=document.getElementById('viz-tab-'+savedVizTab);if(tabBtn)showSub('viz',savedVizTab,tabBtn);}
-    drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
+    drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(_st.currentUnit);buildVizDataSummary(_st.currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();buildXPNextLevel();}
+  if(id==='home'){_st._statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();buildXPNextLevel();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
-    var savedGoal=localStorage.getItem('sh-session-goal')||'0';
+    var savedGoal=_storageRaw('sh-session-goal','0');
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
-    const savedUnit=parseInt(localStorage.getItem('sh-filter-unit'))||1;
-    const savedDiff=localStorage.getItem('sh-filter-diff')||'all';
-    const savedSearch=localStorage.getItem('sh-filter-search')||'';
+    const savedUnit=parseInt(_storageRaw('sh-filter-unit','1'))||1;
+    const savedDiff=_storageRaw('sh-filter-diff','all');
+    const savedSearch=_storageRaw('sh-filter-search','');
     if(typeof setTimeout!=='undefined'){setTimeout(function(){
       setUnit(savedUnit);
       filterProblems(savedDiff);
@@ -57,7 +245,7 @@ function goPage(id){
   if(id==='create'){initCreatePage();}
 }
 function showSub(prefix,id,btn){
-  if(prefix==='viz'&&currentUnit!==1)return;
+  if(prefix==='viz'&&_st.currentUnit!==1)return;
   const parent=prefix==='rm'?'page-roadmap':prefix==='viz'?'page-visualizer':null;
   if(!parent)return;
   const tabBar=prefix==='rm'?document.getElementById('roadmapTabs'):document.getElementById('vizTabs');
@@ -69,7 +257,7 @@ function showSub(prefix,id,btn){
   document.getElementById((prefix==='rm'?'rm-':prefix==='viz'?'viz-':'')+id).classList.add('active');
   if(prefix==='viz'){
     setTimeout(()=>{if(id==='hist')drawHist();if(id==='box')drawBox();if(id==='norm')drawNorm();if(id==='comp')drawComp();},30);
-    if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-viz-tab',id);}catch(e){}
+    _storageRawSave('sh-viz-tab',id);
   }
 }
 
@@ -160,32 +348,23 @@ function addDays(dateStr,days){
 }
 
 function getReviewData(){
-  if(typeof localStorage==='undefined')return{};
-  try{
-    const data=JSON.parse(localStorage.getItem('sh-review')||'{}');
-    return data&&typeof data==='object'&&!Array.isArray(data)?data:{};
-  }catch{return{};}
+  var data=_storage('sh-review',{});
+  return data&&typeof data==='object'&&!Array.isArray(data)?data:{};
 }
 
 function saveReviewData(data){
-  if(typeof localStorage==='undefined')return;
-  const safe=data&&typeof data==='object'&&!Array.isArray(data)?data:{};
-  localStorage.setItem('sh-review',JSON.stringify(safe));
+  var safe=data&&typeof data==='object'&&!Array.isArray(data)?data:{};
+  _storageSave('sh-review',safe);
 }
 
 function getReviewMeta(){
-  const fallback={sessions:0};
-  if(typeof localStorage==='undefined')return fallback;
-  try{
-    const meta=JSON.parse(localStorage.getItem('sh-review-meta')||'{"sessions":0}')||{};
-    return {sessions:Number.isFinite(+meta.sessions)?+meta.sessions:0};
-  }catch{return fallback;}
+  var meta=_storage('sh-review-meta',{sessions:0});
+  return {sessions:Number.isFinite(+meta.sessions)?+meta.sessions:0};
 }
 
 function saveReviewMeta(meta){
-  if(typeof localStorage==='undefined')return;
-  const sessions=meta&&Number.isFinite(+meta.sessions)?+meta.sessions:0;
-  localStorage.setItem('sh-review-meta',JSON.stringify({sessions}));
+  var sessions=meta&&Number.isFinite(+meta.sessions)?+meta.sessions:0;
+  _storageSave('sh-review-meta',{sessions:sessions});
 }
 
 function addToReview(probId,wasCorrect){
@@ -256,47 +435,39 @@ function reviewAnswer(probId,wasCorrect){
 }
 
 function getStreakData(){
-  const fallback={current:0,longest:0,lastDate:'',history:[]};
-  if(typeof localStorage==='undefined')return fallback;
-  try{
-    const data=JSON.parse(localStorage.getItem('sh-streak')||'{}')||{};
-    return {
-      current:Number.isFinite(+data.current)?+data.current:0,
-      longest:Number.isFinite(+data.longest)?+data.longest:0,
-      lastDate:typeof data.lastDate==='string'?data.lastDate:'',
-      history:Array.isArray(data.history)?data.history:[]
-    };
-  }catch{return fallback;}
+  var fallback={current:0,longest:0,lastDate:'',history:[]};
+  var data=_storage('sh-streak',{});
+  return {
+    current:Number.isFinite(+data.current)?+data.current:0,
+    longest:Number.isFinite(+data.longest)?+data.longest:0,
+    lastDate:typeof data.lastDate==='string'?data.lastDate:'',
+    history:Array.isArray(data.history)?data.history:[]
+  };
 }
 
 function saveStreakData(data){
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-streak',JSON.stringify(data));
+  _storageSave('sh-streak',data);
 }
 
 function getXPData(){
-  const fallback={total:0,level:1,history:[]};
-  if(typeof localStorage==='undefined')return fallback;
-  try{
-    const data=JSON.parse(localStorage.getItem('sh-xp')||'{"total":0,"level":1,"history":[]}')||fallback;
-    return {
-      total:Number.isFinite(+data.total)?+data.total:0,
-      level:Number.isFinite(+data.level)&&+data.level>0?+data.level:1,
-      history:Array.isArray(data.history)?data.history:[]
-    };
-  }catch{return fallback;}
+  var data=_storage('sh-xp',{});
+  return {
+    total:Number.isFinite(+data.total)?+data.total:0,
+    level:Number.isFinite(+data.level)&&+data.level>0?+data.level:1,
+    history:Array.isArray(data.history)?data.history:[]
+  };
 }
 
 function saveXPData(data){
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-xp',JSON.stringify(data));
+  _storageSave('sh-xp',data);
 }
 
 function getMilestones(){
-  if(typeof localStorage==='undefined')return{};
-  try{return JSON.parse(localStorage.getItem('sh-milestones')||'{}')||{};}catch{return{};}
+  return _storage('sh-milestones',{});
 }
 
 function saveMilestones(data){
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-milestones',JSON.stringify(data));
+  _storageSave('sh-milestones',data);
 }
 
 function updateStreakDisplay(){
@@ -367,16 +538,13 @@ function recordActivity(){
 }
 
 function getStreakFreezeData(){
-  if(typeof localStorage==='undefined')return{count:2,month:''};
-  try{
-    var curMonth=todayStr().slice(0,7);
-    var d=JSON.parse(localStorage.getItem('sh-streak-freeze')||'{}');
-    if(d.month!==curMonth)d={count:2,month:curMonth};
-    else d.count=Number.isFinite(+d.count)?+d.count:2;
-    return d;
-  }catch{return{count:2,month:todayStr().slice(0,7)};}
+  var curMonth=todayStr().slice(0,7);
+  var d=_storage('sh-streak-freeze',{});
+  if(d.month!==curMonth)d={count:2,month:curMonth};
+  else d.count=Number.isFinite(+d.count)?+d.count:2;
+  return d;
 }
-function saveStreakFreezeData(d){if(typeof localStorage!=='undefined')localStorage.setItem('sh-streak-freeze',JSON.stringify(d));}
+function saveStreakFreezeData(d){_storageSave('sh-streak-freeze',d);}
 function checkStreakFreeze(){
   if(typeof localStorage==='undefined')return;
   var streakData=getStreakData();
@@ -435,7 +603,7 @@ function buildTopicHeatmap(unit){
       else if(d.correct===0)cls='th-red';
       else cls='th-amber';
     }
-    html+='<div class="th-cell '+cls+'" title="'+t+': '+d.correct+'/'+d.total+' correct"></div>';
+    html+='<div class="th-cell '+cls+'" title="'+_esc(t)+': '+d.correct+'/'+d.total+' correct" aria-hidden="true"></div><span class="sr-only">'+_esc(t)+': '+d.correct+'/'+d.total+' correct</span>';
   });
   html+='</div>';
   el.innerHTML=html;
@@ -461,7 +629,7 @@ function buildLongestStreak(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('longestStreak');if(!el)return;
   var activity={};
-  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  activity=_storage('sh-activity',{});
   var dates=Object.keys(activity).sort();
   if(!dates.length){el.textContent='';return;}
   var longest=1,cur=1;
@@ -485,7 +653,7 @@ function awardXP(amount,reason){
   data.history.push({date:todayStr(),earned:amount,reason:String(reason||'')});
   if(data.history.length>100)data.history=data.history.slice(-100);
   saveXPData(data);
-  sessionData.xpEarned+=amount;
+  _st.sessionData.xpEarned+=amount;
   updateXPDisplay();
   showXPPopup('+'+amount+' XP');
   if(data.level>oldLevel)showToast('Level Up! You are now Level '+data.level+' 🎉');
@@ -696,12 +864,12 @@ function updateRoadmapNavBadge(){
 
 function checkRoadmapComplete(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
-  if(localStorage.getItem('sh-cert-shown')==='1')return;
+  if(_storageRaw('sh-cert-shown','')==='1')return;
   var total=0;['l1','l2','l3'].forEach(function(lk){(RM[lk]||[]).forEach(function(c){total+=c.topics.length;});});
   var state=getTopicState();
   var checked=Object.values(state).filter(Boolean).length;
   if(checked>=total&&total>0){
-    localStorage.setItem('sh-cert-shown','1');
+    _storageRawSave('sh-cert-shown','1');
     var modal=document.getElementById('rmCertModal');
     if(modal)modal.style.display='flex';
   }
@@ -748,10 +916,10 @@ function exportRoadmapProgress(){
   URL.revokeObjectURL(url);
   showToast('Roadmap progress exported!');
 }
-function getTopicState(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topics')||'{}')}catch{return{}}}
-function saveTopicState(s){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topics',JSON.stringify(s))}
-function getTopicNotes(){if(typeof localStorage==='undefined')return{};try{return JSON.parse(localStorage.getItem('sh-topic-notes')||'{}')}catch{return{}}}
-function saveTopicNotes(n){if(typeof localStorage!=='undefined')localStorage.setItem('sh-topic-notes',JSON.stringify(n))}
+function getTopicState(){return _storage('sh-topics',{});}
+function saveTopicState(s){_storageSave('sh-topics',s);}
+function getTopicNotes(){return _storage('sh-topic-notes',{});}
+function saveTopicNotes(n){_storageSave('sh-topic-notes',n);}
 function editTopicNote(name,e){
   if(e&&typeof e.stopPropagation==='function')e.stopPropagation();
   if(typeof document==='undefined')return;
@@ -818,36 +986,35 @@ function updateTopicProgress(){
 }
 
 // ===================== HISTOGRAM =====================
-let histData=[];
 function genData(type,n){const d=[];if(type==='symmetric')for(let i=0;i<n;i++)d.push(randn()*15+50);else if(type==='right')for(let i=0;i<n;i++)d.push(Math.exp(randn()*0.5+2));else if(type==='left')for(let i=0;i<n;i++)d.push(100-Math.exp(randn()*0.5+2));else if(type==='bimodal')for(let i=0;i<n;i++)d.push(Math.random()<0.5?randn()*8+30:randn()*8+70);else if(type==='uniform')for(let i=0;i<n;i++)d.push(rand(10,90));return d;}
-function loadPreset(){histData=genData(document.getElementById('histPreset').value,+document.getElementById('sizeSlider').value);drawHist();}
-function loadCustom(){const nums=document.getElementById('customData').value.split(/[,\s]+/).map(Number).filter(v=>!isNaN(v));if(nums.length>1){histData=nums;drawHist();}}
+function loadPreset(){_st.histData=genData(document.getElementById('histPreset').value,+document.getElementById('sizeSlider').value);drawHist();}
+function loadCustom(){const nums=document.getElementById('customData').value.split(/[,\s]+/).map(Number).filter(v=>!isNaN(v));if(nums.length>1){_st.histData=nums;drawHist();}}
 function downloadVizData(){
   if(typeof document==='undefined')return;
-  var data=typeof histData!=='undefined'&&histData.length?histData:[];
+  var data=typeof _st.histData!=='undefined'&&_st.histData.length?_st.histData:[];
   if(!data.length){showToast('No data to download');return;}
   var csv='value\n'+data.map(function(v){return String(v);}).join('\n');
   if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Download unavailable');return;}
   var blob=new Blob([csv],{type:'text/csv'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download='unit-'+currentUnit+'-data.csv';
+  a.href=url;a.download='unit-'+_st.currentUnit+'-data.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('Downloaded '+data.length+' values as CSV');
 }
 function drawHist(){
-  if(!histData.length)return;const c=document.getElementById('histCanvas'),ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=300*dpr;ctx.scale(dpr,dpr);const W=c.offsetWidth,H=300;ctx.clearRect(0,0,W,H);
-  const bins=+document.getElementById('binSlider').value;const mn=Math.min(...histData),mx=Math.max(...histData);const bw=(mx-mn)/bins||1;const counts=new Array(bins).fill(0);histData.forEach(v=>{let b=Math.min(Math.floor((v-mn)/bw),bins-1);counts[b]++;});const maxC=Math.max(...counts);
+  if(!_st.histData.length)return;const c=document.getElementById('histCanvas'),ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=300*dpr;ctx.scale(dpr,dpr);const W=c.offsetWidth,H=300;ctx.clearRect(0,0,W,H);
+  const bins=+document.getElementById('binSlider').value;const mn=Math.min(...histData),mx=Math.max(...histData);const bw=(mx-mn)/bins||1;const counts=new Array(bins).fill(0);_st.histData.forEach(v=>{let b=Math.min(Math.floor((v-mn)/bw),bins-1);counts[b]++;});const maxC=Math.max(...counts);
   const pad={l:46,r:16,t:16,b:36};const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
   ctx.strokeStyle='#1c1c30';ctx.lineWidth=1;for(let i=0;i<=4;i++){const y=pad.t+ph*(1-i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.fillStyle='#55556888';ctx.font='10px Space Mono';ctx.textAlign='right';ctx.fillText(Math.round(maxC*i/4),pad.l-6,y+4);}
   const barW=pw/bins;counts.forEach((cc,i)=>{const x=pad.l+i*barW;const h=(cc/maxC)*ph;const y=pad.t+ph-h;const g=ctx.createLinearGradient(x,y,x,pad.t+ph);g.addColorStop(0,'rgba(6,182,212,0.7)');g.addColorStop(1,'rgba(6,182,212,0.15)');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x+1,y,barW-2,h,3);ctx.fill();});
   ctx.fillStyle='#55556888';ctx.font='10px Space Mono';ctx.textAlign='center';for(let i=0;i<=bins;i+=Math.max(1,Math.floor(bins/6)))ctx.fillText((mn+i*bw).toFixed(1),pad.l+i*barW,H-pad.b+16);
-  const m=mean(histData),med=median(histData);const mX=pad.l+((m-mn)/(mx-mn))*pw,medX=pad.l+((med-mn)/(mx-mn))*pw;
+  const m=mean(_st.histData),med=median(_st.histData);const mX=pad.l+((m-mn)/(mx-mn))*pw,medX=pad.l+((med-mn)/(mx-mn))*pw;
   ctx.setLineDash([6,4]);ctx.strokeStyle='#06b6d4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(mX,pad.t);ctx.lineTo(mX,pad.t+ph);ctx.stroke();ctx.strokeStyle='#f59e0b';ctx.beginPath();ctx.moveTo(medX,pad.t);ctx.lineTo(medX,pad.t+ph);ctx.stroke();ctx.setLineDash([]);
   ctx.font='11px DM Sans';ctx.fillStyle='#06b6d4';ctx.textAlign='left';ctx.fillText('Mean',mX+5,pad.t+12);ctx.fillStyle='#f59e0b';ctx.fillText('Median',medX+5,pad.t+26);
-  const sd=stdev(histData),q1=quantile(histData,0.25),q3=quantile(histData,0.75);
-  document.getElementById('hMean').textContent=m.toFixed(2);document.getElementById('hMedian').textContent=med.toFixed(2);document.getElementById('hMode').textContent=mode(histData).toFixed(1);document.getElementById('hSD').textContent=sd.toFixed(2);document.getElementById('hIQR').textContent=(q3-q1).toFixed(2);document.getElementById('hRange').textContent=(mx-mn).toFixed(2);
+  const sd=stdev(_st.histData),q1=quantile(_st.histData,0.25),q3=quantile(_st.histData,0.75);
+  document.getElementById('hMean').textContent=m.toFixed(2);document.getElementById('hMedian').textContent=med.toFixed(2);document.getElementById('hMode').textContent=mode(_st.histData).toFixed(1);document.getElementById('hSD').textContent=sd.toFixed(2);document.getElementById('hIQR').textContent=(q3-q1).toFixed(2);document.getElementById('hRange').textContent=(mx-mn).toFixed(2);
 }
 
 // ===================== BOXPLOT =====================
@@ -937,7 +1104,6 @@ function buildComparisonStats(muA,sigA,muB,sigB){
 // ===================== FORMULA REFERENCE =====================
 
 // ===================== PHASE 17: REAL DATASETS =====================
-let activeDataset=null;
 
 const DATASETS={
   iris:{
@@ -973,21 +1139,21 @@ function loadDataset(key){
   if(!key){resetToDefaultData();return;}
   const ds=DATASETS[key];
   if(!ds)return;
-  activeDataset=ds.data.filter(v=>Number.isFinite(v));
-  if(typeof histData!=='undefined')histData=activeDataset;
+  _st.activeDataset=ds.data.filter(v=>Number.isFinite(v));
+  if(typeof _st.histData!=='undefined')_st.histData=_st.activeDataset;
   updateDataStats();
   drawHist();drawBox();drawNorm();
 }
 
 function resetToDefaultData(){
-  activeDataset=null;
+  _st.activeDataset=null;
   const dataStats=document.getElementById('dataStats');
   if(dataStats)dataStats.style.display='none';
   if(typeof document!=='undefined'){
     const preset=document.getElementById('histPreset');
     const sizeSlider=document.getElementById('sizeSlider');
     if(preset&&sizeSlider){
-      if(typeof histData!=='undefined')histData=genData(preset.value,+sizeSlider.value);
+      if(typeof _st.histData!=='undefined')_st.histData=genData(preset.value,+sizeSlider.value);
       drawHist();drawBox();drawNorm();
     }
   }
@@ -996,10 +1162,10 @@ function resetToDefaultData(){
 function updateDataStats(){
   if(typeof document==='undefined')return;
   const panel=document.getElementById('dataStats');
-  if(!panel||!activeDataset||!activeDataset.length)return;
+  if(!panel||!_st.activeDataset||!_st.activeDataset.length)return;
   panel.style.display='';
-  const n=activeDataset.length;
-  const m=mean(activeDataset);const sd=stdev(activeDataset);const med=median(activeDataset);
+  const n=_st.activeDataset.length;
+  const m=mean(_st.activeDataset);const sd=stdev(_st.activeDataset);const med=median(_st.activeDataset);
   const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   setEl('dsN',n);setEl('dsMean',m.toFixed(2));setEl('dsStdev',sd.toFixed(2));setEl('dsMedian',med.toFixed(2));
 }
@@ -1041,9 +1207,9 @@ function loadCustomData(parsed){
   if(!parsed||!parsed.data||!parsed.headers)return;
   const numericIdx=parsed.headers.map((_,i)=>i).filter(i=>typeof (parsed.data[0]||[])[i]==='number');
   if(!numericIdx.length){showToast('No numeric columns found in CSV.');return;}
-  activeDataset=parsed.data.map(row=>row[numericIdx[0]]).filter(v=>Number.isFinite(v));
-  if(typeof histData!=='undefined')histData=activeDataset;
-  showToast('Loaded '+activeDataset.length+' values from "'+parsed.headers[numericIdx[0]]+'"');
+  _st.activeDataset=parsed.data.map(row=>row[numericIdx[0]]).filter(v=>Number.isFinite(v));
+  if(typeof _st.histData!=='undefined')_st.histData=_st.activeDataset;
+  showToast('Loaded '+_st.activeDataset.length+' values from "'+parsed.headers[numericIdx[0]]+'"');
   updateDataStats();
   drawHist();drawBox();drawNorm();
 }
@@ -1162,11 +1328,11 @@ function toggleFormulaFav(btn){
   if(!name)return;
   var n=name.textContent;
   var favs=[];
-  try{var _fp2=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp2))favs=_fp2;}catch(e){}
+  try{var _fp2=_storage('sh-formula-favs',[]);if(Array.isArray(_fp2))favs=_fp2;}catch(e){}
   var idx=favs.indexOf(n);
   if(idx>=0){favs.splice(idx,1);btn.textContent='☆';btn.classList.remove('active');}
   else{favs.push(n);btn.textContent='★';btn.classList.add('active');}
-  try{localStorage.setItem('sh-formula-favs',JSON.stringify(favs));}catch(e){}
+  try{_storageSave('sh-formula-favs',favs);}catch(e){}
 }
 function toggleFormulaFavFilter(btn){
   if(typeof document==='undefined')return;
@@ -1174,7 +1340,7 @@ function toggleFormulaFavFilter(btn){
   var active=btn.classList.contains('active');
   btn.textContent=active?'★ Favorites':'☆ Favorites';
   var favs=[];
-  if(typeof localStorage!=='undefined'){try{var _fp3=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp3))favs=_fp3;}catch(e){}}
+  if(typeof localStorage!=='undefined'){try{var _fp3=_storage('sh-formula-favs',[]);if(Array.isArray(_fp3))favs=_fp3;}catch(e){}}
   document.querySelectorAll('.formula-row').forEach(function(row){
     if(!active){row.style.display='';return;}
     var name=row.querySelector('.formula-name');
@@ -1186,7 +1352,7 @@ function buildPinnedFormulas(unit,container){
   var existing=container?container.previousElementSibling:null;
   if(existing&&existing.classList&&existing.classList.contains('pinned-formulas'))existing.remove();
   var favs=[];
-  try{favs=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');}catch(e){}
+  favs=_storage('sh-formula-favs',[]);
   if(!Array.isArray(favs)||!favs.length)return;
   var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[unit]?FORMULAS[unit]:[];
   var pinned=formulas.filter(function(f){return favs.indexOf(f.name)>=0;});
@@ -1203,11 +1369,11 @@ function buildPinnedFormulas(unit,container){
 function trackFormulaView(unit){
   if(typeof localStorage==='undefined')return;
   try{
-    var recent=JSON.parse(localStorage.getItem('sh-formula-recent')||'[]');
+    var recent=_storage('sh-formula-recent',[]);
     recent=recent.filter(function(u){return u!==unit;});
     recent.unshift(unit);
     recent=recent.slice(0,3);
-    localStorage.setItem('sh-formula-recent',JSON.stringify(recent));
+    _storageSave('sh-formula-recent',recent);
   }catch(e){}
   buildRecentFormulaUnits();
 }
@@ -1215,7 +1381,7 @@ function buildRecentFormulaUnits(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('formulaRecentRow');if(!el)return;
   var recent=[];
-  try{recent=JSON.parse(localStorage.getItem('sh-formula-recent')||'[]');}catch(e){}
+  recent=_storage('sh-formula-recent',[]);
   if(!recent.length){el.style.display='none';return;}
   el.style.display='';
   var html='<span class="formula-recent-label">Recent:</span>';
@@ -1244,14 +1410,14 @@ function buildFormulas(unit){
     return tags.slice(0,3);
   }
   formulas.forEach(f=>{
-    var favs2=[];if(typeof localStorage!=='undefined'){try{var _fp=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp))favs2=_fp;}catch(e){}}const isFav=favs2.indexOf(f.name)>=0;
+    var favs2=[];if(typeof localStorage!=='undefined'){try{var _fp=_storage('sh-formula-favs',[]);if(Array.isArray(_fp))favs2=_fp;}catch(e){}}const isFav=favs2.indexOf(f.name)>=0;
     var _ftags=_formulaTags(f.name);
     var _tagsHtml=_ftags.length?'<div class="formula-tags" data-tags="'+_ftags.join(' ').toLowerCase()+'">'+_ftags.map(function(t){return'<span class="formula-tag">'+t+'</span>';}).join('')+'</div>':'';
 html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button>${_tagsHtml}</div>`;
   });
   content.innerHTML=html;
   // Restore saved height
-  if(typeof localStorage!=='undefined'){try{var h=parseInt(localStorage.getItem('sh-formula-height'));if(h>=100&&h<=600)content.style.maxHeight=h+'px';}catch(e){}}
+  var h=parseInt(_storageRaw('sh-formula-height',''));if(h>=100&&h<=600)content.style.maxHeight=h+'px';
   buildFormulaSearchHistory();
 }
 
@@ -1267,7 +1433,7 @@ function initFormulaResize(){
     function onMove(e2){
       var newH=Math.min(600,Math.max(100,startH+(e2.clientY-startY)));
       panel.style.maxHeight=newH+'px';
-      if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-formula-height',newH);}catch(err){}
+      _storageRawSave('sh-formula-height',newH);
     }
     function onUp(){
       if(typeof document!=='undefined'){document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
@@ -1308,12 +1474,12 @@ function filterFormulas(query){
     // Save search history
     if(typeof localStorage!=='undefined'){
       try{
-        var hist=JSON.parse(localStorage.getItem('sh-formula-searches')||'[]');
+        var hist=_storage('sh-formula-searches',[]);
         if(!Array.isArray(hist))hist=[];
         hist=hist.filter(function(x){return x!==q;});
         hist.unshift(q);
         hist=hist.slice(0,5);
-        localStorage.setItem('sh-formula-searches',JSON.stringify(hist));
+        _storageSave('sh-formula-searches',hist);
       }catch(e){}
     }
   }
@@ -1322,7 +1488,7 @@ function buildFormulaSearchHistory(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('formulaHistoryRow');if(!el)return;
   var hist=[];
-  try{hist=JSON.parse(localStorage.getItem('sh-formula-searches')||'[]');}catch(e){}
+  hist=_storage('sh-formula-searches',[]);
   if(!Array.isArray(hist)||!hist.length){el.style.display='none';return;}
   el.style.display='';
   var html='';
@@ -1334,9 +1500,9 @@ function buildFormulaSearchHistory(){
 function formulaUnitNav(dir){
   if(typeof document==='undefined')return;
   var maxUnit=typeof MAX_UNIT!=='undefined'?MAX_UNIT:14;
-  var next=Math.min(Math.max(1,(typeof currentUnit!=='undefined'?currentUnit:1)+dir),maxUnit);
-  if(next===(typeof currentUnit!=='undefined'?currentUnit:1))return;
-  currentUnit=next;
+  var next=Math.min(Math.max(1,(typeof _st.currentUnit!=='undefined'?_st.currentUnit:1)+dir),maxUnit);
+  if(next===(typeof _st.currentUnit!=='undefined'?_st.currentUnit:1))return;
+  _st.currentUnit=next;
   buildFormulas(next);
   buildProblems(next);
   var sel=document.getElementById('unitSelect');if(sel)sel.value=String(next);
@@ -1344,7 +1510,7 @@ function formulaUnitNav(dir){
 }
 function copyAllFormulas(){
   if(typeof document==='undefined')return;
-  var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[currentUnit]?FORMULAS[currentUnit]:[];
+  var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[_st.currentUnit]?FORMULAS[_st.currentUnit]:[];
   if(!formulas.length){showToast('No formulas available');return;}
   var text=formulas.map(function(f){return f.name+': '+f.formula;}).join('\n');
   if(typeof navigator!=='undefined'&&navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
@@ -1372,7 +1538,7 @@ function toggleFormulas(){
   const t=document.getElementById('formulaToggle');
   if(!c)return;
   // If pinned, don't collapse
-  var pinned=typeof localStorage!=='undefined'&&localStorage.getItem('sh-formula-pinned')==='1';
+  var pinned=_storageRaw('sh-formula-pinned','')==='1';
   if(pinned&&c.style.display!=='none')return; // prevent collapsing when pinned
   const show=c.style.display==='none';
   c.style.display=show?'':'none';
@@ -1381,9 +1547,9 @@ function toggleFormulas(){
 }
 function toggleFormulaPin(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
-  var pinned=localStorage.getItem('sh-formula-pinned')==='1';
+  var pinned=_storageRaw('sh-formula-pinned','')==='1';
   pinned=!pinned;
-  try{localStorage.setItem('sh-formula-pinned',pinned?'1':'0');}catch(e){}
+  _storageRawSave('sh-formula-pinned',pinned?'1':'0');
   var btn=document.getElementById('formulaPinBtn');
   if(btn)btn.classList.toggle('pinned',pinned);
   if(pinned){
@@ -1397,7 +1563,7 @@ function toggleFormulaPin(){
 }
 function loadFormulaPin(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
-  var pinned=localStorage.getItem('sh-formula-pinned')==='1';
+  var pinned=_storageRaw('sh-formula-pinned','')==='1';
   if(!pinned)return;
   var btn=document.getElementById('formulaPinBtn');if(btn)btn.classList.add('pinned');
   var c=document.getElementById('formulaContent');var a=document.getElementById('formulaArrow');
@@ -1405,34 +1571,33 @@ function loadFormulaPin(){
 }
 
 // ===================== HINT SYSTEM =====================
-var stepHintProgress={};
 function showHint(id){
   if(typeof document==='undefined')return;
-  if(examModeActive){showToast('Hints disabled in Exam Mode');return;}
+  if(_st.examModeActive){showToast('Hints disabled in Exam Mode');return;}
   const ht=document.getElementById('ht-'+id);
   const hb=document.getElementById('hb-'+id);
   if(hb)hb.style.display='none';
   awardXP(1,'hint-'+id);
   if(typeof localStorage!=='undefined'){
     try{
-      var usage=JSON.parse(localStorage.getItem('sh-hint-usage')||'{}');
-      var key='unit-'+currentUnit;
+      var usage=_storage('sh-hint-usage',{});
+      var key='unit-'+_st.currentUnit;
       usage[key]=(usage[key]||0)+1;
-      localStorage.setItem('sh-hint-usage',JSON.stringify(usage));
+      _storageSave('sh-hint-usage',usage);
       buildHintUsageInfo();
     }catch(e){}
   }
   if(!ht){return;}
-  var prob=activeProbs.find(function(p){return String(p.id)===String(id);});
+  var prob=_st.activeProbs.find(function(p){return String(p.id)===String(id);});
   if(prob&&prob.steps&&prob.steps.length){
-    stepHintProgress[id]=stepHintProgress[id]||0;
+    _st.stepHintProgress[id]=_st.stepHintProgress[id]||0;
     _renderStepHint(id,prob,ht);
   }else{
     ht.style.display='block';
   }
 }
 function _renderStepHint(id,prob,ht){
-  var step=stepHintProgress[id]||0;
+  var step=_st.stepHintProgress[id]||0;
   var steps=prob.steps||[];
   var stepsHtml='<div class="step-hint-text"><div class="step-count-display">Step '+(step+1)+' of '+steps.length+'</div>';
   for(var i=0;i<=step;i++){stepsHtml+='<div class="step-hint-line">'+steps[i]+'</div>';}
@@ -1447,10 +1612,10 @@ function _renderStepHint(id,prob,ht){
 }
 function showNextStep(id){
   if(typeof document==='undefined')return;
-  var prob=activeProbs.find(function(p){return String(p.id)===String(id);});
+  var prob=_st.activeProbs.find(function(p){return String(p.id)===String(id);});
   if(!prob||!prob.steps)return;
-  stepHintProgress[id]=(stepHintProgress[id]||0)+1;
-  if(stepHintProgress[id]>=prob.steps.length)stepHintProgress[id]=prob.steps.length-1;
+  _st.stepHintProgress[id]=(_st.stepHintProgress[id]||0)+1;
+  if(_st.stepHintProgress[id]>=prob.steps.length)_st.stepHintProgress[id]=prob.steps.length-1;
   var ht=document.getElementById('ht-'+id);
   if(ht)_renderStepHint(id,prob,ht);
 }
@@ -1458,25 +1623,24 @@ function buildHintUsageInfo(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('hintUsageLabel');if(!el)return;
   try{
-    var usage=JSON.parse(localStorage.getItem('sh-hint-usage')||'{}');
-    var count=usage['unit-'+currentUnit]||0;
+    var usage=_storage('sh-hint-usage',{});
+    var count=usage['unit-'+_st.currentUnit]||0;
     el.textContent=count>0?'Hints used: '+count:'';
   }catch(e){}
 }
 
-var _sessionNotesTimer=null;
 function saveSessionNotes(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('sessionNotes');if(!el)return;
-  if(_sessionNotesTimer)clearTimeout(_sessionNotesTimer);
-  _sessionNotesTimer=setTimeout(function(){
-    try{localStorage.setItem('sh-session-notes-'+currentUnit,el.value);}catch(e){}
+  if(_st._sessionNotesTimer)clearTimeout(_st._sessionNotesTimer);
+  _st._sessionNotesTimer=setTimeout(function(){
+    _storageRawSave('sh-session-notes-'+_st.currentUnit,el.value);
   },500);
 }
 function loadSessionNotes(unit){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('sessionNotes');if(!el)return;
-  try{el.value=localStorage.getItem('sh-session-notes-'+unit)||'';}catch(e){}
+  el.value=_storageRaw('sh-session-notes-'+unit,'');
 }
 // ===================== CELEBRATIONS =====================
 function spawnConfetti(){
@@ -1518,7 +1682,6 @@ const probs=[
 {id:20,diff:'hard',topic:'Coefficient of Variation',q:'Dataset A: mean=100, SD=15. Dataset B: mean=20, SD=6. Which has MORE relative variability?',data:'A: mean=100, SD=15. B: mean=20, SD=6',type:'mc',ans:1,ch:['Dataset A (CV=15%)','Dataset B (CV=30%)','Equal relative variability','Cannot compare'],ex:'CV_A=15/100=15%. CV_B=6/20=30%. B has more relative spread.',hint:'Coefficient of Variation (CV) = SD/mean * 100%. Use it to compare spread across different scales.'}
 ];
 
-let answered={},pScore=0;
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('DOMContentLoaded',()=>{
     loadTheme();
@@ -1545,7 +1708,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
       const hashPage=window.location.hash.replace('#/','');
       const validPages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
       if(validPages.indexOf(hashPage)!==-1&&hashPage!=='home'){
-        _goPageSkipPush=true;goPage(hashPage);
+        _st._goPageSkipPush=true;goPage(hashPage);
       }
     }
   });
@@ -1553,12 +1716,12 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
   if(typeof window!=='undefined'){
     window.addEventListener('popstate',function(e){
       if(e.state&&e.state.page){
-        _goPageSkipPush=true;goPage(e.state.page);
+        _st._goPageSkipPush=true;goPage(e.state.page);
       } else if(typeof window!=='undefined'&&window.location&&window.location.hash){
         const hashPage=window.location.hash.replace('#/','');
         const validPages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
         if(validPages.indexOf(hashPage)!==-1){
-          _goPageSkipPush=true;goPage(hashPage);
+          _st._goPageSkipPush=true;goPage(hashPage);
         }
       }
     });
@@ -1585,25 +1748,15 @@ const UNIT_META={
 const MAX_UNIT=Object.keys(UNIT_META).length;
 
 let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
-let currentUnit=1;
-let activeProbs=allProbs[1];
-let probTimers={},probTimerStart={};
-let wrongAttempts={};
-let vizDrawn={};
-let practiceSessionStart=0,practiceSessionInterval=null;
-let focusedProblemId=null;
-let reviewQueue=[];
-let reviewIndex=0;
-let reviewSessionCorrect=0;
-let reviewSessionByUnit={};
+_st.activeProbs=allProbs[1];
 
 function setElText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
 function setAllScores(){
-  const n=Object.keys(answered).length;
+  const n=Object.keys(_st.answered).length;
   const scoreText=document.getElementById('scoreText');
   const scoreFill=document.getElementById('scoreFill');
-  if(scoreText)scoreText.textContent=pScore+' / '+n+' correct';
-  if(scoreFill)scoreFill.style.width=(activeProbs.length?n/activeProbs.length*100:0)+'%';
+  if(scoreText)scoreText.textContent=_st.pScore+' / '+n+' correct';
+  if(scoreFill)scoreFill.style.width=(_st.activeProbs.length?n/_st.activeProbs.length*100:0)+'%';
   updateStickyProgress();
 }
 function updateStickyProgress(){
@@ -1612,11 +1765,11 @@ function updateStickyProgress(){
   var spFill=document.getElementById('stickyProgressFill');
   var spText=document.getElementById('stickyProgressText');
   if(!sp)return;
-  var n=typeof answered!=='undefined'?Object.keys(answered).length:0;
-  var total=typeof activeProbs!=='undefined'?activeProbs.length:0;
+  var n=typeof _st.answered!=='undefined'?Object.keys(_st.answered).length:0;
+  var total=typeof _st.activeProbs!=='undefined'?_st.activeProbs.length:0;
   var pct=total>0?Math.round(n/total*100):0;
   if(spFill)spFill.style.width=pct+'%';
-  if(spText)spText.textContent=pScore+' / '+n+' correct';
+  if(spText)spText.textContent=_st.pScore+' / '+n+' correct';
 }
 function initStickyProgress(){
   if(typeof document==='undefined'||typeof IntersectionObserver==='undefined')return;
@@ -1632,30 +1785,32 @@ function initStickyProgress(){
   obs.observe(scoreBar);
 }
 function getPracticeState(unit){
-  if(typeof localStorage==='undefined')return{};
-  try{return JSON.parse(localStorage.getItem('sh-practice-'+unit)||'{}')}catch{return{}}
+  return _storage('sh-practice-'+unit,{});
 }
 function savePracticeState(unit,state){
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-practice-'+unit,JSON.stringify(state));
+  _storageSave('sh-practice-'+unit,state);
 }
-function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typeof document!=='undefined')buildProgressPanel();}
+function persistPracticeState(){savePracticeState(_st.currentUnit,{answered: _st.answered});if(typeof document!=='undefined')buildProgressPanel();}
 
-buildProblems=function(unit=currentUnit){
-  activeProbs=allProbs[unit]||[];
-  wrongAttempts={};stepHintProgress={};
+buildProblems=function(unit=_st.currentUnit){
+  // Clear leaked problem timers from previous build
+  Object.keys(_st.probTimers).forEach(function(id){clearInterval(_st.probTimers[id]);});
+  _st.probTimers={};_st.probTimerStart={};
+  _st.activeProbs=allProbs[unit]||[];
+  _st.wrongAttempts={};_st.stepHintProgress={};
   // Session timer
-  if(practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
-  practiceSessionStart=Date.now();
-  if(typeof setInterval!=='undefined'){practiceSessionInterval=setInterval(function(){var el=typeof document!=='undefined'&&document.getElementById('sessionTime');if(!el)return;var s=Math.floor((Date.now()-practiceSessionStart)/1000);var m=Math.floor(s/60);var ss=s%60;el.textContent=(m>0?m+'m ':'')+ss+'s';},1000);}
+  if(_st.practiceSessionInterval){clearInterval(_st.practiceSessionInterval);_st.practiceSessionInterval=null;}
+  _st.practiceSessionStart=Date.now();
+  if(typeof setInterval!=='undefined'){_st.practiceSessionInterval=setInterval(function(){var el=typeof document!=='undefined'&&document.getElementById('sessionTime');if(!el)return;var s=Math.floor((Date.now()-_st.practiceSessionStart)/1000);var m=Math.floor(s/60);var ss=s%60;el.textContent=(m>0?m+'m ':'')+ss+'s';},1000);}
   const c=document.getElementById('probContainer');if(!c)return;
   const bm=getBookmarks();
   const notes=getNotes();
   var _ratings={};
-  try{if(typeof localStorage!=='undefined')_ratings=JSON.parse(localStorage.getItem('sh-ratings')||'{}')||{};}catch(e){}
+  try{if(typeof localStorage!=='undefined')_ratings=_storage('sh-ratings',{})||{};}catch(e){}
   let html='';
-  activeProbs.forEach((p,p_idx)=>{
+  _st.activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="focusedProblemId='${p.id}'" onblur="focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -1668,34 +1823,28 @@ buildProblems=function(unit=currentUnit){
   });
   c.innerHTML=html;
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
-    const obs=new IntersectionObserver(function(entries){
+    var total=_st.activeProbs.length;
+    var obs=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
-        const id=entry.target.dataset.id;
-        if(entry.isIntersecting&&!probTimers[id]){
-          probTimerStart[id]=Date.now();
-          var _prob=activeProbs.find(function(x){return String(x.id)===id;});
-          var _expSecs=_prob?(_prob.diff==='easy'?60:_prob.diff==='medium'?180:300):180;
-          probTimers[id]=setInterval(function(){
-            if(typeof document==='undefined')return;
-            const el=document.getElementById('timer-'+id);
-            if(!el)return;
-            const secs=Math.floor((Date.now()-probTimerStart[id])/1000);
-            const m=Math.floor(secs/60),s=secs%60;
-            el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
-            el.classList.toggle('timer-warn',secs>=_expSecs&&secs<_expSecs*2);
-            el.classList.toggle('timer-over',secs>=_expSecs*2);
-          },1000);
-        }
-      });
-    },{threshold:0.5});
-    document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
-  }
-  // Problem counter observer
-  if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
-    var total=activeProbs.length;
-    var counterObs=new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
+        var id=entry.target.dataset.id;
         if(entry.isIntersecting){
+          // Timer start
+          if(!_st.probTimers[id]){
+            _st.probTimerStart[id]=Date.now();
+            var _prob=_st.activeProbs.find(function(x){return String(x.id)===id;});
+            var _expSecs=_prob?(_prob.diff==='easy'?60:_prob.diff==='medium'?180:300):180;
+            _st.probTimers[id]=setInterval(function(){
+              if(typeof document==='undefined')return;
+              var el=document.getElementById('timer-'+id);
+              if(!el)return;
+              var secs=Math.floor((Date.now()-_st.probTimerStart[id])/1000);
+              var m=Math.floor(secs/60),s=secs%60;
+              el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
+              el.classList.toggle('timer-warn',secs>=_expSecs&&secs<_expSecs*2);
+              el.classList.toggle('timer-over',secs>=_expSecs*2);
+            },1000);
+          }
+          // Problem counter
           var cards=Array.from(document.querySelectorAll('.pc'));
           var idx=cards.indexOf(entry.target)+1;
           var ctr=document.getElementById('probCounter');
@@ -1703,11 +1852,11 @@ buildProblems=function(unit=currentUnit){
         }
       });
     },{threshold:0.5});
-    document.querySelectorAll('.pc').forEach(function(card){counterObs.observe(card);});
+    document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
   }
   if(typeof localStorage!=='undefined'){
     try{
-      var dvotes=JSON.parse(localStorage.getItem('sh-diff-votes')||'{}');
+      var dvotes=_storage('sh-diff-votes',{});
       Object.keys(dvotes).forEach(function(pid){
         var row=document.getElementById('dvr-'+pid);
         if(!row)return;
@@ -1727,21 +1876,21 @@ buildProblems=function(unit=currentUnit){
   loadSessionNotes(unit);
   _saveRecentUnit(unit);
   buildTagFilter();
-  if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
-  if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
-  if(typeof localStorage!=='undefined'){try{var collSet=new Set(JSON.parse(localStorage.getItem('sh-collapsed-'+unit)||'[]'));collSet.forEach(function(cid){var card=document.getElementById('pc-'+cid);if(card){card.classList.add('pc-collapsed');var btn=card.querySelector('.card-collapse-btn');if(btn)btn.textContent='▸';}});}catch(e){}}
+  var savedSort=_storageRaw('sh-problem-sort','default');if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}
+  if(typeof localStorage!=='undefined'){try{_st.activeTags=new Set(_storage('sh-active-tags',[]));}catch(e){_st.activeTags=new Set();}applyTagFilter();}
+  if(typeof localStorage!=='undefined'){try{var collSet=new Set(_storage('sh-collapsed-'+unit,[]));collSet.forEach(function(cid){var card=document.getElementById('pc-'+cid);if(card){card.classList.add('pc-collapsed');var btn=card.querySelector('.card-collapse-btn');if(btn)btn.textContent='▸';}});}catch(e){}}
   const saved=getPracticeState(unit);
-  answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
-  pScore=0;
-  activeProbs.forEach(p=>{
-    if(answered[p.id]===undefined)return;
+  _st.answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
+  _st.pScore=0;
+  _st.activeProbs.forEach(p=>{
+    if(_st.answered[p.id]===undefined)return;
     if(p.type==='mc'){
-      const ch=+answered[p.id],ok=ch===p.ans;if(ok)pScore++;
+      const ch=+_st.answered[p.id],ok=ch===p.ans;if(ok)_st.pScore++;
       p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+p.id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
       showFB(p.id,ok,ok?p.ex:'Correct answer: '+p.ch[p.ans]+'. '+p.ex);
     }else{
-      const v=parseFloat(answered[p.id]);if(!Number.isFinite(v))return;
-      const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
+      const v=parseFloat(_st.answered[p.id]);if(!Number.isFinite(v))return;
+      const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)_st.pScore++;
       const inp=document.getElementById('fi-'+p.id);if(inp){inp.value=String(v);inp.disabled=true;inp.style.borderColor=ok?'var(--green)':'var(--red)';}
       showFB(p.id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);
     }
@@ -1749,7 +1898,7 @@ buildProblems=function(unit=currentUnit){
   setAllScores();
   // Touch swipe gestures for MC answer selection
   if(typeof document!=='undefined'&&typeof window!=='undefined'&&'ontouchstart' in window){
-    activeProbs.forEach(function(p){
+    _st.activeProbs.forEach(function(p){
       if(p.type!=='mc')return;
       var card=document.getElementById('pc-'+p.id);if(!card)return;
       var tx=0,ty=0;
@@ -1768,7 +1917,7 @@ function updateSessionGoal(){
   var sel=document.getElementById('sessionGoal');
   if(!sel)return;
   var goal=parseInt(sel.value)||0;
-  try{localStorage.setItem('sh-session-goal',String(goal));}catch(e){}
+  _storageRawSave('sh-session-goal',String(goal));
   refreshGoalProgress();
 }
 function refreshGoalProgress(){
@@ -1780,11 +1929,11 @@ function refreshGoalProgress(){
   var ringText=document.getElementById('goalRingText');
   if(!progress||!text)return;
   var goal=0;
-  if(typeof localStorage!=='undefined')try{goal=parseInt(localStorage.getItem('sh-session-goal'))||0;}catch(e){}
+  goal=parseInt(_storageRaw('sh-session-goal','0'))||0;
   if(!goal){progress.style.display='none';if(ring)ring.style.display='none';text.textContent='';return;}
-  var answered=0;
-  if(typeof sessionData!=='undefined')answered=sessionData.problemsAnswered||0;
-  var pct=Math.min(Math.round(answered/goal*100),100);
+  var answeredCount=0;
+  if(typeof _st.sessionData!=='undefined')answeredCount=_st.sessionData.problemsAnswered||0;
+  var pct=Math.min(Math.round(answeredCount/goal*100),100);
   progress.style.display='none';
   if(ring){
     ring.style.display='';
@@ -1792,8 +1941,8 @@ function refreshGoalProgress(){
     if(ringFill)ringFill.setAttribute('stroke-dashoffset',String(Math.round(circ*(1-pct/100)*10)/10));
     if(ringText)ringText.textContent=pct+'%';
   }
-  text.textContent=answered+' / '+goal;
-  if(answered>=goal&&goal>0&&pct===100){
+  text.textContent=answeredCount+' / '+goal;
+  if(answeredCount>=goal&&goal>0&&pct===100){
     if(typeof showToast!=='undefined'&&!document.getElementById('goalProgress').dataset.toasted){document.getElementById('goalProgress').dataset.toasted='1';showToast('Session goal reached! Great work.');}
   }else{
     var pg=document.getElementById('goalProgress');if(pg)pg.dataset.toasted='';
@@ -1802,9 +1951,9 @@ function refreshGoalProgress(){
 function voteDiff(probId,vote){
   if(typeof localStorage==='undefined')return;
   try{
-    var votes=JSON.parse(localStorage.getItem('sh-diff-votes')||'{}');
+    var votes=_storage('sh-diff-votes',{});
     votes[String(probId)]=vote;
-    localStorage.setItem('sh-diff-votes',JSON.stringify(votes));
+    _storageSaveSoon('sh-diff-votes',votes);
   }catch(e){}
   if(typeof document==='undefined')return;
   var row=document.getElementById('dvr-'+probId);
@@ -1817,16 +1966,16 @@ function _recordAnswerHistory(probId,val,ok){
   if(typeof localStorage==='undefined')return;
   try{
     var key='sh-answers-history-'+probId;
-    var hist=JSON.parse(localStorage.getItem(key)||'[]');
+    var hist=_storage(key,[]);
     hist.push({time:Date.now(),val:String(val),correct:ok});
     if(hist.length>10)hist=hist.slice(-10);
-    localStorage.setItem(key,JSON.stringify(hist));
+    _storageSave(key,hist);
   }catch(e){}
 }
 function showAnswerHistory(probId){
   if(typeof document==='undefined')return;
   var hist=[];
-  try{hist=JSON.parse(localStorage.getItem('sh-answers-history-'+probId)||'[]');}catch(e){}
+  hist=_storage('sh-answers-history-'+probId,[]);
   var now=Date.now();
   function _ago(t){var s=Math.round((now-t)/1000);if(s<60)return s+'s ago';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago';}
   var rows=hist.slice(-5).reverse().map(function(h){
@@ -1835,17 +1984,19 @@ function showAnswerHistory(probId){
   if(!rows)rows='<div class="ah-row" style="color:var(--muted)">No attempts yet</div>';
   var overlay=document.createElement('div');
   overlay.className='overlay-backdrop';
-  overlay.innerHTML='<div class="answer-hist-modal"><div class="ahm-title">Problem #'+probId+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
+  overlay.innerHTML='<div class="answer-hist-modal" role="dialog" aria-modal="true"><div class="ahm-title">Problem #'+_esc(probId)+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
   document.body.appendChild(overlay);
+  var _ahModal=overlay.querySelector('.answer-hist-modal');
+  if(_ahModal)_trapFocus(overlay,_ahModal);
 }
 function ansMC(id,ch){
-  if(answered[id]!==undefined)return;
-  if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
-  const p=activeProbs.find(x=>x.id===id);if(!p)return;
+  if(_st.answered[id]!==undefined)return;
+  if(_st.probTimers[id]){clearInterval(_st.probTimers[id]);delete _st.probTimers[id];}
+  const p=_st.activeProbs.find(x=>x.id===id);if(!p)return;
   const ok=ch===p.ans;_recordAnswerHistory(id,ch,ok);
-  answered[id]=ch;if(ok)pScore++;
-  if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
+  _st.answered[id]=ch;if(ok)_st.pScore++;
+  if(!ok&&p.hint){_st.wrongAttempts[id]=(_st.wrongAttempts[id]||0)+1;if(_st.wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans){el.classList.add('right');if(!ok)el.classList.add('flash-correct');}else if(j===ch&&!ok){el.classList.add('wrong');el.classList.add('flash-wrong');}});
   var _ansLabel=ok?null:('ABCD'[ch]+'. '+p.ch[ch]);
   showFB(id,ok,p.ex,_ansLabel);
@@ -1853,7 +2004,7 @@ function ansMC(id,ch){
   persistPracticeState();
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
-  sessionData.problemsAnswered++;if(ok)sessionData.correct++;
+  _st.sessionData.problemsAnswered++;if(ok)_st.sessionData.correct++;
   updateWeeklyProgress('problems',1);
   recordActivity();
   _recordTodayActivity(p.id,p.unit,ok);
@@ -1862,28 +2013,28 @@ function ansMC(id,ch){
   updateWeakSpots();
   refreshGoalProgress();
   updatePracticeNavBadge();
-  checkUnitCompletion(currentUnit);
-  updateMasteryBadge(currentUnit);
-  buildUnitXPBar(currentUnit);
+  checkUnitCompletion(_st.currentUnit);
+  updateMasteryBadge(_st.currentUnit);
+  buildUnitXPBar(_st.currentUnit);
   if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
 function ansFR(id){
-  if(answered[id]!==undefined)return;
-  if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
-  const p=activeProbs.find(x=>x.id===id);if(!p)return;
+  if(_st.answered[id]!==undefined)return;
+  if(_st.probTimers[id]){clearInterval(_st.probTimers[id]);delete _st.probTimers[id];}
+  const p=_st.activeProbs.find(x=>x.id===id);if(!p)return;
   const inp=document.getElementById('fi-'+id);if(!inp)return;
   const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
   const ok=Math.abs(v-p.ans)<=(p.tol||0.1);_recordAnswerHistory(id,v,ok);
-  answered[id]=v;if(ok)pScore++;
-  if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
+  _st.answered[id]=v;if(ok)_st.pScore++;
+  if(!ok&&p.hint){_st.wrongAttempts[id]=(_st.wrongAttempts[id]||0)+1;if(_st.wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
   showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex,ok?null:String(v));
   addToReview(p.id,ok);
   persistPracticeState();
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
-  sessionData.problemsAnswered++;if(ok)sessionData.correct++;
+  _st.sessionData.problemsAnswered++;if(ok)_st.sessionData.correct++;
   updateWeeklyProgress('problems',1);
   recordActivity();
   _recordTodayActivity(p.id,p.unit,ok);
@@ -1892,19 +2043,19 @@ function ansFR(id){
   updateWeakSpots();
   refreshGoalProgress();
   updatePracticeNavBadge();
-  checkUnitCompletion(currentUnit);
-  updateMasteryBadge(currentUnit);
-  buildUnitXPBar(currentUnit);
+  checkUnitCompletion(_st.currentUnit);
+  updateMasteryBadge(_st.currentUnit);
+  buildUnitXPBar(_st.currentUnit);
   if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
 function autoScrollToNext(currentId){
   if(typeof document==='undefined')return;
-  var probs=activeProbs||[];
+  var probs=_st.activeProbs||[];
   var idx=probs.findIndex(function(p){return p.id===currentId;});
   if(idx<0)return;
   for(var i=idx+1;i<probs.length;i++){
-    if(answered[probs[i].id]===undefined){
+    if(_st.answered[probs[i].id]===undefined){
       var el=document.getElementById('pc-'+probs[i].id);
       if(el&&typeof el.scrollIntoView==='function')el.scrollIntoView({behavior:'smooth',block:'center'});
       return;
@@ -1930,10 +2081,10 @@ function startReview(){
     return;
   }
 
-  reviewQueue=dueIds.slice(0,10);
-  reviewIndex=0;
-  reviewSessionCorrect=0;
-  reviewSessionByUnit={};
+  _st.reviewQueue=dueIds.slice(0,10);
+  _st.reviewIndex=0;
+  _st.reviewSessionCorrect=0;
+  _st.reviewSessionByUnit={};
 
   const btn=document.getElementById('startReviewBtn');
   const card=document.getElementById('reviewCard');
@@ -1944,14 +2095,14 @@ function startReview(){
 
 function showReviewCard(){
   if(typeof document==='undefined')return;
-  if(reviewIndex>=reviewQueue.length){endReview();return;}
+  if(_st.reviewIndex>=_st.reviewQueue.length){endReview();return;}
 
-  const probId=reviewQueue[reviewIndex];
+  const probId=_st.reviewQueue[_st.reviewIndex];
   const prob=findProblemById(probId);
-  if(!prob){reviewIndex++;showReviewCard();return;}
+  if(!prob){_st.reviewIndex++;showReviewCard();return;}
 
   const progress=document.getElementById('reviewProgress');
-  if(progress)progress.textContent=(reviewIndex+1)+' / '+reviewQueue.length;
+  if(progress)progress.textContent=(_st.reviewIndex+1)+' / '+_st.reviewQueue.length;
 
   const card=document.getElementById('reviewCardInner');
   if(!card)return;
@@ -1977,19 +2128,19 @@ function showReviewCard(){
 
 function reviewMC(probId,chosen){
   if(typeof document==='undefined')return;
-  if(reviewIndex>=reviewQueue.length)return;
+  if(_st.reviewIndex>=_st.reviewQueue.length)return;
 
-  const activeId=String(reviewQueue[reviewIndex]);
+  const activeId=String(_st.reviewQueue[_st.reviewIndex]);
   if(String(probId)!==activeId)return;
   const prob=findProblemById(activeId);
   if(!prob||prob.type!=='mc')return;
 
   const ok=chosen===prob.ans;
-  if(ok)reviewSessionCorrect++;
+  if(ok)_st.reviewSessionCorrect++;
   var _rUnit=prob.unit||1;
-  if(!reviewSessionByUnit[_rUnit])reviewSessionByUnit[_rUnit]={correct:0,total:0};
-  reviewSessionByUnit[_rUnit].total++;
-  if(ok)reviewSessionByUnit[_rUnit].correct++;
+  if(!_st.reviewSessionByUnit[_rUnit])_st.reviewSessionByUnit[_rUnit]={correct:0,total:0};
+  _st.reviewSessionByUnit[_rUnit].total++;
+  if(ok)_st.reviewSessionByUnit[_rUnit].correct++;
 
   (prob.ch||[]).forEach((_,j)=>{
     const el=document.getElementById('rv-'+activeId+'-'+j);
@@ -2021,15 +2172,15 @@ function reviewMC(probId,chosen){
   recordActivity();
   updateReviewBadge();
 
-  if(typeof setTimeout==='function')setTimeout(()=>{reviewIndex++;showReviewCard();},ok?1500:3000);
-  else{reviewIndex++;showReviewCard();}
+  if(typeof setTimeout==='function')setTimeout(()=>{_st.reviewIndex++;showReviewCard();},ok?1500:3000);
+  else{_st.reviewIndex++;showReviewCard();}
 }
 
 function reviewFR(probId){
   if(typeof document==='undefined')return;
-  if(reviewIndex>=reviewQueue.length)return;
+  if(_st.reviewIndex>=_st.reviewQueue.length)return;
 
-  const activeId=String(reviewQueue[reviewIndex]);
+  const activeId=String(_st.reviewQueue[_st.reviewIndex]);
   if(String(probId)!==activeId)return;
   const prob=findProblemById(activeId);
   if(!prob||prob.type!=='fr')return;
@@ -2040,11 +2191,11 @@ function reviewFR(probId){
   if(!Number.isFinite(v))return;
 
   const ok=Math.abs(v-prob.ans)<=(prob.tol||0.1);
-  if(ok)reviewSessionCorrect++;
+  if(ok)_st.reviewSessionCorrect++;
   var _rUnit=prob.unit||1;
-  if(!reviewSessionByUnit[_rUnit])reviewSessionByUnit[_rUnit]={correct:0,total:0};
-  reviewSessionByUnit[_rUnit].total++;
-  if(ok)reviewSessionByUnit[_rUnit].correct++;
+  if(!_st.reviewSessionByUnit[_rUnit])_st.reviewSessionByUnit[_rUnit]={correct:0,total:0};
+  _st.reviewSessionByUnit[_rUnit].total++;
+  if(ok)_st.reviewSessionByUnit[_rUnit].correct++;
 
   inp.disabled=true;
   inp.style.borderColor=ok?'var(--green)':'var(--red)';
@@ -2072,8 +2223,8 @@ function reviewFR(probId){
   recordActivity();
   updateReviewBadge();
 
-  if(typeof setTimeout==='function')setTimeout(()=>{reviewIndex++;showReviewCard();},ok?1500:3000);
-  else{reviewIndex++;showReviewCard();}
+  if(typeof setTimeout==='function')setTimeout(()=>{_st.reviewIndex++;showReviewCard();},ok?1500:3000);
+  else{_st.reviewIndex++;showReviewCard();}
 }
 
 function drawReviewChart(canvas,byUnit){
@@ -2107,42 +2258,44 @@ function endReview(){
   const btn=document.getElementById('startReviewBtn');
   if(btn){btn.style.display='';btn.textContent='Start Another Session';}
 
-  const total=reviewQueue.length;
-  const pct=total?Math.round(reviewSessionCorrect/total*100):0;
-  showToast('Session complete! '+reviewSessionCorrect+'/'+total+' correct ('+pct+'%)');
+  const total=_st.reviewQueue.length;
+  const pct=total?Math.round(_st.reviewSessionCorrect/total*100):0;
+  showToast('Session complete! '+_st.reviewSessionCorrect+'/'+total+' correct ('+pct+'%)');
 
   const meta=getReviewMeta();
   meta.sessions=(meta.sessions||0)+1;
   saveReviewMeta(meta);
 
   awardXP(10,'review-session-'+meta.sessions);
-  sessionData.reviewsDone++;
+  _st.sessionData.reviewsDone++;
   updateWeeklyProgress('review',1);
   checkMilestones();
   updateReviewBadge();
 
   // Show chart if session had problems from >1 unit
-  var unitKeys=Object.keys(reviewSessionByUnit);
+  var unitKeys=Object.keys(_st.reviewSessionByUnit);
   if(unitKeys.length>1&&typeof document!=='undefined'){
     var overlay=document.createElement('div');
     overlay.className='session-overlay';
     overlay.onclick=function(){overlay.remove();};
     var modal=document.createElement('div');
     modal.className='session-modal';
+    modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
     modal.onclick=function(e){e.stopPropagation();};
-    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+reviewSessionCorrect+'/'+total+' correct ('+pct+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
+    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_esc(_st.reviewSessionCorrect)+'/'+_esc(total)+' correct ('+_esc(pct)+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;" role="img" aria-label="Review session results chart"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
     var _closeBtn=modal.querySelector('#reviewChartClose');
     if(_closeBtn)_closeBtn.onclick=function(){overlay.remove();};
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+    _trapFocus(overlay,modal);
     var canvas=document.getElementById('reviewChart');
-    drawReviewChart(canvas,reviewSessionByUnit);
+    drawReviewChart(canvas,_st.reviewSessionByUnit);
   }
 
-  reviewQueue=[];
-  reviewIndex=0;
-  reviewSessionCorrect=0;
-  reviewSessionByUnit={};
+  _st.reviewQueue=[];
+  _st.reviewIndex=0;
+  _st.reviewSessionCorrect=0;
+  _st.reviewSessionByUnit={};
 }
 
 function updateReviewBadge(){
@@ -2246,26 +2399,25 @@ function updateDailyDigest(){
   }
 }
 
-var examModeActive=false;
 function toggleExamMode(){
   if(typeof document==='undefined')return;
-  examModeActive=!examModeActive;
+  _st.examModeActive=!_st.examModeActive;
   var btn=document.getElementById('examModeBtn');
-  if(btn)btn.classList.toggle('active',examModeActive);
-  if(examModeActive){showToast('Exam Mode ON — feedback hidden until you finish');}
+  if(btn)btn.classList.toggle('active',_st.examModeActive);
+  if(_st.examModeActive){showToast('Exam Mode ON — feedback hidden until you finish');}
   else{
     showToast('Exam Mode OFF — showing feedback');
-    // Re-render feedback for answered problems
-    activeProbs.forEach(function(p){
-      if(answered[p.id]!==undefined){
-        if(p.type==='mc'){var ok=(+answered[p.id])===p.ans;showFB(p.id,ok,ok?p.ex:'Correct: '+p.ch[p.ans]+'. '+p.ex);}
-        else{var v=parseFloat(answered[p.id]);var ok2=Math.abs(v-p.ans)<=(p.tol||0.1);showFB(p.id,ok2,ok2?p.ex:'Correct: '+p.ans+'. '+p.ex);}
+    // Re-render feedback for _st.answered problems
+    _st.activeProbs.forEach(function(p){
+      if(_st.answered[p.id]!==undefined){
+        if(p.type==='mc'){var ok=(+_st.answered[p.id])===p.ans;showFB(p.id,ok,ok?p.ex:'Correct: '+p.ch[p.ans]+'. '+p.ex);}
+        else{var v=parseFloat(_st.answered[p.id]);var ok2=Math.abs(v-p.ans)<=(p.tol||0.1);showFB(p.id,ok2,ok2?p.ex:'Correct: '+p.ans+'. '+p.ex);}
       }
     });
   }
 }
 function showFB(id,ok,ex,userAnswerLabel){
-  if(examModeActive)return;
+  if(_st.examModeActive)return;
   const fb=document.getElementById('fb-'+id),pc=document.getElementById('pc-'+id),b=document.getElementById('fbx-'+id);
   if(!fb||!pc||!b)return;
   fb.classList.add('show');
@@ -2281,7 +2433,7 @@ function showFB(id,ok,ex,userAnswerLabel){
     b.appendChild(prev);
   }
   const _ann=document.getElementById('a11yAnnounce');if(_ann)_ann.textContent=ok?'Correct!':'Incorrect. '+ex;
-  const unit=allProbs[currentUnit]||[];
+  const unit=allProbs[_st.currentUnit]||[];
   const prob=unit.find(function(p){return String(p.id)===String(id);});
   if(prob&&prob.steps&&prob.steps.length){
     const stepsDiv=document.createElement('div');
@@ -2355,7 +2507,7 @@ function updatePScore(){setAllScores()}
 
 function showUnitInfo(){
   if(typeof document==='undefined'||typeof window==='undefined')return;
-  var unit=currentUnit;
+  var unit=_st.currentUnit;
   var meta=UNIT_META[unit];
   if(!meta)return;
   var probs=(allProbs[unit]||[]);
@@ -2369,21 +2521,23 @@ function showUnitInfo(){
   var modal=document.createElement('div');
   modal.className='unit-info-modal';
   modal.onclick=function(e){e.stopPropagation();};
-  var topicList=topics.map(function(t){return '<li>'+t+'</li>';}).join('');
-  modal.innerHTML='<div class="unit-info-header"><strong>Unit '+unit+': '+meta.name+'</strong></div>'+
+  var topicList=topics.map(function(t){return '<li>'+_esc(t)+'</li>';}).join('');
+  modal.innerHTML='<div class="unit-info-header"><strong>Unit '+_esc(unit)+': '+_esc(meta.name)+'</strong></div>'+
     '<div class="unit-info-stat-row"><span>'+probs.length+' problems</span><span class="ui-easy">'+easy+' easy</span><span class="ui-med">'+med+' medium</span><span class="ui-hard">'+hard+' hard</span></div>'+
     '<div class="unit-info-topics"><div class="unit-info-label">Topics covered:</div><ul class="unit-info-topic-list">'+topicList+'</ul></div>'+
     '<button id="unitInfoClose" class="unit-info-close">Close</button>';
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
   var closeBtn=modal.querySelector('#unitInfoClose');
   if(closeBtn)closeBtn.onclick=function(){overlay.remove();};
+  _trapFocus(overlay,modal);
 }
 function setUnit(n){
   if(!UNIT_META[n])return;
-  currentUnit=n;
-  if(typeof document!=='undefined'){var bc=document.getElementById('breadcrumb');if(bc&&bc.textContent.startsWith('Practice')){var unitName=UNIT_META[n]?UNIT_META[n].name:'';bc.innerHTML='Practice <span class="breadcrumb-sep">›</span> Unit '+n+(unitName?' – '+unitName:'');}};
-  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-unit',String(n));}catch(e){};
+  _st.currentUnit=n;
+  if(typeof document!=='undefined'){var bc=document.getElementById('breadcrumb');if(bc&&bc.textContent.startsWith('Practice')){var unitName=UNIT_META[n]?UNIT_META[n].name:'';bc.innerHTML='Practice <span class="breadcrumb-sep">›</span> Unit '+_esc(n)+(unitName?' – '+_esc(unitName):'');}};
+  _storageRawSave('sh-filter-unit',String(n));
   const sel=document.getElementById('unitSelect');if(sel)sel.value=String(n);
   const vsel=document.getElementById('vizUnitSelect');if(vsel)vsel.value=String(n);
   setElText('practiceUnitTag','Unit '+n+' - '+UNIT_META[n].name);
@@ -2610,11 +2764,11 @@ function prepCanvas2(id,h){
 function _recordVizHistory(unit){
   if(typeof localStorage==='undefined')return;
   try{
-    var hist=JSON.parse(localStorage.getItem('sh-viz-history')||'[]');
+    var hist=_storage('sh-viz-history',[]);
     hist=hist.filter(function(u){return u!==unit;});
     hist.unshift(unit);
     if(hist.length>5)hist=hist.slice(0,5);
-    localStorage.setItem('sh-viz-history',JSON.stringify(hist));
+    _storageSave('sh-viz-history',hist);
   }catch(e){}
 }
 function toggleVizInfo(){
@@ -2633,10 +2787,10 @@ function buildVizUnitInfo(unit){
   var probs=allProbs[unit]||[];
   var topics=[...new Set(probs.map(function(p){return p.topic;}))].slice(0,6);
   var xpAvail=probs.reduce(function(sum,p){return sum+(p.diff==='easy'?XP_TABLE.easy:p.diff==='medium'?XP_TABLE.medium:XP_TABLE.hard);},0);
-  body.innerHTML='<div class="vui-name">Unit '+unit+': '+name+'</div>'
+  body.innerHTML='<div class="vui-name">Unit '+_esc(unit)+': '+_esc(name)+'</div>'
     +'<div class="vui-row"><span class="vui-label">Problems:</span><span class="vui-val">'+probs.length+'</span></div>'
     +'<div class="vui-row"><span class="vui-label">XP Available:</span><span class="vui-val">'+xpAvail+'</span></div>'
-    +'<div class="vui-row"><span class="vui-label">Topics:</span><span class="vui-val">'+topics.join(', ')+'</span></div>';
+    +'<div class="vui-row"><span class="vui-label">Topics:</span><span class="vui-val">'+_esc(topics.join(', '))+'</span></div>';
 }
 function buildVizDataSummary(unit){
   if(typeof document==='undefined')return;
@@ -2666,7 +2820,7 @@ function buildVizHistory(){
   var row=document.getElementById('vizHistoryRow');
   if(!row)return;
   var hist=[];
-  try{hist=JSON.parse(localStorage.getItem('sh-viz-history')||'[]');}catch(e){}
+  hist=_storage('sh-viz-history',[]);
   if(!hist.length){row.style.display='none';return;}
   row.style.display='flex';
   var html='<span class="viz-history-label">Recently:</span>';
@@ -2781,7 +2935,7 @@ function isVizPageActive(){
   return !!(vizPage&&vizPage.classList.contains('active'));
 }
 
-function buildVizForUnit(unit=currentUnit){
+function buildVizForUnit(unit=_st.currentUnit){
   const tabs=document.getElementById('vizTabs');
   const panels=document.getElementById('viz-panels');
   const dynamic=document.getElementById('viz-dynamic');
@@ -2789,27 +2943,27 @@ function buildVizForUnit(unit=currentUnit){
   if(unit===1){
     tabs.style.display='flex';panels.style.display='block';
     dynamic.style.display='none';dynamic.innerHTML='';
-    vizDrawn[1]=false;
+    _st.vizDrawn[1]=false;
     return;
   }
   tabs.style.display='none';panels.style.display='none';
   dynamic.style.display='block';dynamic.innerHTML=vizTemplate(unit);
-  vizDrawn[unit]=false;
+  _st.vizDrawn[unit]=false;
 }
 
 function drawActiveVisualizer(force){
   if(!isVizPageActive())return;
-  if(currentUnit===1){
-    if(vizDrawn[1]&&!force)return;
+  if(_st.currentUnit===1){
+    if(_st.vizDrawn[1]&&!force)return;
     drawHist();drawBox();drawNorm();drawComp();
-    vizDrawn[1]=true;
+    _st.vizDrawn[1]=true;
     return;
   }
-  if(vizDrawn[currentUnit]&&!force)return;
-  const v=allViz[currentUnit];
+  if(_st.vizDrawn[_st.currentUnit]&&!force)return;
+  const v=allViz[_st.currentUnit];
   if(v&&typeof v.draw==='function'){
     v.draw();
-    vizDrawn[currentUnit]=true;
+    _st.vizDrawn[_st.currentUnit]=true;
   }
 }
 
@@ -3363,18 +3517,18 @@ function drawRegOut(){
   const canvas=document.getElementById('regCanvas');
   if(canvas&&!canvas.dataset.bound){
     canvas.dataset.bound='1';
-    canvas.addEventListener('mousemove',e=>{
-      const r=canvas.getBoundingClientRect();
-      const x=e.clientX-r.left,y=e.clientY-r.top;
+    canvas.addEventListener('mousemove',_throttle(function(e){
+      var r=canvas.getBoundingClientRect();
+      var x=e.clientX-r.left,y=e.clientY-r.top;
       vizState.u11.mouse={x,y};
-      const hit=vizState.u11.hotspots.find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h);
-      const newHover=hit?hit.key:'';
+      var hit=vizState.u11.hotspots.find(function(h){return x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h;});
+      var newHover=hit?hit.key:'';
       if(newHover!==vizState.u11.hover){
         vizState.u11.hover=newHover;
         setElText('u11Tip',hit?hit.tip:'Hover a highlighted value for explanation.');
         drawRegOut();
       }
-    });
+    },16));
     canvas.addEventListener('mouseleave',()=>{
       if(vizState.u11.hover!==''){
         vizState.u11.hover='';
@@ -3439,7 +3593,7 @@ function getProgressSummary(){
     const probs=allProbs[unit]||[];
     let stored={};
     if(typeof localStorage!=='undefined'){
-      try{stored=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'{}')||{};}catch{stored={};}
+      try{stored=_storage('sh-practice-'+unit,{})||{};}catch{stored={};}
     }
     const saved=stored.answered&&typeof stored.answered==='object'?stored.answered:{};
     const attempted=Object.keys(saved).length;
@@ -3464,7 +3618,7 @@ function drawDiffChart(){
   var canvas=document.getElementById('diffChart');
   var row=document.getElementById('diffChartRow');
   if(!canvas||typeof canvas.getContext!=='function')return;
-  var probs=(allProbs[currentUnit]||[]);
+  var probs=(allProbs[_st.currentUnit]||[]);
   if(!probs.length){if(row)row.style.display='none';return;}
   var easy=probs.filter(function(p){return p.diff==='easy';}).length;
   var med=probs.filter(function(p){return p.diff==='medium';}).length;
@@ -3517,7 +3671,7 @@ function buildProgressPanel(){
     var _pp=document.getElementById('progressPanel');
     var _pb=document.getElementById('progressToggle');
     if(_pp&&_pb&&typeof _pb.setAttribute==='function'){
-      var _isC=localStorage.getItem('sh-progress-collapsed')==='1';
+      var _isC=_storageRaw('sh-progress-collapsed','')==='1';
       if(_isC){_pp.classList.add('collapsed');_pb.setAttribute('aria-expanded','false');_pb.textContent='Progress Overview \u25B8';}
       else{_pp.classList.remove('collapsed');_pb.setAttribute('aria-expanded','true');_pb.textContent='Progress Overview \u25BE';}
     }
@@ -3533,14 +3687,14 @@ function toggleProgressPanel(){
   const expanded=!panel.classList.contains('collapsed');
   btn.setAttribute('aria-expanded',expanded?'true':'false');
   btn.textContent='Progress Overview '+(expanded?'\u25BE':'\u25B8');
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-progress-collapsed',expanded?'0':'1');
+  _storageRawSave('sh-progress-collapsed',expanded?'0':'1');
 }
 
 function resetUnit(unit){
   if(typeof document==='undefined')return;
-  var answeredCount=Object.keys(answered).length;
-  var correctCount=pScore;
-  var elapsed=practiceSessionStart?Math.round((Date.now()-practiceSessionStart)/1000):0;
+  var answeredCount=Object.keys(_st.answered).length;
+  var correctCount=_st.pScore;
+  var elapsed=_st.practiceSessionStart?Math.round((Date.now()-_st.practiceSessionStart)/1000):0;
   if(answeredCount>0){
     showUnitResetSummary(unit,answeredCount,correctCount,elapsed);
   }else{
@@ -3558,9 +3712,9 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
   modal.onclick=function(e){e.stopPropagation();};
   var pct=answeredCount?Math.round(correctCount/answeredCount*100):0;
   var timeStr=elapsed>=60?Math.floor(elapsed/60)+'m '+(elapsed%60)+'s':elapsed+'s';
-  modal.innerHTML='<h3>Unit '+unit+' Summary</h3>'
+  modal.innerHTML='<h3>Unit '+_esc(unit)+' Summary</h3>'
     +'<div class="session-stats">'
-    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">answered</span></div>'
+    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">_st.answered</span></div>'
     +'<div class="session-stat"><span class="session-num">'+correctCount+'</span><span class="session-label">correct</span></div>'
     +'<div class="session-stat"><span class="session-num">'+pct+'%</span><span class="session-label">accuracy</span></div>'
     +'<div class="session-stat"><span class="session-num">'+timeStr+'</span><span class="session-label">time</span></div>'
@@ -3575,9 +3729,9 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
 
 function _doResetUnit(unit){
   if(typeof localStorage!=='undefined')localStorage.removeItem('sh-practice-'+unit);
-  answered={};
-  pScore=0;
-  buildProblems(currentUnit);
+  _st.answered={};
+  _st.pScore=0;
+  buildProblems(_st.currentUnit);
   buildProgressPanel();
   updateReviewBadge();
 }
@@ -3598,9 +3752,9 @@ function resetAllProgress(){
     localStorage.removeItem('sh-custom-problems');
     localStorage.removeItem('sh-ratings');
   }
-  answered={};
-  pScore=0;
-  buildProblems(currentUnit);
+  _st.answered={};
+  _st.pScore=0;
+  buildProblems(_st.currentUnit);
   buildRoadmap();
   buildProgressPanel();
   updateStreakDisplay();
@@ -3611,7 +3765,6 @@ function resetAllProgress(){
 
 
 // ===================== POMODORO TIMER =====================
-let pomoState={running:false,seconds:25*60,total:25*60,interval:null,sessionsToday:0};
 
 function togglePomoPanel(){
   if(typeof document==='undefined')return;
@@ -3620,37 +3773,37 @@ function togglePomoPanel(){
 }
 
 function setPomoTime(mins){
-  if(pomoState.running)return;
-  pomoState.seconds=mins*60;
-  pomoState.total=mins*60;
+  if(_st.pomoState.running)return;
+  _st.pomoState.seconds=mins*60;
+  _st.pomoState.total=mins*60;
   updatePomoDisplay();
   document.querySelectorAll('.pomo-preset').forEach(b=>b.classList.remove('active'));
   if(typeof event!=='undefined'&&event&&event.target)event.target.classList.add('active');
 }
 
 function startPomo(){
-  if(pomoState.running)return;
-  pomoState.running=true;
+  if(_st.pomoState.running)return;
+  _st.pomoState.running=true;
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
   const label=document.getElementById('pomoLabel');
   if(startBtn)startBtn.style.display='none';
   if(pauseBtn)pauseBtn.style.display='';
   if(label)label.textContent='Focusing...';
-  pomoState.interval=setInterval(()=>{
-    pomoState.seconds--;
+  _st.pomoState.interval=setInterval(()=>{
+    _st.pomoState.seconds--;
     updatePomoDisplay();
-    if(pomoState.seconds<=0){
-      clearInterval(pomoState.interval);
-      pomoState.running=false;
+    if(_st.pomoState.seconds<=0){
+      clearInterval(_st.pomoState.interval);
+      _st.pomoState.running=false;
       pomoComplete();
     }
   },1000);
 }
 
 function pausePomo(){
-  clearInterval(pomoState.interval);
-  pomoState.running=false;
+  clearInterval(_st.pomoState.interval);
+  _st.pomoState.running=false;
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
   const label=document.getElementById('pomoLabel');
@@ -3660,9 +3813,9 @@ function pausePomo(){
 }
 
 function resetPomo(){
-  clearInterval(pomoState.interval);
-  pomoState.running=false;
-  pomoState.seconds=pomoState.total;
+  clearInterval(_st.pomoState.interval);
+  _st.pomoState.running=false;
+  _st.pomoState.seconds=_st.pomoState.total;
   updatePomoDisplay();
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
@@ -3674,29 +3827,29 @@ function resetPomo(){
 
 function updatePomoDisplay(){
   if(typeof document==='undefined')return;
-  const m=Math.floor(pomoState.seconds/60);
-  const s=pomoState.seconds%60;
+  const m=Math.floor(_st.pomoState.seconds/60);
+  const s=_st.pomoState.seconds%60;
   const el=document.getElementById('pomoDisplay');
   if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  if(pomoState.running)document.title='('+m+':'+String(s).padStart(2,'0')+') Stats Hub';
+  if(_st.pomoState.running)document.title='('+m+':'+String(s).padStart(2,'0')+') Stats Hub';
   else document.title='Stats Learning Hub';
 }
 
 function pomoComplete(){
   if(typeof document==='undefined')return;
-  pomoState.sessionsToday++;
-  setElText('pomoSessions',pomoState.sessionsToday);
+  _st.pomoState.sessionsToday++;
+  setElText('pomoSessions',_st.pomoState.sessionsToday);
   const label=document.getElementById('pomoLabel');
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
   if(label)label.textContent='Break time! 🎉';
   if(startBtn)startBtn.style.display='';
   if(pauseBtn)pauseBtn.style.display='none';
-  const xp=pomoState.total>=2700?35:pomoState.total>=1500?20:pomoState.total>=900?10:15;
+  const xp=_st.pomoState.total>=2700?35:_st.pomoState.total>=1500?20:_st.pomoState.total>=900?10:15;
   awardXP(xp,'pomo-session');
   recordActivity();
-  var sessionSolved=typeof sessionData!=='undefined'?sessionData.problemsAnswered||0:0;
-  var sessionCorrect=typeof sessionData!=='undefined'?sessionData.correct||0:0;
+  var sessionSolved=typeof _st.sessionData!=='undefined'?_st.sessionData.problemsAnswered||0:0;
+  var sessionCorrect=typeof _st.sessionData!=='undefined'?_st.sessionData.correct||0:0;
   var sessionMsg='Focus session complete! +'+xp+' XP.';
   if(sessionSolved>0)sessionMsg+=' You solved '+sessionSolved+' problem'+(sessionSolved===1?'':'s')+' ('+sessionCorrect+' correct) in this session.';
   sessionMsg+=' Take a break.';
@@ -3704,19 +3857,19 @@ function pomoComplete(){
   showSessionSummary();
   if(typeof localStorage!=='undefined'){
     const today=todayStr();
-    const data=JSON.parse(localStorage.getItem('sh-pomo')||'{}');
+    const data=_storage('sh-pomo',{});
     data[today]=(data[today]||0)+1;
-    localStorage.setItem('sh-pomo',JSON.stringify(data));
+    _storageSave('sh-pomo',data);
     // Also save to sh-pomodoro-log
     var log=[];
-    try{log=JSON.parse(localStorage.getItem('sh-pomodoro-log')||'[]');}catch(e){}
-    log.push({date:today,minutes:Math.round(pomoState.total/60)});
+    log=_storage('sh-pomodoro-log',[]);
+    log.push({date:today,minutes:Math.round(_st.pomoState.total/60)});
     if(log.length>50)log=log.slice(-50);
-    localStorage.setItem('sh-pomodoro-log',JSON.stringify(log));
+    _storageSave('sh-pomodoro-log',log);
   }
   buildPomoHistory();
-  pomoState.seconds=5*60;
-  pomoState.total=5*60;
+  _st.pomoState.seconds=5*60;
+  _st.pomoState.total=5*60;
   updatePomoDisplay();
 }
 
@@ -3725,7 +3878,7 @@ function buildPomoHistory(){
   var el=document.getElementById('pomodoroHistory');
   if(!el)return;
   var log=[];
-  try{log=JSON.parse(localStorage.getItem('sh-pomodoro-log')||'[]');}catch(e){}
+  log=_storage('sh-pomodoro-log',[]);
   if(!log.length){el.innerHTML='';return;}
   // Group last 5 unique dates
   var byDate={};
@@ -3753,7 +3906,7 @@ function toggleTheme(){
   document.documentElement.setAttribute('data-theme',next);
   const btn=document.getElementById('themeToggle');
   if(btn)btn.textContent=next==='light'?'☀️':'🌙';
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-theme',next);
+  _storageRawSave('sh-theme',next);
 }
 
 function _applyTheme(theme){
@@ -3764,7 +3917,7 @@ function _applyTheme(theme){
 }
 function loadTheme(){
   if(typeof localStorage==='undefined'||typeof document==='undefined')return;
-  var saved=localStorage.getItem('sh-theme');
+  var saved=_storageRaw('sh-theme','');
   if(saved){
     _applyTheme(saved);
   } else {
@@ -3775,7 +3928,7 @@ function loadTheme(){
   // Listen for system preference changes (only when user hasn't manually set theme)
   if(typeof window!=='undefined'&&window.matchMedia){
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(e){
-      if(typeof localStorage!=='undefined'&&!localStorage.getItem('sh-theme')){
+      if(!_storageRaw('sh-theme','')){
         _applyTheme(e.matches?'dark':'light');
       }
     });
@@ -3839,13 +3992,13 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     // Keyboard MC answer selection on practice page
     var _pp=document.getElementById('page-practice');
     var _isPractice=_pp&&_pp.classList.contains('active');
-    if(_isPractice&&focusedProblemId!==null&&(e.key==='1'||e.key==='2'||e.key==='3'||e.key==='4')){
+    if(_isPractice&&_st.focusedProblemId!==null&&(e.key==='1'||e.key==='2'||e.key==='3'||e.key==='4')){
       var _idx=parseInt(e.key)-1;
-      var _prob=typeof activeProbs!=='undefined'?activeProbs.find(function(x){return String(x.id)===String(focusedProblemId);}):null;
+      var _prob=typeof _st.activeProbs!=='undefined'?_st.activeProbs.find(function(x){return String(x.id)===String(_st.focusedProblemId);}):null;
       if(_prob&&_prob.type==='mc'&&_idx<_prob.ch.length){ansMC(_prob.id,_idx);return;}
     }
-    if(_isPractice&&focusedProblemId!==null&&(e.key==='b'||e.key==='B')){
-      toggleBookmark(String(focusedProblemId));return;
+    if(_isPractice&&_st.focusedProblemId!==null&&(e.key==='b'||e.key==='B')){
+      toggleBookmark(String(_st.focusedProblemId));return;
     }
     if(e.key==='1'){goPage('home');}
     else if(e.key==='2'){goPage('roadmap');}
@@ -3901,15 +4054,12 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
 
 
 // ===================== PWA INSTALL =====================
-let deferredPrompt=null;
-let focusModeActive=false;
-let sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
 
 if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('beforeinstallprompt',function(e){
     e.preventDefault();
-    deferredPrompt=e;
-    if(typeof localStorage!=='undefined'&&localStorage.getItem('sh-install-dismissed'))return;
+    _st.deferredPrompt=e;
+    if(_storageRaw('sh-install-dismissed',''))return;
     const banner=document.getElementById('installBanner');
     if(banner)banner.style.display='flex';
   });
@@ -3917,7 +4067,7 @@ if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('appinstalled',function(){
     const banner=document.getElementById('installBanner');
     if(banner)banner.style.display='none';
-    deferredPrompt=null;
+    _st.deferredPrompt=null;
     showToast('App installed! Access Stats Hub from your home screen.');
   });
 
@@ -3942,11 +4092,11 @@ if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
 }
 
 function installPWA(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function(result){
+  if(!_st.deferredPrompt)return;
+  _st.deferredPrompt.prompt();
+  _st.deferredPrompt.userChoice.then(function(result){
     if(result.outcome==='accepted')awardXP(25,'pwa-install');
-    deferredPrompt=null;
+    _st.deferredPrompt=null;
     const banner=document.getElementById('installBanner');
     if(banner)banner.style.display='none';
   });
@@ -3956,7 +4106,7 @@ function dismissInstall(){
   if(typeof document==='undefined')return;
   const banner=document.getElementById('installBanner');
   if(banner)banner.style.display='none';
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-install-dismissed','1');
+  _storageRawSave('sh-install-dismissed','1');
 }
 
 
@@ -4005,14 +4155,14 @@ function updateWeakSpots(){
 
 function toggleFocusMode(){
   if(typeof document==='undefined')return;
-  focusModeActive=!focusModeActive;
-  document.body.classList.toggle('focus-mode',focusModeActive);
+  _st.focusModeActive=!_st.focusModeActive;
+  document.body.classList.toggle('focus-mode',_st.focusModeActive);
   ['breadcrumb','quickStatsRow','recentActivity'].forEach(function(id){
-    var el=document.getElementById(id);if(el){el.classList.toggle('focus-mode-hidden',focusModeActive);}
+    var el=document.getElementById(id);if(el){el.classList.toggle('focus-mode-hidden',_st.focusModeActive);}
   });
   const btn=document.getElementById('focusBtn');
-  if(btn)btn.textContent=focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
-  if(focusModeActive){
+  if(btn)btn.textContent=_st.focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
+  if(_st.focusModeActive){
     const probs=document.querySelectorAll('.pc');
     for(const pc of probs){
       if(!pc.classList.contains('correct')&&!pc.classList.contains('incorrect')){
@@ -4028,8 +4178,8 @@ function toggleFocusMode(){
 
 function showSessionSummary(){
   if(typeof document==='undefined')return;
-  const elapsed=Math.round((Date.now()-sessionData.startTime)/60000);
-  if(sessionData.problemsAnswered===0&&sessionData.reviewsDone===0)return;
+  const elapsed=Math.round((Date.now()-_st.sessionData.startTime)/60000);
+  if(_st.sessionData.problemsAnswered===0&&_st.sessionData.reviewsDone===0)return;
   const overlay=document.createElement('div');
   overlay.className='session-overlay';
   overlay.onclick=function(){overlay.remove();};
@@ -4039,19 +4189,19 @@ function showSessionSummary(){
   modal.innerHTML=`<h3>Session Summary</h3>
     <div class="session-stats">
       <div class="session-stat"><span class="session-num">${elapsed}</span><span class="session-label">minutes</span></div>
-      <div class="session-stat"><span class="session-num">${sessionData.problemsAnswered}</span><span class="session-label">problems</span></div>
-      <div class="session-stat"><span class="session-num">${sessionData.correct}</span><span class="session-label">correct</span></div>
-      <div class="session-stat"><span class="session-num">+${sessionData.xpEarned}</span><span class="session-label">XP earned</span></div>
+      <div class="session-stat"><span class="session-num">${_st.sessionData.problemsAnswered}</span><span class="session-label">problems</span></div>
+      <div class="session-stat"><span class="session-num">${_st.sessionData.correct}</span><span class="session-label">correct</span></div>
+      <div class="session-stat"><span class="session-num">+${_st.sessionData.xpEarned}</span><span class="session-label">XP earned</span></div>
     </div>
     <div class="session-message">${getSessionMessage()}</div>
     <button class="session-close" onclick="this.closest('.session-overlay').remove()">Nice! 🎉</button>`;
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-  sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
+  _st.sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
 }
 
 function getSessionMessage(){
-  const pct=sessionData.problemsAnswered?Math.round(sessionData.correct/sessionData.problemsAnswered*100):0;
+  const pct=_st.sessionData.problemsAnswered?Math.round(_st.sessionData.correct/_st.sessionData.problemsAnswered*100):0;
   if(pct>=90)return'Incredible accuracy! You\'re on fire.';
   if(pct>=70)return'Solid session. Keep building momentum.';
   if(pct>=50)return'Good effort! Review the tricky ones tomorrow.';
@@ -4246,11 +4396,11 @@ function getDailyChallenge(){
 
 function getDailyChallengeState(){
   if(typeof localStorage==='undefined')return{};
-  try{return JSON.parse(localStorage.getItem('sh-daily')||'{}')||{};}catch{return{};}
+  try{return _storage('sh-daily',{})||{};}catch{return{};}
 }
 
 function saveDailyChallengeState(state){
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-daily',JSON.stringify(state));
+  _storageSave('sh-daily',state);
 }
 
 function updateDCStreak(){
@@ -4258,17 +4408,17 @@ function updateDCStreak(){
   var el=document.getElementById('dcStreak');if(!el)return;
   var today=typeof todayStr==='function'?todayStr():new Date().toISOString().slice(0,10);
   var dcData={count:0,lastDate:''};
-  try{var _d=JSON.parse(localStorage.getItem('sh-dc-streak')||'{}');if(_d&&typeof _d.count==='number')dcData=_d;}catch(e){}
+  try{var _d=_storage('sh-dc-streak',{});if(_d&&typeof _d.count==='number')dcData=_d;}catch(e){}
   var state=typeof getDailyChallengeState==='function'?getDailyChallengeState():{};
   var doneToday=!!(state.completed&&state.completed[today]);
   if(doneToday&&dcData.lastDate!==today){
     dcData.count=(dcData.count||0)+1;dcData.lastDate=today;
-    try{localStorage.setItem('sh-dc-streak',JSON.stringify(dcData));}catch(e){}
+    try{_storageSave('sh-dc-streak',dcData);}catch(e){}
   } else if(!doneToday&&dcData.lastDate&&dcData.lastDate<today){
     // Check if streak broken (missed a day)
     var last=new Date(dcData.lastDate),now=new Date(today);
     var diff=Math.floor((now-last)/(86400000));
-    if(diff>1){dcData.count=0;try{localStorage.setItem('sh-dc-streak',JSON.stringify(dcData));}catch(e){}}
+    if(diff>1){dcData.count=0;try{_storageSave('sh-dc-streak',dcData);}catch(e){}}
   }
   el.textContent='\uD83D\uDD25 '+dcData.count;
 }
@@ -4317,8 +4467,8 @@ function updatePracticeNavBadge(){
   var badge=document.getElementById('practiceNavBadge');
   if(!badge)return;
   var unanswered=0;
-  if(typeof activeProbs!=='undefined'&&typeof answered!=='undefined'){
-    unanswered=activeProbs.filter(function(p){return answered[p.id]===undefined;}).length;
+  if(typeof _st.activeProbs!=='undefined'&&typeof _st.answered!=='undefined'){
+    unanswered=_st.activeProbs.filter(function(p){return _st.answered[p.id]===undefined;}).length;
   }
   if(unanswered>0){badge.textContent=unanswered;badge.style.display='';}
   else{badge.style.display='none';}
@@ -4387,13 +4537,13 @@ function toggleReadingMode(){
   if(typeof document==='undefined')return;
   document.body.classList.toggle('reading-mode');
   var active=document.body.classList.contains('reading-mode');
-  if(typeof localStorage!=='undefined'){try{localStorage.setItem('sh-reading-mode',active?'1':'0');}catch(e){}}
+  _storageRawSave('sh-reading-mode',active?'1':'0');
   var btn=document.getElementById('readingModeBtn');
   if(btn){btn.style.opacity=active?'1':'0.6';btn.title=active?'Exit Reading Mode':'Reading Mode';}
 }
 function loadReadingMode(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
-  try{if(localStorage.getItem('sh-reading-mode')==='1'){document.body.classList.add('reading-mode');var btn=document.getElementById('readingModeBtn');if(btn){btn.style.opacity='1';btn.title='Exit Reading Mode';}}}catch(e){}
+  if(_storageRaw('sh-reading-mode','')==='1'){document.body.classList.add('reading-mode');var btn=document.getElementById('readingModeBtn');if(btn){btn.style.opacity='1';btn.title='Exit Reading Mode';}}
 }
 function jumpToProblem(){
   if(typeof document==='undefined')return;
@@ -4401,10 +4551,10 @@ function jumpToProblem(){
   if(!input)return;
   var pid=parseInt(input.value);
   if(!pid)return;
-  // Search in activeProbs first
+  // Search in _st.activeProbs first
   var found=false;
-  if(typeof activeProbs!=='undefined'){
-    var local=activeProbs.find(function(p){return p.id===pid;});
+  if(typeof _st.activeProbs!=='undefined'){
+    var local=_st.activeProbs.find(function(p){return p.id===pid;});
     if(local){
       var el=document.getElementById('pc-'+pid);
       if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--cyan)';setTimeout(function(){el.style.outline='';},1500);found=true;}
@@ -4469,16 +4619,16 @@ function toggleCollapse(btn){
   var card=btn.closest('.pc');
   if(!card)return;
   var id=card.dataset.id;
-  var unit=typeof currentUnit!=='undefined'?currentUnit:1;
+  var unit=typeof _st.currentUnit!=='undefined'?_st.currentUnit:1;
   card.classList.toggle('pc-collapsed');
   var collapsed=card.classList.contains('pc-collapsed');
   btn.textContent=collapsed?'▸':'▾';
   if(typeof localStorage!=='undefined'){
     try{
       var key='sh-collapsed-'+unit;
-      var set=new Set(JSON.parse(localStorage.getItem(key)||'[]'));
+      var set=new Set(_storage(key,[]));
       if(collapsed)set.add(String(id));else set.delete(String(id));
-      localStorage.setItem(key,JSON.stringify([...set]));
+      _storageSaveSoon(key,[...set]);
     }catch(e){}
   }
 }
@@ -4487,60 +4637,59 @@ function toggleExpandAll(){
   var cards=document.querySelectorAll('.pc');if(!cards.length)return;
   var anyCollapsed=Array.from(cards).some(function(c){return c.classList.contains('pc-collapsed');});
   var btn=document.getElementById('expandAllBtn');
-  var unit=typeof currentUnit!=='undefined'?currentUnit:1;
+  var unit=typeof _st.currentUnit!=='undefined'?_st.currentUnit:1;
   if(anyCollapsed){
     // Expand all
     cards.forEach(function(c){c.classList.remove('pc-collapsed');var b=c.querySelector('.card-collapse-btn');if(b)b.textContent='▾';});
     if(btn)btn.textContent='Collapse All';
-    if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-collapsed-'+unit,'[]');}catch(e){}
+    _storageSave('sh-collapsed-'+unit,[]);
   }else{
     // Collapse all
     cards.forEach(function(c){c.classList.add('pc-collapsed');var b=c.querySelector('.card-collapse-btn');if(b)b.textContent='▸';});
     if(btn)btn.textContent='Expand All';
     var ids=Array.from(cards).map(function(c){return c.dataset.id;}).filter(Boolean);
-    if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-collapsed-'+unit,JSON.stringify(ids));}catch(e){}
+    if(typeof localStorage!=='undefined')try{_storageSave('sh-collapsed-'+unit,ids);}catch(e){}
   }
 }
-var activeTags=new Set();
 function buildTagFilter(){
   if(typeof document==='undefined')return;
   var bar=document.getElementById('tagFilterBar');
   if(!bar)return;
   var topics=[];
   var seen={};
-  (activeProbs||[]).forEach(function(p){
+  (_st.activeProbs||[]).forEach(function(p){
     if(p.topic&&!seen[p.topic]){seen[p.topic]=true;topics.push(p.topic);}
   });
   if(!topics.length){bar.style.display='none';return;}
   bar.style.display='flex';
-  var html='<button class="tag-filter-chip tag-all-chip'+(activeTags.size===0?' active':'')+'" onclick="clearTagFilter()">All Topics</button>';
+  var html='<button class="tag-filter-chip tag-all-chip'+(_st.activeTags.size===0?' active':'')+'" onclick="clearTagFilter()">All Topics</button>';
   topics.forEach(function(t){
     var enc=t.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    var isActive=activeTags.has(t);
+    var isActive=_st.activeTags.has(t);
     html+='<button class="tag-filter-chip'+(isActive?' active':'')+'" onclick="toggleTag(this,'+JSON.stringify(t)+')">'+enc+'</button>';
   });
   bar.innerHTML=html;
 }
 function toggleTag(btn,topic){
-  if(activeTags.has(topic))activeTags.delete(topic);
-  else activeTags.add(topic);
-  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-active-tags',JSON.stringify([...activeTags]));}catch(e){}
+  if(_st.activeTags.has(topic))_st.activeTags.delete(topic);
+  else _st.activeTags.add(topic);
+  if(typeof localStorage!=='undefined')try{_storageSave('sh-active-tags',[...activeTags]);}catch(e){}
   applyTagFilter();
   buildTagFilter();
 }
 function clearTagFilter(){
-  activeTags=new Set();
-  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-active-tags','[]');}catch(e){}
+  _st.activeTags=new Set();
+  _storageSave('sh-active-tags',[]);
   applyTagFilter();
   buildTagFilter();
 }
 function applyTagFilter(){
   if(typeof document==='undefined')return;
   document.querySelectorAll('.pc').forEach(function(el){
-    if(!activeTags.size){el.style.display='';return;}
+    if(!_st.activeTags.size){el.style.display='';return;}
     var id=el.id.replace('pc-','');
-    var prob=(activeProbs||[]).find(function(p){return String(p.id)===id;});
-    el.style.display=(prob&&activeTags.has(prob.topic))?'':'none';
+    var prob=(_st.activeProbs||[]).find(function(p){return String(p.id)===id;});
+    el.style.display=(prob&&_st.activeTags.has(prob.topic))?'':'none';
   });
 }
 function buildStudyPlan(){
@@ -4554,7 +4703,7 @@ function buildStudyPlan(){
   var weakUnits=[];
   units.forEach(function(u){
     try{
-      var s=JSON.parse(localStorage.getItem('sh-practice-'+u)||'{}');
+      var s=_storage('sh-practice-'+u,{});
       var ans=s.answered&&typeof s.answered==='object'?s.answered:{};
       var probs=allProbs[u]||[];
       var wrong=probs.filter(function(p){
@@ -4603,11 +4752,11 @@ function buildMotivationalQuote(){
 function _recordTodayActivity(id,unit,ok){
   if(typeof localStorage==='undefined')return;
   try{
-    var arr=JSON.parse(localStorage.getItem('sh-today-activity')||'[]');
+    var arr=_storage('sh-today-activity',[]);
     if(!Array.isArray(arr))arr=[];
     arr.unshift({id:String(id),unit:unit,ok:ok,t:Date.now()});
     if(arr.length>20)arr=arr.slice(0,20);
-    localStorage.setItem('sh-today-activity',JSON.stringify(arr));
+    _storageSave('sh-today-activity',arr);
   }catch(e){}
 }
 function buildRecentActivity(){
@@ -4615,7 +4764,7 @@ function buildRecentActivity(){
   var el=document.getElementById('recentActivity');
   if(!el)return;
   var arr=[];
-  try{arr=JSON.parse(localStorage.getItem('sh-today-activity')||'[]');}catch(e){}
+  arr=_storage('sh-today-activity',[]);
   if(!Array.isArray(arr))arr=[];
   var today=typeof todayStr!=='undefined'?todayStr():'';
   var todayArr=arr.filter(function(a){
@@ -4635,19 +4784,19 @@ function buildRecentActivity(){
 function _saveRecentUnit(unit){
   if(typeof localStorage==='undefined')return;
   try{
-    var list=JSON.parse(localStorage.getItem('sh-recent-units')||'[]');
+    var list=_storage('sh-recent-units',[]);
     if(!Array.isArray(list))list=[];
     list=list.filter(function(u){return u!==unit;});
     list.unshift(unit);
     list=list.slice(0,5);
-    localStorage.setItem('sh-recent-units',JSON.stringify(list));
+    _storageSave('sh-recent-units',list);
   }catch(e){}
 }
 function buildRecentUnits(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('recentUnitsRow');if(!el)return;
   var list=[];
-  try{list=JSON.parse(localStorage.getItem('sh-recent-units')||'[]');}catch(e){}
+  list=_storage('sh-recent-units',[]);
   if(!Array.isArray(list)||!list.length){el.style.display='none';return;}
   el.style.display='';
   var html='<span class="ru-label">Recent:</span>';
@@ -4668,7 +4817,7 @@ function buildUnitProgressOverview(){
     var total=probs.length;
     var answeredCount=0;
     try{
-      var saved=JSON.parse(localStorage.getItem('sh-practice-'+u)||'{}');
+      var saved=_storage('sh-practice-'+u,{});
       var ansObj=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
       answeredCount=Object.keys(ansObj).length;
     }catch(e){}
@@ -4686,9 +4835,9 @@ function buildPomoStats(){
   var el=document.getElementById('pomoStats');if(!el)return;
   var today=todayStr();
   var pomo={};
-  try{pomo=JSON.parse(localStorage.getItem('sh-pomo')||'{}');}catch(e){}
+  pomo=_storage('sh-pomo',{});
   var log=[];
-  try{log=JSON.parse(localStorage.getItem('sh-pomodoro-log')||'[]');}catch(e){}
+  log=_storage('sh-pomodoro-log',[]);
   var todayCount=pomo[today]||0;
   // Last 7 days stats
   var weekMins=0,weekSessions=0;
@@ -4741,7 +4890,7 @@ function buildWeeklyStatsChart(){
   var canvas=document.getElementById('weeklyStatsChart');if(!canvas)return;
   var ctx=canvas.getContext?canvas.getContext('2d'):null;if(!ctx)return;
   var activity={};
-  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  activity=_storage('sh-activity',{});
   var days=[],counts=[],today=todayStr();
   for(var i=6;i>=0;i--){
     var d=new Date();d.setDate(d.getDate()-i);
@@ -4773,7 +4922,7 @@ function buildStreakHeatmap(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('streakHeatmap');if(!el)return;
   var activity={};
-  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  activity=_storage('sh-activity',{});
   // Build 12 weeks (84 days) starting from 83 days ago
   var today=new Date();today.setHours(0,0,0,0);
   var startDay=new Date(today);startDay.setDate(today.getDate()-83);
@@ -4798,7 +4947,6 @@ function buildStreakHeatmap(){
   html+='</div>';
   el.innerHTML=html;
 }
-var _statsAnimated=false;
 function _animateCounter(el,target,suffix,duration){
   if(typeof requestAnimationFrame==='undefined'){el.textContent=target+(suffix||'');return;}
   var start=Date.now();var from=parseInt(el.textContent)||0;
@@ -4828,16 +4976,16 @@ function buildQuickStats(){
   }
   var acc=totalAttempted>0?Math.round(totalCorrect/totalAttempted*100):0;
   var streak=0;
-  try{var sd=JSON.parse(localStorage.getItem('sh-streak')||'{}');streak=sd.current||0;}catch(e){}
-  var setEl=function(id,v,suffix){var e=document.getElementById(id);if(!e)return;if(!_statsAnimated)_animateCounter(e,v,suffix||'',600);else e.textContent=v+(suffix||'');};
+  try{var sd=_storage('sh-streak',{});streak=sd.current||0;}catch(e){}
+  var setEl=function(id,v,suffix){var e=document.getElementById(id);if(!e)return;if(!_st._statsAnimated)_animateCounter(e,v,suffix||'',600);else e.textContent=v+(suffix||'');};
   setEl('qsAttempted',totalAttempted);
   setEl('qsCorrect',totalCorrect);
   setEl('qsAccuracy',acc,'%');
   setEl('qsStreak',streak);
   var todayCount=0;
-  if(typeof localStorage!=='undefined'){try{var act=JSON.parse(localStorage.getItem('sh-activity')||'{}');todayCount=act[typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10)]||0;}catch(e){}}
+  if(typeof localStorage!=='undefined'){try{var act=_storage('sh-activity',{});todayCount=act[typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10)]||0;}catch(e){}}
   setEl('qsToday',todayCount);
-  _statsAnimated=true;
+  _st._statsAnimated=true;
   var unitsStarted=0;
   if(typeof allProbs!=='undefined'&&typeof getPracticeState!=='undefined'){
     for(var u2=1;u2<=MAX_UNIT;u2++){
@@ -4880,7 +5028,7 @@ function buildXPNextLevel(){
   var xpInLevel=total%XP_PER_LEVEL;
   var xpToNext=XP_PER_LEVEL-xpInLevel;
   var pct=Math.round(xpInLevel/XP_PER_LEVEL*100);
-  el.innerHTML='<div class="xnl-text">Level '+cur+' → Level '+(cur+1)+': <b>'+xpToNext+' XP to go!</b></div><div class="xnl-bar"><div class="xnl-fill" style="width:'+pct+'%"></div></div>';
+  el.innerHTML='<div class="xnl-text">Level '+_esc(cur)+' → Level '+_esc(cur+1)+': <b>'+_esc(xpToNext)+' XP to go!</b></div><div class="xnl-bar"><div class="xnl-fill" style="width:'+pct+'%"></div></div>';
 }
 function buildStreakMilestones(){
   if(typeof document==='undefined')return;
@@ -4913,7 +5061,7 @@ function buildProblemOfTheDay(){
   var idx=dayMs%allProbsList.length;
   var prob=allProbsList[idx];
   var pid=prob.id,punit=prob.unit;
-  el.innerHTML='<div class="potd-header">Problem of the Day</div><div class="potd-question">'+prob.q+'</div><button class="potd-btn" onclick="goPage(\'practice\');setUnit('+punit+');setTimeout(function(){var e=document.getElementById(\'pc-'+pid+'\');if(e){e.scrollIntoView({behavior:\'smooth\',block:\'center\'});}},500);">Go Solve \u2192</button>';
+  el.innerHTML='<div class="potd-header">Problem of the Day</div><div class="potd-question">'+_esc(prob.q)+'</div><button class="potd-btn" onclick="goPage(\'practice\');setUnit('+punit+');setTimeout(function(){var e=document.getElementById(\'pc-'+pid+'\');if(e){e.scrollIntoView({behavior:\'smooth\',block:\'center\'});}},500);">Go Solve \u2192</button>';
 }
 function buildDailyChallenge(){
   if(typeof document==='undefined')return;
@@ -5010,7 +5158,7 @@ function getWeekStart(){
 function getWeeklyGoals(){
   const weekStart=getWeekStart();
   let stored={};
-  if(typeof localStorage!=='undefined'){try{stored=JSON.parse(localStorage.getItem('sh-weekly')||'{}')||{};}catch{stored={};}}
+  if(typeof localStorage!=='undefined'){try{stored=_storage('sh-weekly',{})||{};}catch{stored={};}}
   if(stored.weekStart!==weekStart){
     const streak=getStreakData();
     const xp=getXPData();
@@ -5022,7 +5170,7 @@ function getWeeklyGoals(){
       {id:'review',target:pace*2,label:'Complete '+pace*2+' review sessions',current:0},
     ];
     stored.completed=false;
-    if(typeof localStorage!=='undefined')localStorage.setItem('sh-weekly',JSON.stringify(stored));
+    _storageSave('sh-weekly',stored);
   }
   return stored;
 }
@@ -5039,7 +5187,7 @@ function updateWeeklyProgress(goalId,increment){
     awardXP(50,'weekly-goals-'+data.weekStart);
     showToast('All weekly goals complete! +50 XP 🎯');
   }
-  localStorage.setItem('sh-weekly',JSON.stringify(data));
+  _storageSave('sh-weekly',data);
   buildWeeklyGoals();
 }
 
@@ -5064,10 +5212,10 @@ function buildWeeklyGoals(){
 function _recordActivity(){
   if(typeof localStorage==='undefined')return;
   var activity={};
-  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  activity=_storage('sh-activity',{});
   var dateStr=todayStr();
   activity[dateStr]=(activity[dateStr]||0)+1;
-  localStorage.setItem('sh-activity',JSON.stringify(activity));
+  _storageSave('sh-activity',activity);
 }
 function buildHeatmap(){
   if(typeof document==='undefined')return;
@@ -5076,7 +5224,7 @@ function buildHeatmap(){
   const streak=getStreakData();
   const history=streak.history||[];
   var activity={};
-  if(typeof localStorage!=='undefined'){try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}}
+  if(typeof localStorage!=='undefined'){activity=_storage('sh-activity',{});}
   const today=new Date();
   let html='';
   for(let i=89;i>=0;i--){
@@ -5086,7 +5234,7 @@ function buildHeatmap(){
     const active=history.includes(dateStr)||count>0;
     const cls=active?'heatmap-active':'heatmap-empty';
     const titleText=count>0?(dateStr+': '+count+' problem'+(count===1?'':'s')+' solved'):dateStr;
-    html+='<div class="heatmap-cell '+cls+'" title="'+titleText+'"></div>';
+    html+='<div class="heatmap-cell '+cls+'" title="'+titleText+'" aria-hidden="true"></div><span class="sr-only">'+_esc(titleText)+'</span>';
   }
   grid.innerHTML=html;
 }
@@ -5098,8 +5246,8 @@ function activateStreakFreeze(){
   var today=typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10);
   try{
     xd.total-=100;
-    localStorage.setItem('sh-xp',JSON.stringify(xd));
-    localStorage.setItem('sh-streak-freeze',today);
+    _storageSave('sh-xp',xd);
+    _storageRawSave('sh-streak-freeze',today);
   }catch(e){}
   buildStreakFreezeCard();
   showToast('❄ Streak Freeze activated! Your streak is protected today.');
@@ -5112,7 +5260,7 @@ function buildStreakFreezeCard(){
   if(!statusEl||!btn)return;
   var today=typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10);
   var freeze='';
-  try{freeze=localStorage.getItem('sh-streak-freeze')||'';}catch(e){}
+  freeze=_storageRaw('sh-streak-freeze','');
   var xd=getXPData();
   if(freeze===today){
     statusEl.innerHTML='<span class="sf-active">❄ Freeze Active — streak protected today</span>';
@@ -5219,7 +5367,7 @@ function buildAchievementsPage(){
     var overallAcc=totalQuestions>0?totalCorrect/totalQuestions:0;
     var unitsCompleted=Object.keys(summary).filter(function(u){var r=summary[u];return r&&r.total>0;}).length;
     if(overallAcc>=0.70){
-      gcArea.innerHTML='<button class="cert-btn" onclick="generateGeneralCertificate('+Math.round(overallAcc*100)+','+unitsCompleted+')">🎓 Generate Certificate</button>';
+      gcArea.innerHTML='<button class="cert-btn" onclick="generateGeneralCertificate('+_esc(Math.round(overallAcc*100))+','+_esc(unitsCompleted)+')">🎓 Generate Certificate</button>';
     } else {
       gcArea.innerHTML='<p style="font-size:12px;color:var(--muted);font-family:Space Mono,monospace;">'+(Math.round(overallAcc*100))+'% overall &mdash; reach 70% to unlock completion certificate</p>';
     }
@@ -5230,14 +5378,14 @@ function buildAchievementsPage(){
 // ===================== PHASE 14: BOOKMARKS, NOTES, SEARCH, FILTER =====================
 function getBookmarks(){
   if(typeof localStorage==='undefined')return{};
-  try{return JSON.parse(localStorage.getItem('sh-bookmarks')||'{}')||{};}catch{return{};}
+  try{return _storage('sh-bookmarks',{})||{};}catch{return{};}
 }
 function reportProblem(probId,unit){
   if(typeof localStorage==='undefined'){showToast('Thanks for the report!');return;}
   var reports=[];
-  try{reports=JSON.parse(localStorage.getItem('sh-reports')||'[]');}catch(e){}
+  reports=_storage('sh-reports',[]);
   reports.push({id:String(probId),unit:unit,timestamp:new Date().toISOString(),reason:'user-report'});
-  localStorage.setItem('sh-reports',JSON.stringify(reports));
+  _storageSave('sh-reports',reports);
   showToast('Thanks for the report!');
 }
 
@@ -5246,7 +5394,7 @@ function toggleBookmark(probId){
   const bm=getBookmarks();
   if(bm[probId])delete bm[probId];
   else bm[probId]=true;
-  localStorage.setItem('sh-bookmarks',JSON.stringify(bm));
+  _storageSave('sh-bookmarks',bm);
   updateBookmarkUI(probId);
 }
 
@@ -5261,7 +5409,7 @@ function updateBookmarkUI(probId){
 
 function printProblemSet(){
   if(typeof window==='undefined'||typeof document==='undefined')return;
-  var probs=activeProbs||[];
+  var probs=_st.activeProbs||[];
   if(!probs.length){showToast('No problems to print.');return;}
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Stats Hub — Problem Set</title>';
   html+='<style>body{font-family:Georgia,serif;padding:40px;color:#1a1a2e;max-width:800px;margin:0 auto;}h1{font-size:20px;margin-bottom:4px;}';
@@ -5270,7 +5418,7 @@ function printProblemSet(){
   html+='.pdata{font-size:12px;background:#f5f5f5;padding:8px 12px;border-radius:4px;margin-bottom:8px;white-space:pre-line;font-family:monospace;}';
   html+='.blank{height:48px;border-bottom:1px solid #ccc;margin-top:8px;}</style></head><body>';
   html+='<h1>Stats Learning Hub — Practice Problems</h1>';
-  html+='<div class="meta">Unit '+currentUnit+' &middot; '+probs.length+' problems &middot; '+new Date().toLocaleDateString()+'</div>';
+  html+='<div class="meta">Unit '+_st.currentUnit+' &middot; '+probs.length+' problems &middot; '+new Date().toLocaleDateString()+'</div>';
   probs.forEach(function(p,i){
     html+='<div class="problem"><div class="pnum">#'+(i+1)+'. ['+p.diff+'] '+p.topic+'</div>';
     html+='<div class="pq">'+p.q+'</div>';
@@ -5284,7 +5432,7 @@ function printProblemSet(){
 function exportBookmarks(){
   if(typeof localStorage==='undefined'||typeof document==='undefined')return;
   var bm={};
-  try{bm=JSON.parse(localStorage.getItem('sh-bookmarks')||'{}');}catch(e){}
+  bm=_storage('sh-bookmarks',{});
   var ids=Object.keys(bm).filter(function(k){return bm[k];});
   var data={bookmarks:ids,exportDate:typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10)};
   var json=JSON.stringify(data,null,2);
@@ -5320,7 +5468,7 @@ function exportNotes(){
 }
 function getNotes(){
   if(typeof localStorage==='undefined')return{};
-  try{return JSON.parse(localStorage.getItem('sh-notes')||'{}')||{};}catch{return{};}
+  try{return _storage('sh-notes',{})||{};}catch{return{};}
 }
 
 function saveNote(probId){
@@ -5331,7 +5479,7 @@ function saveNote(probId){
   const val=input.value.trim();
   if(val)notes[probId]=val;
   else delete notes[probId];
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-notes',JSON.stringify(notes));
+  _storageSave('sh-notes',notes);
   showToast('Note saved');
 }
 
@@ -5344,8 +5492,8 @@ function searchProblems(){
   if(clearBtn)clearBtn.style.display=query?'':'none';
   if(!query){
     document.querySelectorAll('.pc').forEach(el=>el.style.display='');
-    setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
-    if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-search','');}catch(e){};
+    setElText('practiceUnitTag','Unit '+_st.currentUnit+' - '+UNIT_META[_st.currentUnit].name);
+    _storageRawSave('sh-filter-search','');
     return;
   }
   const results=new Set();
@@ -5360,7 +5508,7 @@ function searchProblems(){
     el.style.display=results.has(id)?'':'none';
   });
   setElText('practiceUnitTag','Search: '+results.size+' result'+(results.size===1?'':'s'));
-  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-search',query);}catch(e){};
+  _storageRawSave('sh-filter-search',query);
 }
 
 function clearSearch(){
@@ -5368,11 +5516,11 @@ function clearSearch(){
   const input=document.getElementById('searchInput');
   if(input)input.value='';
   searchProblems();
-  setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+  setElText('practiceUnitTag','Unit '+_st.currentUnit+' - '+UNIT_META[_st.currentUnit].name);
 }
 function sortProblems(method){
   if(typeof document==='undefined')return;
-  if(typeof localStorage!=='undefined'){try{localStorage.setItem('sh-problem-sort',method);}catch(e){}}
+  _storageRawSave('sh-problem-sort',method);
   var container=document.getElementById('probContainer');
   if(!container)return;
   var cards=Array.from(container.querySelectorAll('.pc'));
@@ -5381,8 +5529,8 @@ function sortProblems(method){
   cards.sort(function(a,b){
     var ida=parseInt(a.id.replace('pc-',''))||0;
     var idb=parseInt(b.id.replace('pc-',''))||0;
-    var pa=(activeProbs||[]).find(function(p){return String(p.id)===String(ida);});
-    var pb=(activeProbs||[]).find(function(p){return String(p.id)===String(idb);});
+    var pa=(_st.activeProbs||[]).find(function(p){return String(p.id)===String(ida);});
+    var pb=(_st.activeProbs||[]).find(function(p){return String(p.id)===String(idb);});
     if(method==='easy-first'){return (diffOrder[pa&&pa.diff]||0)-(diffOrder[pb&&pb.diff]||0);}
     if(method==='hard-first'){return (diffOrder[pb&&pb.diff]||0)-(diffOrder[pa&&pa.diff]||0);}
     if(method==='id-asc'){return ida-idb;}
@@ -5397,10 +5545,9 @@ function applySearchChip(term){
   if(input){input.value=term;searchProblems();}
 }
 
-var _activeTopic=null;
 function filterByTopic(topic){
   if(typeof document==='undefined')return;
-  _activeTopic=topic;
+  _st._activeTopic=topic;
   var bar=document.getElementById('topicFocusBar');
   var label=document.getElementById('topicFocusLabel');
   if(bar)bar.style.display='';
@@ -5413,7 +5560,7 @@ function filterByTopic(topic){
 }
 function clearTopicFocus(){
   if(typeof document==='undefined')return;
-  _activeTopic=null;
+  _st._activeTopic=null;
   var bar=document.getElementById('topicFocusBar');if(bar)bar.style.display='none';
   document.querySelectorAll('.pc').forEach(function(el){el.style.display='';});
 }
@@ -5448,11 +5595,11 @@ function filterProblems(filter){
   const chip=document.querySelector('.filter-chip[data-filter="'+filter+'"]');
   if(chip)chip.classList.add('active');
   const bm=getBookmarks();
-  const state=getPracticeState(currentUnit);
+  const state=getPracticeState(_st.currentUnit);
   const ans=state.answered||{};
   document.querySelectorAll('.pc').forEach(el=>{
     const id=el.id.replace('pc-','');
-    const prob=activeProbs.find(p=>String(p.id)===id);
+    const prob=_st.activeProbs.find(p=>String(p.id)===id);
     if(!prob){el.style.display='none';return;}
     let show=true;
     if(filter==='unanswered')show=ans[id]===undefined;
@@ -5465,17 +5612,16 @@ function filterProblems(filter){
     else if(filter==='easy')show=prob.diff==='easy';
     else if(filter==='medium')show=prob.diff==='medium';
     else if(filter==='hard')show=prob.diff==='hard';
-    if(show&&favFilterActive)show=!!bm[id];
+    if(show&&_st.favFilterActive)show=!!bm[id];
     el.style.display=show?'':'none';
   });
-  if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-diff',filter);}catch(e){};
+  _storageRawSave('sh-filter-diff',filter);
 }
-var favFilterActive=false;
 function toggleFavFilter(){
   if(typeof document==='undefined')return;
-  favFilterActive=!favFilterActive;
+  _st.favFilterActive=!_st.favFilterActive;
   var btn=document.getElementById('favFilterBtn');
-  if(btn)btn.classList.toggle('active',favFilterActive);
+  if(btn)btn.classList.toggle('active',_st.favFilterActive);
   // Re-apply current filter
   var cur=document.querySelector('.filter-chip.active');
   var curFilter=cur?cur.getAttribute('data-filter'):'all';
@@ -5484,7 +5630,6 @@ function toggleFavFilter(){
 
 
 // ===================== PHASE 15: ANALYTICS, PDF EXPORT, CALENDAR =====================
-let calDate=typeof Date!=='undefined'?new Date():null;
 
 function showAnalytics(type,evt){
   if(typeof document==='undefined')return;
@@ -5604,9 +5749,9 @@ function buildCalendar(){
   if(typeof document==='undefined')return;
   const grid=document.getElementById('calGrid');
   const monthLabel=document.getElementById('calMonth');
-  if(!grid||!monthLabel||!calDate)return;
-  const year=calDate.getFullYear(),month=calDate.getMonth();
-  monthLabel.textContent=calDate.toLocaleString('default',{month:'long',year:'numeric'});
+  if(!grid||!monthLabel||!_st.calDate)return;
+  const year=_st.calDate.getFullYear(),month=_st.calDate.getMonth();
+  monthLabel.textContent=_st.calDate.toLocaleString('default',{month:'long',year:'numeric'});
   const firstDay=new Date(year,month,1).getDay();
   const daysInMonth=new Date(year,month+1,0).getDate();
   const streak=getStreakData();const history=streak.history||[];
@@ -5620,14 +5765,11 @@ function buildCalendar(){
   grid.innerHTML=html;
 }
 
-function calPrev(){if(calDate){calDate.setMonth(calDate.getMonth()-1);buildCalendar();}}
-function calNext(){if(calDate){calDate.setMonth(calDate.getMonth()+1);buildCalendar();}}
+function calPrev(){if(_st.calDate){_st.calDate.setMonth(_st.calDate.getMonth()-1);buildCalendar();}}
+function calNext(){if(_st.calDate){_st.calDate.setMonth(_st.calDate.getMonth()+1);buildCalendar();}}
 
 
 // ===================== PHASE 16: FLASHCARDS, MATCHING, FORMULA BUILDER =====================
-let fcCards=[],fcIndex=0,fcKnownCount=0,fcSeenCount=0;
-let matchSelected=null,matchedPairs=0,matchPairsTotal=0;
-let builderParts=[],builderTarget=null,builderSelected=[];
 
 function initFlashcardsPage(){
   if(typeof document==='undefined')return;
@@ -5658,17 +5800,17 @@ function setFCMode(mode){
 
 function buildFlashcards(unit){
   if(typeof document==='undefined')return;
-  fcCards=[];fcIndex=0;fcKnownCount=0;fcSeenCount=0;
+  _st.fcCards=[];_st.fcIndex=0;_st.fcKnownCount=0;_st.fcSeenCount=0;
   (FORMULAS[unit]||[]).forEach(f=>{
-    fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula',id:f.name});
+    _st.fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula',id:f.name});
   });
   (allProbs[unit]||[]).forEach(p=>{
     const answer=p.type==='mc'?p.ch[p.ans]:String(p.ans);
-    fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem',id:p.id});
+    _st.fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem',id:p.id});
   });
-  for(let i=fcCards.length-1;i>0;i--){
+  for(let i=_st.fcCards.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
-    [fcCards[i],fcCards[j]]=[fcCards[j],fcCards[i]];
+    [_st.fcCards[i],_st.fcCards[j]]=[_st.fcCards[j],_st.fcCards[i]];
   }
   renderFlashcard();
 }
@@ -5677,12 +5819,12 @@ function renderFlashcard(){
   if(typeof document==='undefined')return;
   const container=document.getElementById('fcContainer');
   if(!container)return;
-  if(!fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
-  const card=fcCards[fcIndex];
-  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+card.front+'</div><div class="fc-back" style="display:none;">'+card.back+'</div></div>';
-  setElText('fcProgress',(fcIndex+1)+' / '+fcCards.length);
+  if(!_st.fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
+  const card=_st.fcCards[_st.fcIndex];
+  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+_esc(card.front)+'</div><div class="fc-back" style="display:none;">'+_esc(card.back)+'</div></div>';
+  setElText('fcProgress',(_st.fcIndex+1)+' / '+_st.fcCards.length);
   var fill=document.getElementById('fcProgressFill');
-  if(fill&&fcCards.length>0)fill.style.width=Math.round((fcIndex+1)/fcCards.length*100)+'%';
+  if(fill&&_st.fcCards.length>0)fill.style.width=Math.round((_st.fcIndex+1)/_st.fcCards.length*100)+'%';
 }
 
 function flipCard(){
@@ -5697,12 +5839,12 @@ function flipCard(){
   if(card)card.classList.toggle('flipped',!showing);
 }
 
-function fcNext(){if(fcIndex<fcCards.length-1){fcIndex++;renderFlashcard();}}
-function fcPrev(){if(fcIndex>0){fcIndex--;renderFlashcard();}}
+function fcNext(){if(_st.fcIndex<_st.fcCards.length-1){_st.fcIndex++;renderFlashcard();}}
+function fcPrev(){if(_st.fcIndex>0){_st.fcIndex--;renderFlashcard();}}
 function _fcUpdateSRS(card,known){
   if(typeof localStorage==='undefined')return;
   try{
-    var srs=JSON.parse(localStorage.getItem('sh-srs')||'{}');
+    var srs=_storage('sh-srs',{});
     var key=card.type==='formula'?'formula-'+card.id:'problem-'+card.id;
     if(known){
       var prev=srs[key]||{interval:0};
@@ -5711,22 +5853,22 @@ function _fcUpdateSRS(card,known){
     }else{
       srs[key]={interval:0,lastSeen:new Date().toISOString().slice(0,10)};
     }
-    localStorage.setItem('sh-srs',JSON.stringify(srs));
+    _storageSave('sh-srs',srs);
   }catch(e){}
 }
 function fcMark(known){
-  if(known)awardXP(2,'flashcard-'+fcIndex);
-  fcSeenCount++;if(known)fcKnownCount++;
-  if(fcCards[fcIndex])_fcUpdateSRS(fcCards[fcIndex],known);
+  if(known)awardXP(2,'flashcard-'+_st.fcIndex);
+  _st.fcSeenCount++;if(known)_st.fcKnownCount++;
+  if(_st.fcCards[_st.fcIndex])_fcUpdateSRS(_st.fcCards[_st.fcIndex],known);
   updateFCSessionStats();
   fcNext();
 }
 function updateFCSessionStats(){
   if(typeof document==='undefined')return;
   var el=document.getElementById('fcSessionStats');if(!el)return;
-  var total=fcCards.length||1;
-  var pct=fcSeenCount>0?Math.round(fcKnownCount/fcSeenCount*100):0;
-  el.innerHTML='<span class="fcs-item">Seen: <b>'+fcSeenCount+'/'+total+'</b></span><span class="fcs-item">Known: <b>'+fcKnownCount+'</b></span><span class="fcs-item">Score: <b>'+pct+'%</b></span>';
+  var total=_st.fcCards.length||1;
+  var pct=_st.fcSeenCount>0?Math.round(_st.fcKnownCount/_st.fcSeenCount*100):0;
+  el.innerHTML='<span class="fcs-item">Seen: <b>'+_st.fcSeenCount+'/'+total+'</b></span><span class="fcs-item">Known: <b>'+_st.fcKnownCount+'</b></span><span class="fcs-item">Score: <b>'+pct+'%</b></span>';
 }
 
 function startMatchGame(unit){
@@ -5740,18 +5882,18 @@ function startMatchGame(unit){
     return;
   }
   const pool=[...formulas].sort(()=>Math.random()-0.5).slice(0,Math.min(6,formulas.length));
-  matchPairsTotal=pool.length;matchedPairs=0;matchSelected=null;
+  _st.matchPairsTotal=pool.length;_st.matchedPairs=0;_st.matchSelected=null;
   const left=pool.map((f,i)=>({id:i,text:f.name,matched:false})).sort(()=>Math.random()-0.5);
   const right=pool.map((f,i)=>({id:i,text:f.formula,matched:false})).sort(()=>Math.random()-0.5);
   if(status)status.textContent='Match each term with its formula. '+pool.length+' pairs to find.';
   function render(){
     let html='<div class="match-cols"><div class="match-col">';
     left.forEach(l=>{
-      html+='<div class="match-item '+(l.matched?'match-done':'')+(matchSelected&&matchSelected.side===0&&matchSelected.id===l.id&&!l.matched?' match-sel':'')+'" id="ml-'+l.id+'" onclick="matchClick(0,'+l.id+')">'+l.text+'</div>';
+      html+='<div class="match-item '+(l.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===0&&_st.matchSelected.id===l.id&&!l.matched?' match-sel':'')+'" id="ml-'+l.id+'" onclick="matchClick(0,'+l.id+')">'+l.text+'</div>';
     });
     html+='</div><div class="match-col">';
     right.forEach(r=>{
-      html+='<div class="match-item '+(r.matched?'match-done':'')+(matchSelected&&matchSelected.side===1&&matchSelected.id===r.id&&!r.matched?' match-sel':'')+'" id="mr-'+r.id+'" onclick="matchClick(1,'+r.id+')">'+r.text+'</div>';
+      html+='<div class="match-item '+(r.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===1&&_st.matchSelected.id===r.id&&!r.matched?' match-sel':'')+'" id="mr-'+r.id+'" onclick="matchClick(1,'+r.id+')">'+r.text+'</div>';
     });
     html+='</div></div>';
     board.innerHTML=html;
@@ -5762,45 +5904,45 @@ function startMatchGame(unit){
 
 window.matchClick=function(side,id){
   const left=window._matchLeft;const right=window._matchRight;const render=window._matchRender;const status=window._matchStatus;
-  if(!matchSelected){
-    matchSelected={side,id};render();return;
+  if(!_st.matchSelected){
+    _st.matchSelected={side,id};render();return;
   }
-  if(matchSelected.side===side){matchSelected={side,id};render();return;}
-  const lId=side===1?matchSelected.id:id;
-  const rId=side===1?id:matchSelected.id;
+  if(_st.matchSelected.side===side){_st.matchSelected={side,id};render();return;}
+  const lId=side===1?_st.matchSelected.id:id;
+  const rId=side===1?id:_st.matchSelected.id;
   const lItem=left.find(x=>x.id===lId);
   const rItem=right.find(x=>x.id===rId);
   if(lId===rId){
     if(lItem)lItem.matched=true;if(rItem)rItem.matched=true;
-    matchedPairs++;
-    matchSelected=null;
+    _st.matchedPairs++;
+    _st.matchSelected=null;
     render();
-    if(matchedPairs>=matchPairsTotal){
-      if(status)status.textContent='🎉 All '+matchedPairs+' pairs matched! +20 XP';
+    if(_st.matchedPairs>=_st.matchPairsTotal){
+      if(status)status.textContent='🎉 All '+_st.matchedPairs+' pairs matched! +20 XP';
       awardXP(20,'match-game');
     }
   }else{
     const lEl=document.getElementById('ml-'+lId);const rEl=document.getElementById('mr-'+rId);
     if(lEl)lEl.classList.add('match-wrong');if(rEl)rEl.classList.add('match-wrong');
     setTimeout(()=>{if(lEl)lEl.classList.remove('match-wrong');if(rEl)rEl.classList.remove('match-wrong');},600);
-    matchSelected=null;render();
+    _st.matchSelected=null;render();
   }
 };
 
 function startFormulaBuilder(unit){
   if(typeof document==='undefined')return;
-  const target=document.getElementById('builderTarget');
+  const target=document.getElementById('_st.builderTarget');
   const piecesEl=document.getElementById('builderPieces');
   const ansEl=document.getElementById('builderAnswer');
   const statusEl=document.getElementById('builderStatus');
   if(!target)return;
   const formulas=FORMULAS[unit]||[];
   if(!formulas.length){target.innerHTML='<p style="color:var(--muted)">No formulas for this unit.</p>';return;}
-  builderTarget=formulas[Math.floor(Math.random()*formulas.length)];
-  builderParts=builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
-  builderSelected=[];
+  _st.builderTarget=formulas[Math.floor(Math.random()*formulas.length)];
+  _st.builderParts=_st.builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
+  _st.builderSelected=[];
   const shuffled=[...builderParts].sort(()=>Math.random()-0.5);
-  target.innerHTML='Build the formula for: <strong>'+builderTarget.name+'</strong>';
+  target.innerHTML='Build the formula for: <strong>'+_esc(_st.builderTarget.name)+'</strong>';
   if(piecesEl){
     window._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
   }
@@ -5811,19 +5953,19 @@ function startFormulaBuilder(unit){
 window.builderPick=function(idx){
   if(typeof document==='undefined')return;
   const piece=(window._builderShuffled||[])[idx]||'';
-  builderSelected.push(piece);
+  _st.builderSelected.push(piece);
   const btn=document.getElementById('bp-'+idx);
   if(btn)btn.disabled=true;
   const slots=document.getElementById('builderSlots');
-  if(slots)slots.innerHTML=builderSelected.map(p=>'<span class="builder-slot">'+p+'</span>').join(' ');
+  if(slots)slots.innerHTML=_st.builderSelected.map(p=>'<span class="builder-slot">'+p+'</span>').join(' ');
 };
 
 function builderCheck(){
   if(typeof document==='undefined')return;
   const status=document.getElementById('builderStatus');
-  if(!builderTarget||!builderParts.length)return;
-  const correct=builderSelected.join('')===builderParts.join('');
-  if(status)status.textContent=correct?'✅ Correct! +10 XP':'❌ Not quite. The formula is: '+builderTarget.formula;
+  if(!_st.builderTarget||!_st.builderParts.length)return;
+  const correct=_st.builderSelected.join('')===_st.builderParts.join('');
+  if(status)status.textContent=correct?'✅ Correct! +10 XP':'❌ Not quite. The formula is: '+_st.builderTarget.formula;
   if(correct)awardXP(10,'formula-builder');
 }
 
@@ -5831,7 +5973,7 @@ function builderCheck(){
 // ===================== PHASE 18: CUSTOM PROBLEM CREATOR, DECK SHARING, RATINGS =====================
 function getCustomProblems(){
   if(typeof localStorage==='undefined')return[];
-  try{return JSON.parse(localStorage.getItem('sh-custom-problems')||'[]')||[];}catch{return[];}
+  try{return _storage('sh-custom-problems',[])||[];}catch{return[];}
 }
 
 function initCreatePage(){
@@ -5887,7 +6029,7 @@ function saveCustomProblem(){
     prob.tol=+(document.getElementById('cpTol')?.value||0.1);
   }
   customs.push(prob);
-  if(typeof localStorage!=='undefined')localStorage.setItem('sh-custom-problems',JSON.stringify(customs));
+  _storageSave('sh-custom-problems',customs);
   if(!allProbs[unit])allProbs[unit]=[];
   allProbs[unit].push(prob);
   showToast('Problem saved! Find it in Unit '+unit+' practice. +10 XP');
@@ -5916,7 +6058,7 @@ window.deleteCustomProblem=function(idx){
   const customs=getCustomProblems();
   const prob=customs[idx];
   customs.splice(idx,1);
-  localStorage.setItem('sh-custom-problems',JSON.stringify(customs));
+  _storageSave('sh-custom-problems',customs);
   if(prob&&allProbs[prob.unit]){
     allProbs[prob.unit]=allProbs[prob.unit].filter(p=>p.id!==prob.id);
   }
@@ -5931,7 +6073,7 @@ function exportAllData(){
     for(var i=0;i<localStorage.length;i++){
       var k=localStorage.key(i);
       if(k&&k.startsWith('sh-')){
-        try{data[k]=JSON.parse(localStorage.getItem(k));}catch(e){data[k]=localStorage.getItem(k);}
+        var rawVal=_storageRaw(k,'');try{data[k]=JSON.parse(rawVal);}catch(e){data[k]=rawVal;}
       }
     }
   }
@@ -5987,7 +6129,7 @@ function importCustomDeck(){
           allProbs[p.unit].push(p);
           added++;
         });
-        if(typeof localStorage!=='undefined')localStorage.setItem('sh-custom-problems',JSON.stringify(customs));
+        _storageSave('sh-custom-problems',customs);
         showToast('Imported '+added+' problems!');
         buildCustomProblemList();
       }catch{showToast('Invalid deck file.');}
@@ -5999,9 +6141,9 @@ function importCustomDeck(){
 
 function rateProblem(probId,rating){
   if(typeof localStorage==='undefined')return;
-  const ratings=JSON.parse(localStorage.getItem('sh-ratings')||'{}');
+  const ratings=_storage('sh-ratings',{});
   ratings[probId]=rating;
-  localStorage.setItem('sh-ratings',JSON.stringify(ratings));
+  _storageSave('sh-ratings',ratings);
   const row=document.getElementById('rate-'+probId);
   if(row)row.innerHTML='<span class="rate-thanks">Thanks for the rating!</span>';
   awardXP(1,'rate-'+probId);
@@ -6010,7 +6152,6 @@ function rateProblem(probId,rating){
   if(rd)rd.textContent='\u2605'.repeat(rating);
 }
 
-let toastTimer=null;
 function showConfetti(){
   if(typeof document==='undefined')return;
   var colors=['var(--cyan)','var(--amber)','var(--green)','var(--pink)','var(--purple)'];
@@ -6026,12 +6167,12 @@ function checkUnitCompletion(unit){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var probs=allProbs[unit]||[];
   if(!probs.length)return;
-  var allCorrect=probs.every(function(p){return answered[p.id]==='correct'||answered[p.id]===p.ans||(typeof answered[p.id]==='number'&&Math.abs(answered[p.id]-p.ans)<=(p.tol||0.1));});
+  var allCorrect=probs.every(function(p){return _st.answered[p.id]==='correct'||_st.answered[p.id]===p.ans||(typeof _st.answered[p.id]==='number'&&Math.abs(_st.answered[p.id]-p.ans)<=(p.tol||0.1));});
   if(!allCorrect)return;
   var key='sh-confetti-done-'+unit;
-  try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1');}catch(e){return;}
+  if(_storageRaw(key,''))return;_storageRawSave(key,'1');
   showConfetti();
-  showToast('Unit '+unit+' complete! All problems answered correctly! 🎉',3000);
+  showToast('Unit '+unit+' complete! All problems _st.answered correctly! 🎉',3000);
 }
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;
@@ -6039,28 +6180,28 @@ function showToast(msg,duration=2000){
   if(!toast)return;
   toast.textContent=msg;
   toast.classList.add('toast-visible');
-  if(toastTimer)clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{toast.classList.remove('toast-visible');},duration);
+  if(_st.toastTimer)clearTimeout(_st.toastTimer);
+  _st.toastTimer=setTimeout(()=>{toast.classList.remove('toast-visible');},duration);
   const ann=document.getElementById('a11yAnnounce');if(ann)ann.textContent=msg;
 }
 
 function exportUnitProblems(){
   if(typeof document==='undefined')return;
-  var probs=allProbs[currentUnit]||[];
+  var probs=allProbs[_st.currentUnit]||[];
   if(!probs.length){showToast('No problems to export');return;}
-  var json=JSON.stringify({unit:currentUnit,name:typeof UNIT_META!=='undefined'&&UNIT_META[currentUnit]?UNIT_META[currentUnit].name:'',exported:new Date().toISOString(),problems:probs},null,2);
+  var json=JSON.stringify({unit:_st.currentUnit,name:typeof UNIT_META!=='undefined'&&UNIT_META[_st.currentUnit]?UNIT_META[_st.currentUnit].name:'',exported:new Date().toISOString(),problems:probs},null,2);
   if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Export unavailable');return;}
   var blob=new Blob([json],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download='unit-'+currentUnit+'-problems.json';
+  a.href=url;a.download='unit-'+_st.currentUnit+'-problems.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('Exported unit '+currentUnit+' problems');
+  showToast('Exported unit '+_st.currentUnit+' problems');
 }
 function jumpToRandomProblem(){
   if(typeof document==='undefined')return;
-  var unsolved=activeProbs.filter(function(p){return answered[p.id]===undefined;});
+  var unsolved=_st.activeProbs.filter(function(p){return _st.answered[p.id]===undefined;});
   if(!unsolved.length){showToast('All problems solved! Great job. \ud83c\udf89');return;}
   var p=unsolved[Math.floor(Math.random()*unsolved.length)];
   var card=document.getElementById('pc-'+p.id);
@@ -6082,10 +6223,10 @@ function exportProgressJSON(){
   if(typeof localStorage==='undefined')return;
   const payload={version:1,exported:new Date().toISOString(),practice:{},topics:null,streak:getStreakData(),xp:getXPData(),milestones:getMilestones(),review:getReviewData(),reviewMeta:getReviewMeta(),bookmarks:getBookmarks(),notes:getNotes()};
   for(let unit=1;unit<=MAX_UNIT;unit++){
-    try{payload.practice[unit]=JSON.parse(localStorage.getItem('sh-practice-'+unit)||'null');}
+    try{payload.practice[unit]=_storage('sh-practice-'+unit,null);}
     catch{payload.practice[unit]=null;}
   }
-  try{payload.topics=JSON.parse(localStorage.getItem('sh-topics')||'null');}
+  try{payload.topics=_storage('sh-topics',null);}
   catch{payload.topics=null;}
   const json=JSON.stringify(payload,null,2);
   if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){
@@ -6119,7 +6260,7 @@ async function copyProgressSummary(){
   }
   let topics={};
   if(typeof localStorage!=='undefined'){
-    try{topics=JSON.parse(localStorage.getItem('sh-topics')||'{}')||{};}catch{topics={};}
+    try{topics=_storage('sh-topics',{})||{};}catch{topics={};}
   }
   const topicKeys=Object.keys(topics);
   const checked=topicKeys.filter(k=>!!topics[k]).length;
@@ -6162,34 +6303,34 @@ function importProgressJSON(file){
       if(typeof localStorage!=='undefined'){
         Object.keys(data.practice).forEach(unit=>{
           const val=data.practice[unit];
-          if(val!==null)localStorage.setItem('sh-practice-'+unit,JSON.stringify(val));
+          if(val!==null)_storageSave('sh-practice-'+unit,val);
         });
         if(data.topics&&typeof data.topics==='object'&&!Array.isArray(data.topics)){
-          localStorage.setItem('sh-topics',JSON.stringify(data.topics));
+          _storageSave('sh-topics',data.topics);
         }
         if(data.streak&&typeof data.streak==='object'&&!Array.isArray(data.streak)){
-          localStorage.setItem('sh-streak',JSON.stringify(data.streak));
+          _storageSave('sh-streak',data.streak);
         }
         if(data.xp&&typeof data.xp==='object'&&!Array.isArray(data.xp)){
-          localStorage.setItem('sh-xp',JSON.stringify(data.xp));
+          _storageSave('sh-xp',data.xp);
         }
         if(data.milestones&&typeof data.milestones==='object'&&!Array.isArray(data.milestones)){
-          localStorage.setItem('sh-milestones',JSON.stringify(data.milestones));
+          _storageSave('sh-milestones',data.milestones);
         }
         if(data.review&&typeof data.review==='object'&&!Array.isArray(data.review)){
-          localStorage.setItem('sh-review',JSON.stringify(data.review));
+          _storageSave('sh-review',data.review);
         }
         if(data.reviewMeta&&typeof data.reviewMeta==='object'&&!Array.isArray(data.reviewMeta)){
-          localStorage.setItem('sh-review-meta',JSON.stringify(data.reviewMeta));
+          _storageSave('sh-review-meta',data.reviewMeta);
         }
         if(data.bookmarks&&typeof data.bookmarks==='object'&&!Array.isArray(data.bookmarks)){
-          localStorage.setItem('sh-bookmarks',JSON.stringify(data.bookmarks));
+          _storageSave('sh-bookmarks',data.bookmarks);
         }
         if(data.notes&&typeof data.notes==='object'&&!Array.isArray(data.notes)){
-          localStorage.setItem('sh-notes',JSON.stringify(data.notes));
+          _storageSave('sh-notes',data.notes);
         }
       }
-      buildProblems(currentUnit);
+      buildProblems(_st.currentUnit);
       buildRoadmap();
       buildProgressPanel();
       updateStreakDisplay();
@@ -6242,7 +6383,7 @@ const LEARNING_PATHS={
 
 function getActivePath(){
   if(typeof localStorage==='undefined')return null;
-  try{return JSON.parse(localStorage.getItem('sh-active-path')||'null');}catch{return null;}
+  return _storage('sh-active-path',null);
 }
 
 function selectPath(pathId){
@@ -6250,7 +6391,7 @@ function selectPath(pathId){
   const path=LEARNING_PATHS[pathId];
   if(!path)return;
   const data={pathId:pathId,startDate:todayStr(),currentStep:0};
-  localStorage.setItem('sh-active-path',JSON.stringify(data));
+  _storageSave('sh-active-path',data);
   showToast('Started: '+path.name);
   updatePathDisplay();
   buildPathGrid();
@@ -6263,7 +6404,7 @@ function advancePath(){
   const path=LEARNING_PATHS[data.pathId];
   if(!path)return;
   data.currentStep=Math.min(data.currentStep+1,path.units.length-1);
-  localStorage.setItem('sh-active-path',JSON.stringify(data));
+  _storageSave('sh-active-path',data);
   updatePathDisplay();
 }
 
@@ -6315,13 +6456,13 @@ function setGoal(){
   const input=document.getElementById('goalDate');
   const date=input?input.value:'';
   if(!date)return;
-  localStorage.setItem('sh-goal',date);
+  _storageRawSave('sh-goal',date);
   updateGoalDisplay();
 }
 
 function updateGoalDisplay(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
-  const goalDate=localStorage.getItem('sh-goal');
+  const goalDate=_storageRaw('sh-goal','');
   if(!goalDate)return;
   const remaining=Math.ceil((new Date(goalDate)-new Date())/(1000*60*60*24));
   setElText('goalDays',Math.max(0,remaining));
@@ -6373,21 +6514,20 @@ function generateCertificate(){
   showToast('Congratulations! Certificate generated. 🎓');
 }
 
-let stepProgress={};
 
 function revealNextStep(probId,total){
   if(typeof document==='undefined')return;
-  if(!stepProgress[probId])stepProgress[probId]=0;
-  const idx=stepProgress[probId];
+  if(!_st.stepProgress[probId])_st.stepProgress[probId]=0;
+  const idx=_st.stepProgress[probId];
   if(idx>=total)return;
   const step=document.getElementById('step-'+probId+'-'+idx);
   if(step)step.classList.remove('hidden');
-  stepProgress[probId]++;
+  _st.stepProgress[probId]++;
   const btn=document.getElementById('stepBtn-'+probId);
-  if(stepProgress[probId]>=total){
+  if(_st.stepProgress[probId]>=total){
     if(btn)btn.style.display='none';
   }else{
-    if(btn)btn.textContent='Show Step '+(stepProgress[probId]+1)+' →';
+    if(btn)btn.textContent='Show Step '+(_st.stepProgress[probId]+1)+' →';
   }
 }
 
@@ -6501,15 +6641,15 @@ const NLP_PATTERNS=[
 function _saveNLPHistory(query){
   if(typeof localStorage==='undefined')return;
   var hist=[];
-  try{hist=JSON.parse(localStorage.getItem('sh-nlp-history')||'[]');}catch(e){}
+  hist=_storage('sh-nlp-history',[]);
   hist=hist.filter(function(q){return q!==query;});
   hist.unshift(query);
   if(hist.length>5)hist=hist.slice(0,5);
-  localStorage.setItem('sh-nlp-history',JSON.stringify(hist));
+  _storageSave('sh-nlp-history',hist);
 }
 function _applyNLPChip(idx){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
-  var hist=[];try{hist=JSON.parse(localStorage.getItem('sh-nlp-history')||'[]');}catch(e){}
+  var hist=[];hist=_storage('sh-nlp-history',[]);
   var inp=document.getElementById('nlpInput');
   if(inp&&hist[idx]!==undefined){inp.value=hist[idx];solveNLP();}
 }
@@ -6518,7 +6658,7 @@ function buildNLPHistory(){
   var el=document.getElementById('nlpHistory');
   if(!el)return;
   var hist=[];
-  if(typeof localStorage!=='undefined'){try{hist=JSON.parse(localStorage.getItem('sh-nlp-history')||'[]');}catch(e){}}
+  if(typeof localStorage!=='undefined'){hist=_storage('sh-nlp-history',[]);}
   if(!hist.length){el.innerHTML='';return;}
   el.innerHTML=hist.map(function(q,i){
     var label=q.length>40?q.slice(0,40)+'...':q;
