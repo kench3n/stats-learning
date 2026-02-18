@@ -32,7 +32,11 @@ function goPage(id){
     history.pushState({page:id},'','#/'+id);
   }
   _goPageSkipPush=false;
-  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);},50);}
+  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{
+    var savedVizTab=typeof localStorage!=='undefined'?localStorage.getItem('sh-viz-tab'):null;
+    if(savedVizTab){var tabBtn=document.getElementById('viz-tab-'+savedVizTab);if(tabBtn)showSub('viz',savedVizTab,tabBtn);}
+    drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
+  },50);}
   if(id==='review')updateReviewBadge();
   if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
@@ -63,7 +67,10 @@ function showSub(prefix,id,btn){
   const container=prefix==='rm'?document.getElementById('rm-panels'):document.getElementById('viz-panels');
   container.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById((prefix==='rm'?'rm-':prefix==='viz'?'viz-':'')+id).classList.add('active');
-  if(prefix==='viz')setTimeout(()=>{if(id==='hist')drawHist();if(id==='box')drawBox();if(id==='norm')drawNorm();if(id==='comp')drawComp();},30);
+  if(prefix==='viz'){
+    setTimeout(()=>{if(id==='hist')drawHist();if(id==='box')drawBox();if(id==='norm')drawNorm();if(id==='comp')drawComp();},30);
+    if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-viz-tab',id);}catch(e){}
+  }
 }
 
 // ===================== KEYBOARD NAV =====================
