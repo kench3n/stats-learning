@@ -183,6 +183,14 @@ var _st = {
   builderParts: [],
   builderTarget: null,
   builderSelected: [],
+  _builderShuffled: [],
+  _dcProbs: [],
+  _dcAnswered: {},
+  _matchLeft: [],
+  _matchRight: [],
+  _matchRender: null,
+  _matchStatus: null,
+  _matchPool: [],
   toastTimer: null,
   stepProgress: {},
   intervals: []
@@ -5125,14 +5133,14 @@ function buildDailyChallenge(){
   });
   dcProblems.innerHTML=html;
 
-  window._dcProbs=dc.problems;
-  window._dcAnswered={};
+  _st._dcProbs=dc.problems;
+  _st._dcAnswered={};
 
   window.dcAnsMC=function(i,j){
-    if(window._dcAnswered[i]!==undefined)return;
-    window._dcAnswered[i]=j;
+    if(_st._dcAnswered[i]!==undefined)return;
+    _st._dcAnswered[i]=j;
     answeredCount++;
-    const p=window._dcProbs[i];
+    const p=_st._dcProbs[i];
     const ok=j===p.ans;
     if(ok)correctCount++;
     p.ch.forEach((_,k)=>{
@@ -5148,13 +5156,13 @@ function buildDailyChallenge(){
   };
 
   window.dcAnsFR=function(i){
-    if(window._dcAnswered[i]!==undefined)return;
+    if(_st._dcAnswered[i]!==undefined)return;
     const inp=document.getElementById('dc-fi-'+i);
     if(!inp)return;
     const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
-    window._dcAnswered[i]=v;
+    _st._dcAnswered[i]=v;
     answeredCount++;
-    const p=window._dcProbs[i];
+    const p=_st._dcProbs[i];
     const ok=Math.abs(v-p.ans)<=(p.tol||0.1);
     if(ok)correctCount++;
     inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
@@ -5916,12 +5924,12 @@ function startMatchGame(unit){
     html+='</div></div>';
     board.innerHTML=html;
   }
-  window._matchLeft=left;window._matchRight=right;window._matchRender=render;window._matchStatus=status;window._matchPool=pool;
+  _st._matchLeft=left;_st._matchRight=right;_st._matchRender=render;_st._matchStatus=status;_st._matchPool=pool;
   render();
 }
 
 window.matchClick=function(side,id){
-  const left=window._matchLeft;const right=window._matchRight;const render=window._matchRender;const status=window._matchStatus;
+  const left=_st._matchLeft;const right=_st._matchRight;const render=_st._matchRender;const status=_st._matchStatus;
   if(!_st.matchSelected){
     _st.matchSelected={side,id};render();return;
   }
@@ -5962,7 +5970,7 @@ function startFormulaBuilder(unit){
   const shuffled=[..._st.builderParts].sort(()=>Math.random()-0.5);
   target.innerHTML='Build the formula for: <strong>'+_esc(_st.builderTarget.name)+'</strong>';
   if(piecesEl){
-    window._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
+    _st._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
   }
   if(ansEl)ansEl.innerHTML='<div class="builder-slots" id="builderSlots"></div>';
   if(statusEl)statusEl.textContent='';
@@ -5970,7 +5978,7 @@ function startFormulaBuilder(unit){
 
 window.builderPick=function(idx){
   if(typeof document==='undefined')return;
-  const piece=(window._builderShuffled||[])[idx]||'';
+  const piece=(_st._builderShuffled||[])[idx]||'';
   _st.builderSelected.push(piece);
   const btn=document.getElementById('bp-'+idx);
   if(btn)btn.disabled=true;
