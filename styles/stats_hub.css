@@ -128,6 +128,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .nav-pill{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);background:var(--bg3);padding:5px 10px;border-radius:20px;border:1px solid var(--border);display:flex;align-items:center;gap:6px;white-space:nowrap;}
 #streakPill{font-size:12px;color:var(--amber);}
 #streakIcon{font-size:16px;transition:filter 0.3s;}
+.freeze-info{font-size:11px;color:var(--cyan);margin-left:2px;}
 #xpPill{display:flex;align-items:center;gap:6px;font-size:12px;font-family:'Space Mono',monospace;}
 .xp-level{color:var(--amber);font-weight:700;}
 .xp-bar-mini{width:40px;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;}

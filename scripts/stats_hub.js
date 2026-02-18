@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -363,6 +363,49 @@ function recordActivity(){
   awardXP(data.current*2,'streak-'+today);
   checkMilestones();
   return data;
+}
+
+function getStreakFreezeData(){
+  if(typeof localStorage==='undefined')return{count:2,month:''};
+  try{
+    var curMonth=todayStr().slice(0,7);
+    var d=JSON.parse(localStorage.getItem('sh-streak-freeze')||'{}');
+    if(d.month!==curMonth)d={count:2,month:curMonth};
+    else d.count=Number.isFinite(+d.count)?+d.count:2;
+    return d;
+  }catch{return{count:2,month:todayStr().slice(0,7)};}
+}
+function saveStreakFreezeData(d){if(typeof localStorage!=='undefined')localStorage.setItem('sh-streak-freeze',JSON.stringify(d));}
+function checkStreakFreeze(){
+  if(typeof localStorage==='undefined')return;
+  var streakData=getStreakData();
+  var current=streakData.current||0;
+  if(!current||!streakData.lastDate)return;
+  var today=todayStr();
+  if(streakData.lastDate===today)return;
+  var yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  var yesterStr=yesterday.toISOString().slice(0,10);
+  if(streakData.lastDate===yesterStr)return;
+  var twoDaysAgo=new Date();twoDaysAgo.setDate(twoDaysAgo.getDate()-2);
+  var twoDaysStr=twoDaysAgo.toISOString().slice(0,10);
+  if(streakData.lastDate!==twoDaysStr)return;
+  var freezeData=getStreakFreezeData();
+  if(freezeData.count<=0)return;
+  freezeData.count--;
+  saveStreakFreezeData(freezeData);
+  if(!Array.isArray(streakData.history))streakData.history=[];
+  if(!streakData.history.includes(yesterStr))streakData.history.push(yesterStr);
+  streakData.lastDate=yesterStr;
+  saveStreakData(streakData);
+  if(typeof showToast==='function')showToast('\u274c Streak Freeze used! Streak preserved.');
+  buildFreezeInfo();
+}
+function buildFreezeInfo(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('freezeInfo');if(!el)return;
+  var d=getStreakFreezeData();
+  if(d.count<=0){el.textContent='No freezes';el.style.color='var(--red)';}
+  else{el.textContent='\u2744\ufe0f x'+d.count;}
 }
 
 function awardXP(amount,reason){
