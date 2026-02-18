@@ -6700,7 +6700,7 @@ function buildNLPHistory(){
   if(!hist.length){el.innerHTML='';return;}
   el.innerHTML=hist.map(function(q,i){
     var label=q.length>40?q.slice(0,40)+'...':q;
-    return '<button class="nlp-history-chip" onclick="_applyNLPChip('+i+')">'+label+'</button>';
+    return '<button class="nlp-history-chip" onclick="_applyNLPChip('+i+')">'+_esc(label)+'</button>';
   }).join('');
 }
 function solveNLP(){
