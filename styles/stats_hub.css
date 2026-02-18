@@ -1224,6 +1224,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .prob-link-btn:hover{opacity:1;color:var(--cyan);}
 .prob-share-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 6px;opacity:0.7;transition:opacity 0.2s,color 0.2s;}
 .prob-share-btn:hover{opacity:1;border-color:var(--green);color:var(--green);}
+.deep-link-highlight{animation:deepLinkPulse 0.5s ease-in-out 2;border:2px solid var(--cyan)!important;}
+@keyframes deepLinkPulse{0%,100%{background:transparent;}50%{background:rgba(0,212,255,0.12);}}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @media(prefers-reduced-motion:no-preference){.pc{animation:cardIn 0.2s ease both;}}
 .jump-bar{display:flex;align-items:center;gap:6px;padding:6px 0 4px;}

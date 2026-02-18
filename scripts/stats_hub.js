@@ -95,6 +95,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     const tabList=tab&&tab.closest?tab.closest('[role="tablist"]'):null;
     if(tab&&tabList)handleTabKeyboard(e,tabList);
   });
+  checkDeepLink();
 });}
 
 // ===================== UTILITIES =====================
@@ -4201,11 +4202,32 @@ function jumpToProblem(){
 }
 function copyProblemLink(probId){
   if(typeof window==='undefined'||typeof navigator==='undefined')return;
-  var url=(window.location.origin||'')+(window.location.pathname||'')+'#/practice?pid='+probId;
+  var url=(window.location.origin||'')+(window.location.pathname||'')+'#problem-'+probId;
   if(navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
-    navigator.clipboard.writeText(url).then(function(){showToast('Link copied!');}).catch(function(){showToast('Could not copy link');});
+    navigator.clipboard.writeText(url).then(function(){showToast('Link copied! Share to jump directly to this problem.');}).catch(function(){showToast('Could not copy link');});
   }else{
     showToast('Link: '+url);
+  }
+}
+function checkDeepLink(){
+  if(typeof window==='undefined'||typeof document==='undefined')return;
+  var hash=window.location.hash||'';
+  var m=hash.match(/^#problem-(\d+)$/);
+  if(!m)return;
+  var probId=m[1];
+  // find which unit has this problem
+  for(var u=1;u<=MAX_UNIT;u++){
+    var probs=allProbs[u]||[];
+    var found=probs.find(function(x){return String(x.id)===probId;});
+    if(found){
+      goPage('practice');
+      setUnit(u);
+      setTimeout(function(){
+        var el=document.getElementById('pc-'+probId);
+        if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('deep-link-highlight');setTimeout(function(){el.classList.remove('deep-link-highlight');},2000);}
+      },500);
+      return;
+    }
   }
 }
 function shareProblem(probId){
