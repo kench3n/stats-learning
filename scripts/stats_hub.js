@@ -4170,7 +4170,7 @@ function updateWeakSpots(){
       <div class="weakspot-unit">Unit ${s.unit}: ${s.name}</div>
       <div class="weakspot-bar"><div class="weakspot-fill" style="width:${s.pct}%;"></div></div>
       <div class="weakspot-detail">${s.correct}/${s.total} correct &middot; ${s.wrong} wrong &middot; ${s.unanswered} unanswered</div>
-      ${s.weakTopics.length?'<div class="weakspot-topics">Weak: '+s.weakTopics.slice(0,2).join(', ')+'</div>':''}
+      ${s.weakTopics.length?'<div class="weakspot-topics">Weak: '+_esc(s.weakTopics.slice(0,2).join(', '))+'</div>':''}
     </div>`;
   });
   list.innerHTML=h;
