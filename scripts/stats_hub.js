@@ -1019,6 +1019,17 @@ function filterFormulas(query){
     if(c&&c.style.display==='none')toggleFormulas();
   }
 }
+function formulaUnitNav(dir){
+  if(typeof document==='undefined')return;
+  var maxUnit=typeof MAX_UNIT!=='undefined'?MAX_UNIT:14;
+  var next=Math.min(Math.max(1,(typeof currentUnit!=='undefined'?currentUnit:1)+dir),maxUnit);
+  if(next===(typeof currentUnit!=='undefined'?currentUnit:1))return;
+  currentUnit=next;
+  buildFormulas(next);
+  buildProblems(next);
+  var sel=document.getElementById('unitSelect');if(sel)sel.value=String(next);
+  var vsel=document.getElementById('vizUnitSelect');if(vsel)vsel.value=String(next);
+}
 function clearFormulaSearch(){
   if(typeof document==='undefined')return;
   var inp=document.getElementById('formulaSearch');

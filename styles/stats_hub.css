@@ -1166,6 +1166,10 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .formula-pin-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;padding:3px 8px;transition:border-color 0.2s,color 0.2s;}
 .formula-pin-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 .formula-pin-btn.pinned{border-color:var(--amber);color:var(--amber);}
+.formula-unit-nav-row{display:flex;align-items:center;gap:6px;margin:4px 0;}
+.formula-unit-nav{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 6px;transition:border-color 0.2s,color 0.2s;}
+.formula-unit-nav:hover{border-color:var(--cyan);color:var(--cyan);}
+.formula-unit-label{flex:1;font-size:11px;color:var(--muted);text-align:center;}
 .prob-link-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 4px;opacity:0.6;transition:opacity 0.2s,color 0.2s;}
 .prob-link-btn:hover{opacity:1;color:var(--cyan);}
 .prob-share-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 6px;opacity:0.7;transition:opacity 0.2s,color 0.2s;}
