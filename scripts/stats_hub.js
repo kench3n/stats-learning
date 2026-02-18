@@ -3130,6 +3130,9 @@ function drawScatter(){
   const canvas=document.getElementById('scatterCanvas');
   if(canvas&&!canvas.dataset.bound){
     canvas.dataset.bound='1';
+    if(_st._vizAbort&&_st._vizAbort.u3){_st._vizAbort.u3.abort();}
+    if(!_st._vizAbort)_st._vizAbort={};
+    _st._vizAbort.u3=typeof AbortController!=='undefined'?new AbortController():{signal:{}};
     canvas.addEventListener('click',e=>{
       const rect=canvas.getBoundingClientRect(),pad={l:44,r:20,t:20,b:34};
       const xPix=e.clientX-rect.left,yPix=e.clientY-rect.top;
@@ -3137,7 +3140,7 @@ function drawScatter(){
       const y=clamp(10-(yPix-pad.t)/(rect.height-pad.t-pad.b)*10,0,10);
       vizState.u3.points.push({x,y});
       drawScatter();
-    });
+    },{signal:_st._vizAbort.u3.signal});
   }
   const pts=vizState.u3.points;
   const stats=regressionStats(pts);
@@ -3520,6 +3523,9 @@ function drawRegOut(){
   const canvas=document.getElementById('regCanvas');
   if(canvas&&!canvas.dataset.bound){
     canvas.dataset.bound='1';
+    if(_st._vizAbort&&_st._vizAbort.u11){_st._vizAbort.u11.abort();}
+    if(!_st._vizAbort)_st._vizAbort={};
+    _st._vizAbort.u11=typeof AbortController!=='undefined'?new AbortController():{signal:{}};
     canvas.addEventListener('mousemove',_throttle(function(e){
       var r=canvas.getBoundingClientRect();
       var x=e.clientX-r.left,y=e.clientY-r.top;
@@ -3531,14 +3537,14 @@ function drawRegOut(){
         setElText('u11Tip',hit?hit.tip:'Hover a highlighted value for explanation.');
         drawRegOut();
       }
-    },16));
+    },16),{signal:_st._vizAbort.u11.signal});
     canvas.addEventListener('mouseleave',()=>{
       if(vizState.u11.hover!==''){
         vizState.u11.hover='';
         setElText('u11Tip','Hover a highlighted value for explanation.');
         drawRegOut();
       }
-    });
+    },{signal:_st._vizAbort.u11.signal});
   }
 
   const cv=prepCanvas2('regCanvas',340);if(!cv)return;
