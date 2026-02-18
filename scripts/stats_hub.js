@@ -6725,10 +6725,10 @@ function solveNLP(){
     const match=query.match(pattern.regex);
     if(match){
       const solution=pattern.solve(match);
-      let html='<div class="nlp-answer">'+solution.answer+'</div>';
+      let html='<div class="nlp-answer">'+_esc(solution.answer)+'</div>';
       if(solution.steps){
         html+='<div class="nlp-steps">';
-        solution.steps.forEach(function(s,j){html+='<div class="step"><span class="step-num">Step '+(j+1)+':</span> '+s+'</div>';});
+        solution.steps.forEach(function(s,j){html+='<div class="step"><span class="step-num">Step '+(j+1)+':</span> '+_esc(s)+'</div>';});
         html+='</div>';
       }
       result.innerHTML=html;
