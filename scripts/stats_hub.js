@@ -1438,7 +1438,7 @@ function initFormulaResize(){
 function _highlightText(text,q){
   if(!q)return text;
   var esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  return text.replace(new RegExp('('+esc+')','gi'),'<mark>$1</mark>');
+  return text.replace(new RegExp('('+esc+')','gi'),function(m){return '<mark>'+_esc(m)+'</mark>';});
 }
 function filterFormulas(query){
   if(typeof document==='undefined')return;
