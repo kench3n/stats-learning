@@ -3127,7 +3127,42 @@ function toggleProgressPanel(){
 
 function resetUnit(unit){
   if(typeof document==='undefined')return;
-  if(typeof confirm==='function'&&!confirm('Reset all progress for Unit '+unit+'?'))return;
+  var answeredCount=Object.keys(answered).length;
+  var correctCount=pScore;
+  var elapsed=practiceSessionStart?Math.round((Date.now()-practiceSessionStart)/1000):0;
+  if(answeredCount>0){
+    showUnitResetSummary(unit,answeredCount,correctCount,elapsed);
+  }else{
+    if(typeof confirm==='function'&&!confirm('Reset all progress for Unit '+unit+'?'))return;
+    _doResetUnit(unit);
+  }
+}
+
+function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
+  if(typeof document==='undefined')return;
+  var overlay=document.createElement('div');
+  overlay.className='session-overlay';
+  var modal=document.createElement('div');
+  modal.className='session-modal';
+  modal.onclick=function(e){e.stopPropagation();};
+  var pct=answeredCount?Math.round(correctCount/answeredCount*100):0;
+  var timeStr=elapsed>=60?Math.floor(elapsed/60)+'m '+(elapsed%60)+'s':elapsed+'s';
+  modal.innerHTML='<h3>Unit '+unit+' Summary</h3>'
+    +'<div class="session-stats">'
+    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">answered</span></div>'
+    +'<div class="session-stat"><span class="session-num">'+correctCount+'</span><span class="session-label">correct</span></div>'
+    +'<div class="session-stat"><span class="session-num">'+pct+'%</span><span class="session-label">accuracy</span></div>'
+    +'<div class="session-stat"><span class="session-num">'+timeStr+'</span><span class="session-label">time</span></div>'
+    +'</div>'
+    +'<button class="session-close" id="unitResetConfirmBtn">Reset &amp; Continue</button>'
+    +'<br><button class="session-cancel-btn" id="unitResetCancelBtn" style="margin-top:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;">Cancel</button>';
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  document.getElementById('unitResetConfirmBtn').onclick=function(){overlay.remove();_doResetUnit(unit);};
+  document.getElementById('unitResetCancelBtn').onclick=function(){overlay.remove();};
+}
+
+function _doResetUnit(unit){
   if(typeof localStorage!=='undefined')localStorage.removeItem('sh-practice-'+unit);
   answered={};
   pScore=0;
