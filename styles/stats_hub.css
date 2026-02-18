@@ -1334,3 +1334,4 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .ah-status{font-size:14px;flex-shrink:0;}
 .ah-ok{color:var(--green);}
 .ah-wrong{color:var(--pink);}
+.formula-list mark{background:color-mix(in srgb,var(--amber) 30%,transparent);color:var(--text);border-radius:2px;}
