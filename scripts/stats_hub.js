@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -409,6 +409,21 @@ function buildFreezeInfo(){
   else{el.textContent='\u2744\ufe0f x'+d.count;}
 }
 
+function buildLongestStreak(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('longestStreak');if(!el)return;
+  var activity={};
+  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  var dates=Object.keys(activity).sort();
+  if(!dates.length){el.textContent='';return;}
+  var longest=1,cur=1;
+  for(var i=1;i<dates.length;i++){
+    var prev=new Date(dates[i-1]),curr=new Date(dates[i]);
+    var diff=(curr-prev)/(1000*60*60*24);
+    if(diff===1){cur++;if(cur>longest)longest=cur;}else{cur=1;}
+  }
+  el.textContent='(best: '+longest+'\uD83D\uDD25)';
+}
 function awardXP(amount,reason){
   if(!Number.isFinite(amount)||amount<=0)return;
   const data=getXPData();

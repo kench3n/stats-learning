@@ -1339,3 +1339,4 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .session-notes-panel .cl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
 #sessionNotes{width:100%;min-height:80px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;padding:8px;resize:vertical;box-sizing:border-box;}
 #sessionNotes:focus{outline:none;border-color:var(--cyan);}
+.longest-streak{font-size:10px;color:var(--muted);margin-left:4px;}
