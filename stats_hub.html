@@ -254,7 +254,7 @@
   </div>
   <div class="viz-history-row" id="vizHistoryRow" style="display:none;"></div>
   <div class="viz-unit-info" id="vizUnitInfo">
-    <button class="viz-unit-info-toggle" data-action="toggleVizInfo">&#8505; Unit Info &#9656;</button>
+    <button class="viz-unit-info-toggle" data-action="toggleVizInfo" aria-expanded="false" aria-controls="vizUnitInfoBody">&#8505; Unit Info &#9656;</button>
     <div class="viz-unit-info-body" id="vizUnitInfoBody" style="display:none;"></div>
   </div>
   <div class="sub-tabs" id="vizTabs" role="tablist" aria-label="Visualizer tools">
@@ -330,7 +330,7 @@
           <div class="cg"><label class="cl" for="sigSlider">σ (std dev) <span class="sv-val" id="sigVal">1</span></label><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" data-action="drawNorm"></div>
           <div class="cg"><label class="cl" for="normRegion">Region</label><select id="normRegion" data-action="drawNorm"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option><option value="range">Z Range</option></select></div>
           <div class="cg" id="zGrp" style="display:none"><label class="cl" for="zSlider">z <span class="sv-val" id="zVal">1.96</span></label><input type="range" id="zSlider" min="0" max="4" value="1.96" step="0.01" data-action="drawNorm"></div>
-          <div class="cg" id="zRangeGrp" style="display:none"><label class="cl">z1 <span class="sv-val" id="z1Val">-1.00</span></label><input type="range" id="z1Slider" min="-4" max="4" value="-1" step="0.01" data-action="drawNorm"><label class="cl">z2 <span class="sv-val" id="z2Val">1.00</span></label><input type="range" id="z2Slider" min="-4" max="4" value="1" step="0.01" data-action="drawNorm"></div>
+          <div class="cg" id="zRangeGrp" style="display:none"><label class="cl" for="z1Slider">z1 <span class="sv-val" id="z1Val">-1.00</span></label><input type="range" id="z1Slider" min="-4" max="4" value="-1" step="0.01" aria-label="z1 lower bound, range -4 to 4" data-action="drawNorm"><label class="cl" for="z2Slider">z2 <span class="sv-val" id="z2Val">1.00</span></label><input type="range" id="z2Slider" min="-4" max="4" value="1" step="0.01" aria-label="z2 upper bound, range -4 to 4" data-action="drawNorm"></div>
         </div>
         <div class="stats-row" style="margin-top:14px" aria-label="Normal distribution statistics">
           <div class="sc"><div class="sv sv-cyan" id="nArea">68.3%</div><div class="sl">Shaded area</div></div>
@@ -602,9 +602,9 @@
   <div class="fc-unit-select">
     <label for="fcUnitSelect">Unit:</label>
     <select id="fcUnitSelect" data-action="buildFlashcards"></select>
-    <button class="fc-mode-btn active" id="fcModeFlash" data-action="fcMode" data-val="flash">Flashcards</button>
-    <button class="fc-mode-btn" id="fcModeMatch" data-action="fcMode" data-val="match">Match Game</button>
-    <button class="fc-mode-btn" id="fcModeBuild" data-action="fcMode" data-val="build">Formula Builder</button>
+    <button class="fc-mode-btn active" id="fcModeFlash" data-action="fcMode" data-val="flash" aria-pressed="true">Flashcards</button>
+    <button class="fc-mode-btn" id="fcModeMatch" data-action="fcMode" data-val="match" aria-pressed="false">Match Game</button>
+    <button class="fc-mode-btn" id="fcModeBuild" data-action="fcMode" data-val="build" aria-pressed="false">Formula Builder</button>
   </div>
   <div id="fcFlashMode">
     <div class="fc-session-stats" id="fcSessionStats"></div>
@@ -665,10 +665,10 @@
   </div>
   <div class="analytics-section">
     <h3 class="achieve-section-title">📈 Learning Analytics</h3>
-    <div class="analytics-tabs">
-      <button class="analytics-tab active" data-action="analytics" data-val="accuracy">Accuracy</button>
-      <button class="analytics-tab" data-action="analytics" data-val="xp">XP Over Time</button>
-      <button class="analytics-tab" data-action="analytics" data-val="units">Unit Breakdown</button>
+    <div class="analytics-tabs" role="tablist" aria-label="Analytics views">
+      <button class="analytics-tab active" data-action="analytics" data-val="accuracy" role="tab" aria-selected="true">Accuracy</button>
+      <button class="analytics-tab" data-action="analytics" data-val="xp" role="tab" aria-selected="false">XP Over Time</button>
+      <button class="analytics-tab" data-action="analytics" data-val="units" role="tab" aria-selected="false">Unit Breakdown</button>
     </div>
     <canvas id="analyticsCanvas" height="220" style="width:100%;max-width:600px;display:block;margin-top:12px;" aria-label="Analytics chart" role="img"></canvas>
   </div>
@@ -696,8 +696,8 @@
 
 <div class="pomo-widget" id="pomoWidget">
   <button class="pomo-toggle" id="pomoToggle" data-action="togglePomoPanel" aria-label="Toggle study timer">⏱</button>
-  <div class="pomo-panel" id="pomoPanel" style="display:none;">
-    <div class="pomo-display" id="pomoDisplay">25:00</div>
+  <div class="pomo-panel" id="pomoPanel" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="pomoLabel">
+    <div class="pomo-display" id="pomoDisplay" aria-live="off" aria-label="Timer display">25:00</div>
     <div class="pomo-label" id="pomoLabel">Focus Time</div>
     <div class="pomo-controls">
       <button data-action="startPomo" id="pomoStart">Start</button>
@@ -749,7 +749,7 @@
     <span>🤖 Stats Tutor</span>
     <button data-action="toggleTutor" aria-label="Close tutor">✕</button>
   </div>
-  <div class="tutor-messages" id="tutorMessages"></div>
+  <div class="tutor-messages" id="tutorMessages" aria-live="polite" aria-label="Tutor conversation"></div>
   <div class="tutor-input-row">
     <input type="text" id="tutorInput" placeholder="Ask a stats question..." data-action-enter="sendTutorMessage" aria-label="Tutor input">
     <button data-action="sendTutorMessage">Send</button>

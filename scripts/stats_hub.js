@@ -1830,7 +1830,7 @@ var buildProblems=function(unit=_st.currentUnit){
     }else{
       html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." aria-label="Answer for problem ${p.id}" onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
     }
-    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')" oninput="var wc=this.value.trim().split(/\\s+/).filter(Boolean).length;var el=document.getElementById('nwc-${p.id}');if(el){el.textContent=wc+' / 50 words';el.classList.toggle('met',wc>=50);}">  </div><span class="note-wc" id="nwc-${p.id}">0 / 50 words</span><div class="diff-vote-row" id="dvr-${p.id}"><span class="diff-vote-label">Rate difficulty:</span><button class="diff-vote-btn" data-vote="easy" onclick="voteDiff(${p.id},\'easy\')">😅 Too Easy</button><button class="diff-vote-btn" data-vote="ok" onclick="voteDiff(${p.id},\'ok\')">✓ Just Right</button><button class="diff-vote-btn" data-vote="hard" onclick="voteDiff(${p.id},\'hard\')">😤 Too Hard</button></div></div>`;
+    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" aria-label="Note for problem ${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')" oninput="var wc=this.value.trim().split(/\\s+/).filter(Boolean).length;var el=document.getElementById('nwc-${p.id}');if(el){el.textContent=wc+' / 50 words';el.classList.toggle('met',wc>=50);}">  </div><span class="note-wc" id="nwc-${p.id}">0 / 50 words</span><div class="diff-vote-row" id="dvr-${p.id}"><span class="diff-vote-label">Rate difficulty:</span><button class="diff-vote-btn" data-vote="easy" onclick="voteDiff(${p.id},\'easy\')">😅 Too Easy</button><button class="diff-vote-btn" data-vote="ok" onclick="voteDiff(${p.id},\'ok\')">✓ Just Right</button><button class="diff-vote-btn" data-vote="hard" onclick="voteDiff(${p.id},\'hard\')">😤 Too Hard</button></div></div>`;
   });
   c.innerHTML=html;
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
@@ -2533,11 +2533,11 @@ function showUnitInfo(){
   modal.className='unit-info-modal';
   modal.onclick=function(e){e.stopPropagation();};
   var topicList=topics.map(function(t){return '<li>'+_esc(t)+'</li>';}).join('');
-  modal.innerHTML='<div class="unit-info-header"><strong>Unit '+_esc(unit)+': '+_esc(meta.name)+'</strong></div>'+
+  modal.innerHTML='<div class="unit-info-header"><strong id="unitInfoTitle">Unit '+_esc(unit)+': '+_esc(meta.name)+'</strong></div>'+
     '<div class="unit-info-stat-row"><span>'+probs.length+' problems</span><span class="ui-easy">'+easy+' easy</span><span class="ui-med">'+med+' medium</span><span class="ui-hard">'+hard+' hard</span></div>'+
     '<div class="unit-info-topics"><div class="unit-info-label">Topics covered:</div><ul class="unit-info-topic-list">'+topicList+'</ul></div>'+
     '<button id="unitInfoClose" class="unit-info-close">Close</button>';
-  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','unitInfoTitle');
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
   var closeBtn=modal.querySelector('#unitInfoClose');
@@ -2789,7 +2789,7 @@ function toggleVizInfo(){
   if(!body)return;
   var open=body.style.display!=='none';
   body.style.display=open?'none':'';
-  if(btn)btn.textContent=(open?'\u2139 Unit Info \u25B6':'\u2139 Unit Info \u25BC');
+  if(btn){btn.textContent=(open?'\u2139 Unit Info \u25B6':'\u2139 Unit Info \u25BC');btn.setAttribute('aria-expanded',open?'false':'true');}
 }
 function buildVizUnitInfo(unit){
   if(typeof document==='undefined')return;
@@ -3788,7 +3788,10 @@ function resetAllProgress(){
 function togglePomoPanel(){
   if(typeof document==='undefined')return;
   const p=document.getElementById('pomoPanel');
-  if(p)p.style.display=p.style.display==='none'?'':'none';
+  if(!p)return;
+  const opening=p.style.display==='none';
+  p.style.display=opening?'':'none';
+  if(opening){const first=p.querySelector('button');if(first)first.focus();}
 }
 
 function setPomoTime(mins,triggerEl){
@@ -5661,8 +5664,8 @@ function toggleFavFilter(){
 function showAnalytics(type,evt){
   if(typeof document==='undefined')return;
   if(evt&&evt.target){
-    document.querySelectorAll('.analytics-tab').forEach(t=>t.classList.remove('active'));
-    evt.target.classList.add('active');
+    document.querySelectorAll('.analytics-tab').forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false');});
+    evt.target.classList.add('active');evt.target.setAttribute('aria-selected','true');
   }
   if(type==='accuracy')drawAccuracyChart();
   else if(type==='xp')drawXPChart();
@@ -5818,7 +5821,7 @@ function setFCMode(mode){
   ['flash','match','build'].forEach(m=>{
     const btn=document.getElementById('fcMode'+m.charAt(0).toUpperCase()+m.slice(1));
     const panel=document.getElementById('fc'+m.charAt(0).toUpperCase()+m.slice(1)+'Mode');
-    if(btn)btn.classList.toggle('active',m===mode);
+    if(btn){btn.classList.toggle('active',m===mode);btn.setAttribute('aria-pressed',m===mode?'true':'false');}
     if(panel)panel.style.display=m===mode?'':'none';
   });
   const unit=+(document.getElementById('fcUnitSelect')?.value||1);
