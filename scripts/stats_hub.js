@@ -1348,14 +1348,13 @@ function loadFormulaPin(){
 }
 
 // ===================== HINT SYSTEM =====================
+var stepHintProgress={};
 function showHint(id){
   if(typeof document==='undefined')return;
   const ht=document.getElementById('ht-'+id);
   const hb=document.getElementById('hb-'+id);
-  if(ht)ht.style.display='block';
   if(hb)hb.style.display='none';
   awardXP(1,'hint-'+id);
-  // Track hint usage
   if(typeof localStorage!=='undefined'){
     try{
       var usage=JSON.parse(localStorage.getItem('sh-hint-usage')||'{}');
@@ -1365,6 +1364,37 @@ function showHint(id){
       buildHintUsageInfo();
     }catch(e){}
   }
+  if(!ht){return;}
+  var prob=activeProbs.find(function(p){return String(p.id)===String(id);});
+  if(prob&&prob.steps&&prob.steps.length){
+    stepHintProgress[id]=stepHintProgress[id]||0;
+    _renderStepHint(id,prob,ht);
+  }else{
+    ht.style.display='block';
+  }
+}
+function _renderStepHint(id,prob,ht){
+  var step=stepHintProgress[id]||0;
+  var steps=prob.steps||[];
+  var stepsHtml='<div class="step-hint-text"><div class="step-count-display">Step '+(step+1)+' of '+steps.length+'</div>';
+  for(var i=0;i<=step;i++){stepsHtml+='<div class="step-hint-line">'+steps[i]+'</div>';}
+  stepsHtml+='</div>';
+  if(step<steps.length-1){
+    stepsHtml+='<button class="step-hint-btn" onclick="showNextStep(\''+id+'\')">' + 'Next Step →</button>';
+  }else{
+    stepsHtml+='<div class="step-hint-line" style="color:var(--green);margin-top:4px;">All steps shown!</div>';
+  }
+  ht.innerHTML=stepsHtml;
+  ht.style.display='block';
+}
+function showNextStep(id){
+  if(typeof document==='undefined')return;
+  var prob=activeProbs.find(function(p){return String(p.id)===String(id);});
+  if(!prob||!prob.steps)return;
+  stepHintProgress[id]=(stepHintProgress[id]||0)+1;
+  if(stepHintProgress[id]>=prob.steps.length)stepHintProgress[id]=prob.steps.length-1;
+  var ht=document.getElementById('ht-'+id);
+  if(ht)_renderStepHint(id,prob,ht);
 }
 function buildHintUsageInfo(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
@@ -1554,7 +1584,7 @@ function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typ
 
 buildProblems=function(unit=currentUnit){
   activeProbs=allProbs[unit]||[];
-  wrongAttempts={};
+  wrongAttempts={};stepHintProgress={};
   // Session timer
   if(practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
   practiceSessionStart=Date.now();
