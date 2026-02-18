@@ -34,7 +34,7 @@ function goPage(id){
   _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildMotivationalQuote();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakHeatmap();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4007,6 +4007,34 @@ function buildRecentActivity(){
     var unitName=typeof UNIT_META!=='undefined'&&UNIT_META[a.unit]?'Unit '+a.unit:('Unit '+a.unit);
     html+='<div class="ra-row"><span class="ra-id">#'+a.id+'</span><span class="ra-unit">'+unitName+'</span><span class="ra-status '+statusCls+'">'+statusText+'</span></div>';
   });
+  el.innerHTML=html;
+}
+function buildStreakHeatmap(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('streakHeatmap');if(!el)return;
+  var activity={};
+  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  // Build 12 weeks (84 days) starting from 83 days ago
+  var today=new Date();today.setHours(0,0,0,0);
+  var startDay=new Date(today);startDay.setDate(today.getDate()-83);
+  // Align to Monday of that week
+  var dayOfWeek=startDay.getDay()||7; // 1=Mon..7=Sun
+  startDay.setDate(startDay.getDate()-(dayOfWeek-1));
+  var html='<div class="hm-title">12-Week Activity</div><div class="hm-grid">';
+  var d=new Date(startDay);
+  for(var week=0;week<13;week++){
+    html+='<div class="hm-week">';
+    for(var day=0;day<7;day++){
+      var iso=d.toISOString().slice(0,10);
+      var count=activity[iso]||0;
+      var level=count===0?0:count===1?1:count<=3?2:3;
+      var isFuture=d>today;
+      html+='<div class="hm-day" data-level="'+(isFuture?'future':level)+'" title="'+iso+(count?' — '+count+' session'+(count>1?'s':''):'')+'"></div>';
+      d.setDate(d.getDate()+1);
+    }
+    html+='</div>';
+  }
+  html+='</div>';
   el.innerHTML=html;
 }
 var _statsAnimated=false;
