@@ -2291,9 +2291,9 @@ function endReview(){
     overlay.onclick=function(){overlay.remove();};
     var modal=document.createElement('div');
     modal.className='session-modal';
-    modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
+    modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','rcTitle');
     modal.onclick=function(e){e.stopPropagation();};
-    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_esc(_st.reviewSessionCorrect)+'/'+_esc(total)+' correct ('+_esc(pct)+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;" role="img" aria-label="Review session results chart"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
+    modal.innerHTML='<h3 id="rcTitle">Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_esc(_st.reviewSessionCorrect)+'/'+_esc(total)+' correct ('+_esc(pct)+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;" role="img" aria-label="Review session results chart"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
     var _closeBtn=modal.querySelector('#reviewChartClose');
     if(_closeBtn)_closeBtn.onclick=function(){overlay.remove();};
     overlay.appendChild(modal);
@@ -3726,10 +3726,11 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
   overlay.className='session-overlay';
   var modal=document.createElement('div');
   modal.className='session-modal';
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','ursTitle');
   modal.onclick=function(e){e.stopPropagation();};
   var pct=answeredCount?Math.round(correctCount/answeredCount*100):0;
   var timeStr=elapsed>=60?Math.floor(elapsed/60)+'m '+(elapsed%60)+'s':elapsed+'s';
-  modal.innerHTML='<h3>Unit '+_esc(unit)+' Summary</h3>'
+  modal.innerHTML='<h3 id="ursTitle">Unit '+_esc(unit)+' Summary</h3>'
     +'<div class="session-stats">'
     +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">answered</span></div>'
     +'<div class="session-stat"><span class="session-num">'+correctCount+'</span><span class="session-label">correct</span></div>'
@@ -3742,6 +3743,7 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
   document.body.appendChild(overlay);
   document.getElementById('unitResetConfirmBtn').onclick=function(){overlay.remove();_doResetUnit(unit);};
   document.getElementById('unitResetCancelBtn').onclick=function(){overlay.remove();};
+  _trapFocus(overlay,modal);
 }
 
 function _doResetUnit(unit){
@@ -4208,8 +4210,9 @@ function showSessionSummary(){
   overlay.onclick=function(){overlay.remove();};
   const modal=document.createElement('div');
   modal.className='session-modal';
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','ssTitle');
   modal.onclick=function(e){e.stopPropagation();};
-  modal.innerHTML=`<h3>Session Summary</h3>
+  modal.innerHTML=`<h3 id="ssTitle">Session Summary</h3>
     <div class="session-stats">
       <div class="session-stat"><span class="session-num">${elapsed}</span><span class="session-label">minutes</span></div>
       <div class="session-stat"><span class="session-num">${_st.sessionData.problemsAnswered}</span><span class="session-label">problems</span></div>
@@ -4220,6 +4223,7 @@ function showSessionSummary(){
     <button class="session-close" onclick="this.closest('.session-overlay').remove()">Nice! 🎉</button>`;
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
+  _trapFocus(overlay,modal);
   _st.sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
 }
 
