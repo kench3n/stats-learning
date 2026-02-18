@@ -215,7 +215,7 @@
       <li class="improvement-item"><span class="marker" aria-hidden="true">+</span> New 6th pillar: Infrastructure &amp; Systems</li>
     </ul>
   </div>
-  <div class="rm-search-wrap"><input type="text" id="rmSearch" placeholder="Search topics..." data-action="searchRoadmap" class="rm-search-input" aria-label="Search roadmap topics"><button class="rm-search-clear" id="rmSearchClear" data-action="clearRoadmapSearch" style="display:none;">×</button><button class="rm-export-btn" data-action="exportRoadmapProgress" title="Export progress as JSON">Export Progress</button></div>
+  <div class="rm-search-wrap"><input type="text" id="rmSearch" placeholder="Search topics..." data-action="searchRoadmap" class="rm-search-input" aria-label="Search roadmap topics"><button class="rm-search-clear" id="rmSearchClear" aria-label="Clear roadmap search" data-action="clearRoadmapSearch" style="display:none;">×</button><button class="rm-export-btn" data-action="exportRoadmapProgress" title="Export progress as JSON">Export Progress</button></div>
   <div class="sub-tabs" id="roadmapTabs" role="tablist" aria-label="Roadmap levels">
     <button class="sub-tab active" id="rm-tab-l1" role="tab" aria-selected="true" aria-controls="rm-l1" data-action="sub" data-prefix="rm" data-sub="l1">Level 1<span class="level-time-remaining" id="ltr-l1"></span></button>
     <button class="sub-tab" id="rm-tab-l2" role="tab" aria-selected="false" aria-controls="rm-l2" data-action="sub" data-prefix="rm" data-sub="l2">Level 2<span class="level-time-remaining" id="ltr-l2"></span></button>
@@ -445,7 +445,7 @@
   </div>
   <div class="search-bar" id="searchBar">
   <input type="text" id="searchInput" placeholder="Search problems..." data-action="searchProblems" aria-label="Search problems">
-  <button class="search-clear" id="searchClear" data-action="clearSearch" style="display:none;">✕</button>
+  <button class="search-clear" id="searchClear" aria-label="Clear search" data-action="clearSearch" style="display:none;">✕</button>
 </div>
 <div class="search-suggestions" id="searchSuggestions">
   <button class="search-chip" data-action="searchChip" data-val="Hypothesis Test">Hypothesis Test</button>
@@ -494,8 +494,8 @@
   <button class="formula-toggle" id="formulaToggle" data-action="toggleFormulas" aria-expanded="false">
     📐 Formulas <span id="formulaArrow">▸</span>
   </button>
-  <button class="formula-pin-btn" id="formulaPinBtn" data-action="toggleFormulaPin" title="Pin formula panel open">📌</button>
-  <div class="formula-unit-nav-row"><button class="formula-unit-nav" id="formulaUnitPrev" data-action="formulaNav" data-dir="-1" title="Previous unit formulas">◀</button><div class="formula-unit-label" id="formulaUnitLabel"></div><button class="formula-unit-nav" id="formulaUnitNext" data-action="formulaNav" data-dir="1" title="Next unit formulas">▶</button><button class="formula-copy-all-btn" data-action="copyAllFormulas" title="Copy all formulas">Copy All</button></div>
+  <button class="formula-pin-btn" id="formulaPinBtn" data-action="toggleFormulaPin" title="Pin formula panel open" aria-label="Pin formula panel open">📌</button>
+  <div class="formula-unit-nav-row"><button class="formula-unit-nav" id="formulaUnitPrev" data-action="formulaNav" data-dir="-1" title="Previous unit formulas" aria-label="Previous unit formulas">◀</button><div class="formula-unit-label" id="formulaUnitLabel"></div><button class="formula-unit-nav" id="formulaUnitNext" data-action="formulaNav" data-dir="1" title="Next unit formulas" aria-label="Next unit formulas">▶</button><button class="formula-copy-all-btn" data-action="copyAllFormulas" title="Copy all formulas">Copy All</button></div>
   <div class="formula-recent-row" id="formulaRecentRow" style="display:none;"></div>
   <div class="formula-content" id="formulaContent" style="display:none;"></div>
   <div class="formula-resize-handle" id="formulaResizeHandle" title="Drag to resize formula panel"></div>
@@ -675,9 +675,9 @@
   <div class="calendar-section">
     <h3 class="achieve-section-title">📅 Study Calendar</h3>
     <div class="cal-nav">
-      <button data-action="calPrev">◀</button>
+      <button data-action="calPrev" aria-label="Previous month">◀</button>
       <span id="calMonth"></span>
-      <button data-action="calNext">▶</button>
+      <button data-action="calNext" aria-label="Next month">▶</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
   </div>
