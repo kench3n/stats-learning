@@ -77,7 +77,7 @@
     <div class="quick-stat-item"><span class="quick-stat-value" id="qsStreak">0</span><span class="quick-stat-label">Day Streak</span></div>
     <div class="quick-stat-item"><span class="quick-stat-value" id="qsToday">0</span><span class="quick-stat-label">Answered Today</span></div>
     <div class="quick-stat-item quick-stat-ring-item">
-      <svg class="progress-ring" width="44" height="44" viewBox="0 0 44 44" aria-label="Units started progress ring">
+      <svg class="progress-ring" width="44" height="44" viewBox="0 0 44 44" role="img" aria-label="Units started progress ring">
         <circle class="progress-ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
         <circle class="progress-ring-fill" id="qsRingFill" cx="22" cy="22" r="18" fill="none" stroke-width="4" stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
         <text class="progress-ring-text" x="22" y="26" text-anchor="middle" id="qsRingText">0</text>
@@ -372,13 +372,13 @@
     <p class="section-tag" id="practiceUnitTag">Unit 1 — Descriptive Statistics</p>
     <h2 class="section-title">Practice <em>Problems</em></h2>
     <p class="section-desc">Practice problems from easy to hard. Work them by hand, then check.</p>
-    <button class="focus-btn" id="focusBtn" data-action="toggleFocusMode" aria-label="Toggle focus mode">🎯 Focus Mode</button>
+    <button class="focus-btn" id="focusBtn" data-action="toggleFocusMode" aria-label="Toggle focus mode" aria-pressed="false">🎯 Focus Mode</button>
     <button class="export-pdf-btn" data-action="exportPracticePDF" aria-label="Export problems as PDF">🖨 Export PDF</button>
     <button class="export-unit-btn" data-action="exportUnitProblems" aria-label="Export unit problems as JSON">📥 Export Problems</button>
     <button class="rand-prob-btn" data-action="jumpToRandomProblem" aria-label="Jump to random unsolved problem">🎲 Random</button>
-    <button class="kb-help-btn" id="kbHelpBtn" data-action="toggleKBHelp" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">⌨️</button>
-    <button class="exam-mode-btn" id="examModeBtn" data-action="toggleExamMode" title="Toggle exam mode">Exam Mode</button>
-    <div class="kb-help-panel" id="kbHelpPanel" style="display:none;"><div class="kb-help-title">Keyboard Shortcuts</div><div class="kb-shortcut-row"><span class="kb-key">j / k</span><span class="kb-desc">Next / prev problem</span></div><div class="kb-shortcut-row"><span class="kb-key">h</span><span class="kb-desc">Show hint</span></div><div class="kb-shortcut-row"><span class="kb-key">b</span><span class="kb-desc">Toggle bookmark</span></div><div class="kb-shortcut-row"><span class="kb-key">Enter</span><span class="kb-desc">Submit answer</span></div><div class="kb-shortcut-row"><span class="kb-key">Esc</span><span class="kb-desc">Close panel</span></div></div>
+    <button class="kb-help-btn" id="kbHelpBtn" data-action="toggleKBHelp" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts" aria-expanded="false" aria-controls="kbHelpPanel">⌨️</button>
+    <button class="exam-mode-btn" id="examModeBtn" data-action="toggleExamMode" title="Toggle exam mode" aria-pressed="false">Exam Mode</button>
+    <div class="kb-help-panel" id="kbHelpPanel" role="region" aria-label="Keyboard shortcuts" style="display:none;"><div class="kb-help-title">Keyboard Shortcuts</div><div class="kb-shortcut-row"><span class="kb-key">j / k</span><span class="kb-desc">Next / prev problem</span></div><div class="kb-shortcut-row"><span class="kb-key">h</span><span class="kb-desc">Show hint</span></div><div class="kb-shortcut-row"><span class="kb-key">b</span><span class="kb-desc">Toggle bookmark</span></div><div class="kb-shortcut-row"><span class="kb-key">Enter</span><span class="kb-desc">Submit answer</span></div><div class="kb-shortcut-row"><span class="kb-key">Esc</span><span class="kb-desc">Close panel</span></div></div>
   </header>
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" data-action="toggleProgressPanel">Progress Overview &#9662;</button>
@@ -467,13 +467,13 @@
 </div>
 <div class="topic-focus-bar" id="topicFocusBar" style="display:none;"><span class="topic-focus-label" id="topicFocusLabel"></span><button class="topic-focus-clear" data-action="clearTopicFocus">✕ Clear topic filter</button></div>
 <div class="filter-bar" id="filterBar">
-  <button class="filter-chip active" data-action="filter" data-val="all" data-filter="all">All</button>
-  <button class="filter-chip" data-action="filter" data-val="unanswered" data-filter="unanswered">Unanswered</button>
-  <button class="filter-chip" data-action="filter" data-val="wrong" data-filter="wrong">Wrong</button>
-  <button class="filter-chip" data-action="filter" data-val="bookmarked" data-filter="bookmarked">★ Bookmarked</button>
-  <button class="filter-chip" data-action="filter" data-val="easy" data-filter="easy">Easy</button>
-  <button class="filter-chip" data-action="filter" data-val="medium" data-filter="medium">Medium</button>
-  <button class="filter-chip" data-action="filter" data-val="hard" data-filter="hard">Hard</button>
+  <button class="filter-chip active" data-action="filter" data-val="all" data-filter="all" aria-pressed="true">All</button>
+  <button class="filter-chip" data-action="filter" data-val="unanswered" data-filter="unanswered" aria-pressed="false">Unanswered</button>
+  <button class="filter-chip" data-action="filter" data-val="wrong" data-filter="wrong" aria-pressed="false">Wrong</button>
+  <button class="filter-chip" data-action="filter" data-val="bookmarked" data-filter="bookmarked" aria-pressed="false">★ Bookmarked</button>
+  <button class="filter-chip" data-action="filter" data-val="easy" data-filter="easy" aria-pressed="false">Easy</button>
+  <button class="filter-chip" data-action="filter" data-val="medium" data-filter="medium" aria-pressed="false">Medium</button>
+  <button class="filter-chip" data-action="filter" data-val="hard" data-filter="hard" aria-pressed="false">Hard</button>
   <button class="fav-filter-btn" id="favFilterBtn" data-action="toggleFavFilter" title="Toggle favorites-only overlay">★ Favorites</button>
 </div>
 <div class="hint-usage-info" id="hintUsageInfo"><span class="hint-usage-label" id="hintUsageLabel"></span></div>

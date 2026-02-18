@@ -974,7 +974,7 @@ function restoreTopics(){
     }
   });
 }
-function toggleRes(btn){const p=btn.closest('.pillar-card').querySelector('.res-panel');p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'Resources ↑':'Resources ↓';}
+function toggleRes(btn){const p=btn.closest('.pillar-card').querySelector('.res-panel');p.classList.toggle('open');const open=p.classList.contains('open');btn.textContent=open?'Resources ↑':'Resources ↓';btn.setAttribute('aria-expanded',open?'true':'false');}
 function updateTopicProgress(){
   const total=document.querySelectorAll('.ti').length;
   const checked=document.querySelectorAll('.ti.chk').length;
@@ -1361,7 +1361,7 @@ function buildPinnedFormulas(unit,container){
   div.className='pinned-formulas';
   var html='<div class="pinned-header">\u2b50 Pinned</div>';
   pinned.forEach(function(f){
-    html+='<div class="pinned-formula-row"><span class="formula-name">'+f.name+'</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">'+f.formula+'</span></div>';
+    html+='<div class="pinned-formula-row"><span class="formula-name">'+f.name+'</span><span class="formula-eq" role="button" tabindex="0" onclick="quickCopyFormula(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();quickCopyFormula(this);}" aria-label="Copy formula" title="Click to copy">'+f.formula+'</span></div>';
   });
   div.innerHTML=html;
   if(container&&container.parentNode)container.parentNode.insertBefore(div,container);
@@ -1413,7 +1413,7 @@ function buildFormulas(unit){
     var favs2=[];if(typeof localStorage!=='undefined'){try{var _fp=_storage('sh-formula-favs',[]);if(Array.isArray(_fp))favs2=_fp;}catch(e){}}const isFav=favs2.indexOf(f.name)>=0;
     var _ftags=_formulaTags(f.name);
     var _tagsHtml=_ftags.length?'<div class="formula-tags" data-tags="'+_ftags.join(' ').toLowerCase()+'">'+_ftags.map(function(t){return'<span class="formula-tag">'+t+'</span>';}).join('')+'</div>':'';
-html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula" aria-label="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite" aria-label="Toggle favorite">${isFav?'★':'☆'}</button>${_tagsHtml}</div>`;
+html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq" role="button" tabindex="0" onclick="quickCopyFormula(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();quickCopyFormula(this);}" aria-label="Copy formula" title="Click to copy">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula" aria-label="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite" aria-label="Toggle favorite">${isFav?'★':'☆'}</button>${_tagsHtml}</div>`;
   });
   content.innerHTML=html;
   // Restore saved height
@@ -1821,7 +1821,7 @@ var buildProblems=function(unit=_st.currentUnit){
   let html='';
   _st.activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${_esc(p.topic)}')" style="cursor:pointer" title="Filter by topic">${_esc(p.topic)}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" aria-label="Report an issue with this problem" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" aria-label="Copy link to this problem" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${_esc(p.q)}</div>${p.data?'<div class="pc-data">'+_esc(p.data)+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" role="button" tabindex="0" onclick="showAnswerHistory('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showAnswerHistory('${p.id}');}" aria-label="View answer history for problem ${p.id}" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" role="button" tabindex="0" onclick="filterByTopic('${_esc(p.topic)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterByTopic('${_esc(p.topic)}');}" aria-label="Filter by topic: ${_esc(p.topic)}" style="cursor:pointer" title="Filter by topic">${_esc(p.topic)}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" aria-label="Report an issue with this problem" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" aria-label="Copy link to this problem" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${_esc(p.q)}</div>${p.data?'<div class="pc-data">'+_esc(p.data)+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${_esc(p.hint)}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -1995,7 +1995,7 @@ function showAnswerHistory(probId){
   if(!rows)rows='<div class="ah-row" style="color:var(--muted)">No attempts yet</div>';
   var overlay=document.createElement('div');
   overlay.className='overlay-backdrop';
-  overlay.innerHTML='<div class="answer-hist-modal" role="dialog" aria-modal="true"><div class="ahm-title">Problem #'+_esc(probId)+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
+  overlay.innerHTML='<div class="answer-hist-modal" role="dialog" aria-modal="true" aria-labelledby="ahmTitle"><div class="ahm-title" id="ahmTitle">Problem #'+_esc(probId)+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
   document.body.appendChild(overlay);
   var _ahModal=overlay.querySelector('.answer-hist-modal');
@@ -2414,7 +2414,7 @@ function toggleExamMode(){
   if(typeof document==='undefined')return;
   _st.examModeActive=!_st.examModeActive;
   var btn=document.getElementById('examModeBtn');
-  if(btn)btn.classList.toggle('active',_st.examModeActive);
+  if(btn){btn.classList.toggle('active',_st.examModeActive);btn.setAttribute('aria-pressed',_st.examModeActive?'true':'false');}
   if(_st.examModeActive){showToast('Exam Mode ON — feedback hidden until you finish');}
   else{
     showToast('Exam Mode OFF — showing feedback');
@@ -4189,7 +4189,7 @@ function toggleFocusMode(){
     var el=document.getElementById(id);if(el){el.classList.toggle('focus-mode-hidden',_st.focusModeActive);}
   });
   const btn=document.getElementById('focusBtn');
-  if(btn)btn.textContent=_st.focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
+  if(btn){btn.textContent=_st.focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';btn.setAttribute('aria-pressed',_st.focusModeActive?'true':'false');}
   if(_st.focusModeActive){
     const probs=document.querySelectorAll('.pc');
     for(const pc of probs){
@@ -4853,7 +4853,7 @@ function buildUnitProgressOverview(){
     }catch(e){}
     var pct=Math.round(answeredCount/total*100);
     var unitName=typeof UNIT_META!=='undefined'&&UNIT_META[u]?UNIT_META[u].name:'Unit '+u;
-    html+='<div class="upo-item" onclick="goPage(\'practice\');setUnit('+u+');" title="Go to Unit '+u+'">'
+    html+='<div class="upo-item" role="button" tabindex="0" onclick="goPage(\'practice\');setUnit('+u+');" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();goPage(\'practice\');setUnit('+u+');}" aria-label="Go to Unit '+u+': '+unitName+'">'
       +'<div class="upo-label">'+u+'. '+unitName+'</div>'
       +'<div class="upo-bar-wrap"><div class="upo-bar"><div class="upo-fill" style="width:'+pct+'%"></div></div><span class="upo-count">'+answeredCount+'/'+total+'</span></div>'
       +'</div>';
@@ -5153,7 +5153,7 @@ function buildDailyChallenge(){
     p.ch.forEach((_,k)=>{
       const el=document.getElementById('dc-ch-'+i+'-'+k);
       if(!el)return;
-      el.classList.add('dis');
+      el.classList.add('dis');el.setAttribute('aria-disabled','true');el.removeAttribute('tabindex');
       if(k===p.ans)el.classList.add('dc-right');
       else if(k===j&&!ok)el.classList.add('dc-wrong');
     });
@@ -5621,9 +5621,9 @@ function updateFilterCounts(unit){
 }
 function filterProblems(filter){
   if(typeof document==='undefined')return;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.filter-chip').forEach(c=>{c.classList.remove('active');c.setAttribute('aria-pressed','false');});
   const chip=document.querySelector('.filter-chip[data-filter="'+filter+'"]');
-  if(chip)chip.classList.add('active');
+  if(chip){chip.classList.add('active');chip.setAttribute('aria-pressed','true');}
   const bm=getBookmarks();
   const state=getPracticeState(_st.currentUnit);
   const ans=state.answered||{};
@@ -6250,6 +6250,8 @@ function toggleKBHelp(){
   if(!panel)return;
   var visible=panel.style.display!=='none';
   panel.style.display=visible?'none':'block';
+  var btn=document.getElementById('kbHelpBtn');
+  if(btn)btn.setAttribute('aria-expanded',visible?'false':'true');
 }
 function exportProgressJSON(){
   if(typeof document==='undefined')return;
