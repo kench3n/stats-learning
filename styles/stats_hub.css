@@ -876,6 +876,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .ach-progress{height:3px;background:var(--border);border-radius:2px;margin:6px 0;overflow:hidden;}
 .ach-progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.5s;}
 .achieve-badge-card.achieved .ach-progress-fill{background:var(--cyan);}
+.ach-share-btn{margin-top:6px;background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 8px;width:100%;}
+.ach-share-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 
 .heatmap{display:flex;flex-wrap:wrap;gap:3px;max-width:500px;margin:12px auto 0;}
 .heatmap-cell{width:12px;height:12px;border-radius:2px;}

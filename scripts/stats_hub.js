@@ -3906,6 +3906,13 @@ function shareProblem(probId){
   var text='Stats Hub Problem #'+p.id+' (Unit '+p.unit+' — '+(typeof UNIT_META!=='undefined'&&UNIT_META[p.unit]?UNIT_META[p.unit].name:'Stats')+'): '+p.q;
   navigator.clipboard.writeText(text).then(function(){showToast('Problem text copied!');}).catch(function(){showToast('Could not copy text');});
 }
+function shareAchievement(id){
+  if(typeof navigator==='undefined'||typeof navigator.clipboard==='undefined'){showToast('Clipboard not available');return;}
+  var m=typeof MILESTONES!=='undefined'?MILESTONES.find(function(x){return x.id===id;}):null;
+  if(!m)return;
+  var text='I just earned "'+m.name+'" on Stats Learning Hub! '+m.icon+' '+m.desc;
+  navigator.clipboard.writeText(text).then(function(){showToast('Achievement copied to clipboard!');}).catch(function(){showToast('Could not copy');});
+}
 function toggleCollapse(btn){
   if(typeof document==='undefined')return;
   var card=btn.closest('.pc');
@@ -4428,7 +4435,7 @@ function buildAchievementsPage(){
       '<div class="achieve-badge-name">'+m.name+'</div>'+
       '<div class="achieve-badge-desc">'+m.desc+'</div>'+
       '<div class="ach-progress"><div class="ach-progress-fill" style="width:'+pct+'%"></div></div>'+
-      (done?'<div class="achieve-badge-earned">Earned ✓</div>':'<div class="achieve-badge-locked">'+pct+'%</div>')+
+      (done?'<div class="achieve-badge-earned">Earned ✓</div><button class="ach-share-btn" onclick="shareAchievement(\''+m.id+'\')">Share</button>':'<div class="achieve-badge-locked">'+pct+'%</div>')+
     '</div>';
   });
   badgeGrid.innerHTML=badgeHtml;
