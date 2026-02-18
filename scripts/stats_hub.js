@@ -5113,10 +5113,10 @@ function buildDailyChallenge(){
   }
   let html='';
   dc.problems.forEach((p,i)=>{
-    html+='<div class="dc-problem" id="dcp-'+i+'"><div class="dc-q">'+(i+1)+'. ['+p.topic+'] '+p.q+'</div>';
+    html+='<div class="dc-problem" id="dcp-'+i+'"><div class="dc-q">'+(i+1)+'. ['+_esc(p.topic)+'] '+_esc(p.q)+'</div>';
     if(p.type==='mc'){
       p.ch.forEach((ch,j)=>{
-        html+='<div class="dc-ch" id="dc-ch-'+i+'-'+j+'" onclick="dcAnsMC('+i+','+j+')">'+ch+'</div>';
+        html+='<div class="dc-ch" id="dc-ch-'+i+'-'+j+'" onclick="dcAnsMC('+i+','+j+')">'+_esc(ch)+'</div>';
       });
     }else{
       html+='<div class="dc-fr"><input type="text" id="dc-fi-'+i+'" placeholder="Your answer..." aria-label="Answer for daily challenge question '+(i+1)+'" onkeydown="if(event.key===&quot;Enter&quot;)dcAnsFR('+i+')"><button onclick="dcAnsFR('+i+')">Check</button></div>';
