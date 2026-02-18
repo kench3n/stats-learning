@@ -5429,9 +5429,9 @@ function printProblemSet(){
   html+='<h1>Stats Learning Hub — Practice Problems</h1>';
   html+='<div class="meta">Unit '+_st.currentUnit+' &middot; '+probs.length+' problems &middot; '+new Date().toLocaleDateString()+'</div>';
   probs.forEach(function(p,i){
-    html+='<div class="problem"><div class="pnum">#'+(i+1)+'. ['+p.diff+'] '+p.topic+'</div>';
-    html+='<div class="pq">'+p.q+'</div>';
-    if(p.data)html+='<div class="pdata">'+p.data+'</div>';
+    html+='<div class="problem"><div class="pnum">#'+(i+1)+'. ['+_esc(p.diff)+'] '+_esc(p.topic)+'</div>';
+    html+='<div class="pq">'+_esc(p.q)+'</div>';
+    if(p.data)html+='<div class="pdata">'+_esc(p.data)+'</div>';
     html+='<div class="blank"></div></div>';
   });
   html+='<script>window.onload=function(){window.print();}<\/script></body></html>';
