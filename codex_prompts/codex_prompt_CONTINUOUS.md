@@ -608,6 +608,80 @@ Add a "Daily Challenge Streak" counter — separate from the general learning st
 - Call `updateDCStreak()` in `buildDailyChallenge()` and in the daily challenge answer handler
 - CSS: `.dc-streak { font-size:13px; color:var(--amber); }`
 
+### TASK: problem-card-expand-all
+Add "Expand All" / "Collapse All" toggle button above the problem list.
+- HTML: `<button class="expand-all-btn" id="expandAllBtn" onclick="toggleExpandAll()">Expand All</button>` — placed in `.sort-bar`
+- `toggleExpandAll()`: if any card is collapsed, expand all; else collapse all
+- Update `sh-collapsed-{unit}` in localStorage
+- Update button text accordingly
+- Guard with typeof document
+
+### TASK: quick-copy-formula
+When clicking directly on a formula equation text (`.formula-eq`), flash a brief highlight and copy it to clipboard.
+- Add `onclick="quickCopyFormula(this)"` to each `.formula-eq` span in `buildFormulas()`
+- `quickCopyFormula(el)`: copies el's textContent, shows toast "Formula copied!", adds `.formula-eq-flash` class (removed after 600ms)
+- CSS: `@keyframes formulaFlash { 0%{background:var(--amber);color:var(--bg)} 100%{background:none;} } .formula-eq{cursor:pointer;} .formula-eq-flash{animation:formulaFlash 0.6s ease;}`
+- Guard with typeof navigator.clipboard
+
+### TASK: unit-xp-progress-bar
+Show per-unit XP progress in the unit selector dropdown.
+- After each unit `<option>` in `<select id="vizUnitSelect">`, add XP % as aria-label
+- More importantly: add a `<div class="unit-xp-bar-row">` above `#probContainer` in the practice page showing a colored bar of how much XP earned vs total available
+- `buildUnitXPBar(unit)`: compute earned XP from practice state (correct * xp per diff), compare to total possible XP for that unit
+- HTML: `<div class="unit-xp-bar-row" id="unitXPBarRow"><div class="unit-xp-bar-fill" id="unitXPBarFill"></div><span class="unit-xp-bar-text" id="unitXPBarText">0 XP</span></div>`
+- Call in `buildProblems()` and after answering
+- CSS: `.unit-xp-bar-row`, `.unit-xp-bar-fill`, `.unit-xp-bar-text`
+
+### TASK: notes-word-count-goal
+Extend the note word count to show a target (e.g., 50 words) and color the counter green when met.
+- Add a `target` of 50 words for practice notes
+- When word count >= target: counter turns green (`.note-wc.met`) and shows checkmark
+- CSS: `.note-wc.met { color: var(--green); }` `.note-wc.met::after { content: ' ✓'; }`
+- Update the oninput handler in buildProblems note section
+
+### TASK: problem-auto-scroll
+After answering a problem (MC or FR), automatically scroll to the next unanswered problem.
+- In `ansMC()` and `ansFR()`, after the answer processing, find the next unanswered problem in `activeProbs`
+- Scroll it into view smoothly: `el.scrollIntoView({ behavior: 'smooth', block: 'center' })`
+- Only scroll if the next problem is below the current viewport
+- Guard with `typeof document`, `typeof el.scrollIntoView`
+- Add 300ms delay so feedback is visible first
+
+### TASK: achievement-progress-bars
+Add progress bars to each achievement card on the Achievements page showing current progress toward the achievement.
+- Find achievement cards in HTML; add `<div class="ach-progress"><div class="ach-progress-fill" style="width:X%"></div></div>` inside each
+- `buildAchievementProgress()`: read current XP, streak, problems answered; calculate % progress for each achievement (e.g., "100 XP" achievement = current_xp/100 * 100%)
+- Call in `goPage('achievements')`
+- CSS: `.ach-progress{height:3px; background:var(--border); border-radius:2px; margin-top:6px;} .ach-progress-fill{height:100%; background:var(--green); border-radius:2px;}`
+
+### TASK: formula-panel-pin
+Add a pin button to keep the formula panel always expanded (prevent auto-collapse).
+- Button `<button class="formula-pin-btn" id="formulaPinBtn" onclick="toggleFormulaPin()" title="Pin formula panel open">📌</button>` in formula toggle row
+- `toggleFormulaPin()`: saves `sh-formula-pinned` boolean to localStorage; when pinned, `toggleFormulas()` no longer collapses it
+- CSS: `.formula-pin-btn.pinned { color: var(--amber); }`
+- Guard with typeof localStorage
+
+### TASK: roadmap-completion-percentage
+Show overall roadmap completion percentage in the roadmap header.
+- HTML: `<span class="roadmap-pct" id="roadmapPct">0%</span>` added to `.section-header` of roadmap page
+- `updateRoadmapPct()`: reads `sh-topics`, counts checked vs total 120 topics, calculates percentage
+- Call from `buildRoadmap()` and `toggleTopic()`
+- CSS: `.roadmap-pct { font-size:13px; color:var(--cyan); font-family:'Space Mono',monospace; }`
+
+### TASK: visualizer-fullscreen
+Add a fullscreen button to expand the active visualizer canvas.
+- HTML: `<button class="viz-fullscreen-btn" onclick="toggleVizFullscreen()" title="Fullscreen visualizer">⛶</button>` in `.viz-screenshot-row`
+- `toggleVizFullscreen()`: calls `panel.requestFullscreen()` if available, else `panel.webkitRequestFullscreen()`
+- Guard with `typeof document.fullscreenEnabled !== 'undefined'`
+- CSS: `.viz-fullscreen-btn` — same style as `.viz-screenshot-btn`
+
+### TASK: practice-keyboard-answer-mc
+Allow pressing 1/2/3/4 keys to select MC answer choices when focused on a problem card.
+- Track currently focused problem card ID in `focusedProblemId` variable
+- Add `tabindex="0"` and `onfocus="focusedProblemId='${p.id}'"` to `.pc` already exists
+- In the global keydown handler, check if on practice page: if key is '1','2','3','4' and `focusedProblemId` is set, call `ansMC(focusedProblemId, parseInt(key)-1)`
+- Guard: only if target is not input/select/textarea and practice page is active
+
 ---
 
 ## RULES (ALWAYS)
