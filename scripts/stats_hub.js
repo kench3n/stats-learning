@@ -1156,6 +1156,23 @@ function formulaUnitNav(dir){
   var sel=document.getElementById('unitSelect');if(sel)sel.value=String(next);
   var vsel=document.getElementById('vizUnitSelect');if(vsel)vsel.value=String(next);
 }
+function copyAllFormulas(){
+  if(typeof document==='undefined')return;
+  var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[currentUnit]?FORMULAS[currentUnit]:[];
+  if(!formulas.length){showToast('No formulas available');return;}
+  var text=formulas.map(function(f){return f.name+': '+f.formula;}).join('\n');
+  if(typeof navigator!=='undefined'&&navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
+    navigator.clipboard.writeText(text).then(function(){showToast('Formulas copied!');}).catch(function(){_copyAllFallback(text);});
+  }else{_copyAllFallback(text);}
+}
+function _copyAllFallback(text){
+  if(typeof document==='undefined')return;
+  var ta=document.createElement('textarea');ta.value=text;
+  ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');showToast('Formulas copied!');}catch(e){showToast('Could not copy');}
+  document.body.removeChild(ta);
+}
 function clearFormulaSearch(){
   if(typeof document==='undefined')return;
   var inp=document.getElementById('formulaSearch');
