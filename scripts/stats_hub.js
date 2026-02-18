@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();buildStudyPlan();buildPomoStats();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4412,6 +4412,30 @@ function buildRecentUnits(){
     var name=typeof UNIT_META!=='undefined'&&UNIT_META[u]?UNIT_META[u].name:'Unit '+u;
     html+='<button class="recent-unit-chip" onclick="goPage(\'practice\');setUnit('+u+')">U'+u+': '+name+'</button>';
   });
+  el.innerHTML=html;
+}
+function buildUnitProgressOverview(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('unitProgressOverview');if(!el)return;
+  var maxUnit=typeof MAX_UNIT!=='undefined'?MAX_UNIT:14;
+  var html='';
+  for(var u=1;u<=maxUnit;u++){
+    var probs=typeof allProbs!=='undefined'&&allProbs[u]?allProbs[u]:[];
+    if(!probs.length)continue;
+    var total=probs.length;
+    var answeredCount=0;
+    try{
+      var saved=JSON.parse(localStorage.getItem('sh-practice-'+u)||'{}');
+      var ansObj=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
+      answeredCount=Object.keys(ansObj).length;
+    }catch(e){}
+    var pct=Math.round(answeredCount/total*100);
+    var unitName=typeof UNIT_META!=='undefined'&&UNIT_META[u]?UNIT_META[u].name:'Unit '+u;
+    html+='<div class="upo-item" onclick="goPage(\'practice\');setUnit('+u+');" title="Go to Unit '+u+'">'
+      +'<div class="upo-label">'+u+'. '+unitName+'</div>'
+      +'<div class="upo-bar-wrap"><div class="upo-bar"><div class="upo-fill" style="width:'+pct+'%"></div></div><span class="upo-count">'+answeredCount+'/'+total+'</span></div>'
+      +'</div>';
+  }
   el.innerHTML=html;
 }
 function buildPomoStats(){
