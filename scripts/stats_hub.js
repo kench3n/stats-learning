@@ -34,7 +34,7 @@ function goPage(id){
   _goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);},50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4115,6 +4115,18 @@ function buildRecentUnits(){
     html+='<button class="recent-unit-chip" onclick="goPage(\'practice\');setUnit('+u+')">U'+u+': '+name+'</button>';
   });
   el.innerHTML=html;
+}
+function buildStreakMessage(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('streakMessage');if(!el)return;
+  var streak=typeof getStreakData==='function'?getStreakData().current:0;
+  var msg='';
+  if(streak===0)msg='Start your streak today! Answer at least one problem.';
+  else if(streak<=2)msg='Great start! Keep it up — '+streak+' day'+(streak>1?'s':'')+' strong!';
+  else if(streak<=6)msg='You\'re building momentum! '+streak+' days strong. Don\'t break the chain!';
+  else if(streak<=13)msg='One week strong! '+streak+' days — keep the streak alive.';
+  else msg='Impressive! '+streak+' days straight — you\'re unstoppable.';
+  el.textContent=msg;
 }
 function buildStreakHeatmap(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
