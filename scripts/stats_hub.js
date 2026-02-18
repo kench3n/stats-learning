@@ -27,6 +27,24 @@ function _esc(str) {
                     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ===================== MODAL FOCUS MANAGEMENT =====================
+function _trapFocus(overlay, modal) {
+  if (typeof document === 'undefined') return;
+  var prev = document.activeElement;
+  var focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (focusable.length) focusable[0].focus();
+  var _onKey = function(e) {
+    if (e.key === 'Escape') { overlay.remove(); if (prev && prev.focus) prev.focus(); overlay.removeEventListener('keydown', _onKey); return; }
+    if (e.key !== 'Tab' || !focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+    else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+  };
+  overlay.addEventListener('keydown', _onKey);
+  var _origRemove = overlay.remove.bind(overlay);
+  overlay.remove = function() { _origRemove(); if (prev && prev.focus) prev.focus(); };
+}
+
 // ===================== DEBOUNCED STORAGE SAVE =====================
 var _pendingSaves={};
 function _storageSaveSoon(key,val){
@@ -585,7 +603,7 @@ function buildTopicHeatmap(unit){
       else if(d.correct===0)cls='th-red';
       else cls='th-amber';
     }
-    html+='<div class="th-cell '+cls+'" title="'+t+': '+d.correct+'/'+d.total+' correct"></div>';
+    html+='<div class="th-cell '+cls+'" title="'+_esc(t)+': '+d.correct+'/'+d.total+' correct" aria-hidden="true"></div><span class="sr-only">'+_esc(t)+': '+d.correct+'/'+d.total+' correct</span>';
   });
   html+='</div>';
   el.innerHTML=html;
@@ -1966,9 +1984,11 @@ function showAnswerHistory(probId){
   if(!rows)rows='<div class="ah-row" style="color:var(--muted)">No attempts yet</div>';
   var overlay=document.createElement('div');
   overlay.className='overlay-backdrop';
-  overlay.innerHTML='<div class="answer-hist-modal"><div class="ahm-title">Problem #'+_esc(probId)+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
+  overlay.innerHTML='<div class="answer-hist-modal" role="dialog" aria-modal="true"><div class="ahm-title">Problem #'+_esc(probId)+' — Last Attempts</div>'+rows+'<button onclick="this.closest(\'.overlay-backdrop\').remove()" class="close-modal-btn">Close</button></div>';
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
   document.body.appendChild(overlay);
+  var _ahModal=overlay.querySelector('.answer-hist-modal');
+  if(_ahModal)_trapFocus(overlay,_ahModal);
 }
 function ansMC(id,ch){
   if(_st.answered[id]!==undefined)return;
@@ -2260,12 +2280,14 @@ function endReview(){
     overlay.onclick=function(){overlay.remove();};
     var modal=document.createElement('div');
     modal.className='session-modal';
+    modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
     modal.onclick=function(e){e.stopPropagation();};
-    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_esc(_st.reviewSessionCorrect)+'/'+_esc(total)+' correct ('+_esc(pct)+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
+    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_esc(_st.reviewSessionCorrect)+'/'+_esc(total)+' correct ('+_esc(pct)+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;" role="img" aria-label="Review session results chart"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
     var _closeBtn=modal.querySelector('#reviewChartClose');
     if(_closeBtn)_closeBtn.onclick=function(){overlay.remove();};
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+    _trapFocus(overlay,modal);
     var canvas=document.getElementById('reviewChart');
     drawReviewChart(canvas,_st.reviewSessionByUnit);
   }
@@ -2504,10 +2526,12 @@ function showUnitInfo(){
     '<div class="unit-info-stat-row"><span>'+probs.length+' problems</span><span class="ui-easy">'+easy+' easy</span><span class="ui-med">'+med+' medium</span><span class="ui-hard">'+hard+' hard</span></div>'+
     '<div class="unit-info-topics"><div class="unit-info-label">Topics covered:</div><ul class="unit-info-topic-list">'+topicList+'</ul></div>'+
     '<button id="unitInfoClose" class="unit-info-close">Close</button>';
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
   var closeBtn=modal.querySelector('#unitInfoClose');
   if(closeBtn)closeBtn.onclick=function(){overlay.remove();};
+  _trapFocus(overlay,modal);
 }
 function setUnit(n){
   if(!UNIT_META[n])return;
@@ -5210,7 +5234,7 @@ function buildHeatmap(){
     const active=history.includes(dateStr)||count>0;
     const cls=active?'heatmap-active':'heatmap-empty';
     const titleText=count>0?(dateStr+': '+count+' problem'+(count===1?'':'s')+' solved'):dateStr;
-    html+='<div class="heatmap-cell '+cls+'" title="'+titleText+'"></div>';
+    html+='<div class="heatmap-cell '+cls+'" title="'+titleText+'" aria-hidden="true"></div><span class="sr-only">'+_esc(titleText)+'</span>';
   }
   grid.innerHTML=html;
 }

@@ -88,7 +88,7 @@
   <div class="recent-activity" id="recentActivity" style="display:none;"></div>
   <div class="streak-message" id="streakMessage"></div>
   <div class="streak-heatmap" id="streakHeatmap"></div>
-  <canvas id="weeklyStatsChart" width="280" height="60" style="display:none;"></canvas>
+  <canvas id="weeklyStatsChart" width="280" height="60" style="display:none;" role="img" aria-label="Weekly statistics chart"></canvas>
   <div class="unit-progress-overview" id="unitProgressOverview"></div>
   <div class="recent-badges" id="recentBadges"></div>
   <div class="potd-widget" id="potdWidget"></div>
@@ -288,7 +288,7 @@
       <div class="viz-box">
         <h3 class="viz-title">Interactive Histogram</h3>
         <div class="viz-desc">See how shape, center, and spread change as you modify the data.</div>
-        <canvas id="histCanvas" height="300" aria-label="Histogram visualization" role="img"></canvas>
+        <canvas id="histCanvas" height="300" aria-label="Histogram visualization" role="img" tabindex="0"></canvas>
         <div class="stats-row" aria-label="Histogram statistics">
           <div class="sc"><div class="sv sv-cyan" id="hMean">—</div><div class="sl">Mean</div></div>
           <div class="sc"><div class="sv sv-amber" id="hMedian">—</div><div class="sl">Median</div></div>
@@ -316,7 +316,7 @@
       <div class="viz-box">
         <h3 class="viz-title">Five-Number Summary & Boxplot</h3>
         <div class="viz-desc">Min, Q1, median, Q3, max. Drag the slider to add outliers.</div>
-        <canvas id="boxCanvas" height="260" aria-label="Boxplot visualization" role="img"></canvas>
+        <canvas id="boxCanvas" height="260" aria-label="Boxplot visualization" role="img" tabindex="0"></canvas>
         <div class="stats-row" aria-label="Boxplot statistics">
           <div class="sc"><div class="sv sv-orange" id="bMin">—</div><div class="sl">Min</div></div>
           <div class="sc"><div class="sv sv-green" id="bQ1">—</div><div class="sl">Q1</div></div>
@@ -339,7 +339,7 @@
       <div class="viz-box">
         <h3 class="viz-title">The Normal Distribution</h3>
         <div class="viz-desc">Adjust μ and σ. The shaded regions show the 68-95-99.7 rule.</div>
-        <canvas id="normCanvas" height="340" aria-label="Normal distribution visualization" role="img"></canvas>
+        <canvas id="normCanvas" height="340" aria-label="Normal distribution visualization" role="img" tabindex="0"></canvas>
         <div class="controls">
           <div class="cg"><label class="cl" for="muSlider">μ (mean) <span class="sv-val" id="muVal">0</span></label><input type="range" id="muSlider" min="-4" max="4" value="0" step="0.1" data-action="drawNorm"></div>
           <div class="cg"><label class="cl" for="sigSlider">σ (std dev) <span class="sv-val" id="sigVal">1</span></label><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" data-action="drawNorm"></div>
@@ -361,7 +361,7 @@
       <div class="viz-box">
         <h3 class="viz-title">Compare Two Distributions</h3>
         <div class="viz-desc">Same mean, different spread? Same spread, different center? See how they're independent.</div>
-        <canvas id="compCanvas" height="320" aria-label="Distribution comparison visualization" role="img"></canvas>
+        <canvas id="compCanvas" height="320" aria-label="Distribution comparison visualization" role="img" tabindex="0"></canvas>
         <div class="controls">
           <div class="cg"><label class="cl" for="muAS">A: μ <span class="sv-val" id="muA">0</span></label><input type="range" id="muAS" min="-4" max="4" value="0" step="0.1" data-action="drawComp"></div>
           <div class="cg"><label class="cl" for="sigAS">A: σ <span class="sv-val" id="sigA">1</span></label><input type="range" id="sigAS" min="0.3" max="3" value="1" step="0.1" data-action="drawComp"></div>
@@ -401,7 +401,7 @@
     <div class="topic-heatmap" id="topicHeatmap"></div>
     <div class="diff-chart-row" id="diffChartRow" style="display:none;text-align:center;padding:8px 0 4px;">
       <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:4px;">Difficulty Distribution</div>
-      <canvas id="diffChart" width="200" height="50"></canvas>
+      <canvas id="diffChart" width="200" height="50" role="img" aria-label="Difficulty distribution chart"></canvas>
     </div>
     <div class="session-goal-bar" id="sessionGoalBar">
       <label class="cl" for="sessionGoal">Session Goal:</label>
@@ -607,7 +607,7 @@
   </div>
 </div>
 <div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none;" data-action="toggleShortcutsHelp">
-  <div class="shortcuts-modal" data-stop-propagation="true">
+  <div class="shortcuts-modal" data-stop-propagation="true" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
     <h3>Keyboard Shortcuts</h3>
     <div class="shortcut-section">Navigation</div>
     <div class="shortcut-row"><kbd>1</kbd>&ndash;<kbd>5</kbd> Home / Roadmap / Visualizer / Practice / Review</div>
