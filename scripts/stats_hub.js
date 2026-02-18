@@ -1104,6 +1104,7 @@ let probTimers={},probTimerStart={};
 let wrongAttempts={};
 let vizDrawn={};
 let practiceSessionStart=0,practiceSessionInterval=null;
+let focusedProblemId=null;
 let reviewQueue=[];
 let reviewIndex=0;
 let reviewSessionCorrect=0;
@@ -1165,7 +1166,7 @@ buildProblems=function(unit=currentUnit){
   let html='';
   activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="pc-topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="focusedProblemId='${p.id}'" onblur="focusedProblemId=null"><div class="pc-head"><span class="pc-num">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="pc-topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -3183,6 +3184,14 @@ function downloadShortcutCheatsheet(){
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('keydown',function(e){
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+    // Keyboard MC answer selection on practice page
+    var _pp=document.getElementById('page-practice');
+    var _isPractice=_pp&&_pp.classList.contains('active');
+    if(_isPractice&&focusedProblemId!==null&&(e.key==='1'||e.key==='2'||e.key==='3'||e.key==='4')){
+      var _idx=parseInt(e.key)-1;
+      var _prob=typeof activeProbs!=='undefined'?activeProbs.find(function(x){return String(x.id)===String(focusedProblemId);}):null;
+      if(_prob&&_prob.type==='mc'&&_idx<_prob.ch.length){ansMC(_prob.id,_idx);return;}
+    }
     if(e.key==='1'){goPage('home');}
     else if(e.key==='2'){goPage('roadmap');}
     else if(e.key==='3'){goPage('visualizer');}
