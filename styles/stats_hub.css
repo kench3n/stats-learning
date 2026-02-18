@@ -995,6 +995,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .fc-actions{display:flex;justify-content:center;gap:12px;margin-bottom:16px;}
 .fc-know{padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;}
 .fc-unsure{padding:10px 20px;background:var(--pink);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;}
+.fc-kb-hints{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--text-muted);}
+.fc-kb-hint kbd{display:inline-block;padding:1px 5px;border:1px solid var(--border);border-radius:3px;font-family:'Space Mono',monospace;font-size:10px;background:var(--surface);}
 
 .match-board{margin:16px 0;}
 .match-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:600px;margin:0 auto;}

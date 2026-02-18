@@ -3650,6 +3650,8 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();fcMark(true);}else{window.scrollBy(0,100);}}
     else if(e.key==='ArrowLeft'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();fcMark(false);}}
     else if(e.key===' '){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();flipCard();}}
+    else if(/^[1-5]$/.test(e.key)){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();var rating=parseInt(e.key);fcMark(rating>=3);showToast('Confidence: '+['','★☆☆☆☆','★★☆☆☆','★★★☆☆','★★★★☆','★★★★★'][rating]);}}
+
     else if(e.key==='j'||e.key==='J'){
       // Scroll to next problem card
       const cards=typeof document!=='undefined'?document.querySelectorAll('.prob-card'):[];
