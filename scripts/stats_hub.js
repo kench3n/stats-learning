@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4838,6 +4838,26 @@ function buildPOD(){
   var unitNum=prob.unit||1;
   btn.onclick=function(){goPage('practice');setUnit(unitNum);if(typeof setTimeout!=='undefined'){setTimeout(function(){var el=document.querySelector('[data-id="'+prob.id+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);}};
   widget.style.display='';
+}
+function buildStreakMilestones(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('streakMilestones');if(!el)return;
+  var streak=getStreakData();
+  var cur=streak.current||0;
+  var milestones=[7,30,100,365];
+  var next=milestones.find(function(m){return m>cur;});
+  if(!next){el.innerHTML='<div class="sm-item">\uD83C\uDFC6 All streak milestones reached!</div>';return;}
+  var daysLeft=next-cur;
+  var html='<div class="sm-title">Streak Goal</div>';
+  milestones.forEach(function(m){
+    var done=cur>=m;
+    var active=m===next;
+    var pct=Math.min(Math.round(cur/m*100),100);
+    html+='<div class="sm-item '+(done?'sm-done':active?'sm-active':'sm-upcoming')+'"><span>\uD83C\uDFAF '+m+'-day streak'+(done?' \u2713':active?' \u2014 '+daysLeft+' day'+(daysLeft===1?'':'s')+' to go!':'')+'</span>';
+    if(active)html+='<div class="sm-progress"><div class="sm-progress-fill" style="width:'+pct+'%"></div></div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
 }
 function buildProblemOfTheDay(){
   if(typeof document==='undefined')return;

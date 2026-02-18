@@ -1372,3 +1372,10 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .exam-mode-btn{padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:'Space Mono',monospace;transition:border-color 0.2s,color 0.2s;}
 .exam-mode-btn.active{border-color:var(--pink);color:var(--pink);}
 .exam-mode-btn:hover{border-color:var(--pink);color:var(--pink);}
+.streak-milestones{margin:10px 0;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;}
+.sm-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono',monospace;margin-bottom:8px;}
+.sm-item{font-size:12px;padding:4px 0;color:var(--muted);}
+.sm-item.sm-done{color:var(--green);text-decoration:line-through;}
+.sm-item.sm-active{color:var(--amber);}
+.sm-progress{height:4px;background:var(--border);border-radius:2px;margin-top:4px;}
+.sm-progress-fill{height:100%;background:var(--amber);border-radius:2px;transition:width 0.3s;}
