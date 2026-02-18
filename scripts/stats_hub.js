@@ -1233,6 +1233,21 @@ buildProblems=function(unit=currentUnit){
     },{threshold:0.5});
     document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
   }
+  // Problem counter observer
+  if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
+    var total=activeProbs.length;
+    var counterObs=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var cards=Array.from(document.querySelectorAll('.pc'));
+          var idx=cards.indexOf(entry.target)+1;
+          var ctr=document.getElementById('probCounter');
+          if(ctr&&total>0)ctr.textContent='Problem '+idx+' of '+total;
+        }
+      });
+    },{threshold:0.5});
+    document.querySelectorAll('.pc').forEach(function(card){counterObs.observe(card);});
+  }
   if(typeof localStorage!=='undefined'){
     try{
       var dvotes=JSON.parse(localStorage.getItem('sh-diff-votes')||'{}');

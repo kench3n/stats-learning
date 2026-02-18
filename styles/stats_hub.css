@@ -370,6 +370,7 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .score-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width 0.5s;}
 .score-text{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
 .session-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;opacity:0.7;}
+.prob-counter{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
 .unit-xp-bar-row{display:flex;align-items:center;gap:10px;max-width:780px;margin:0 auto 10px;padding:0 24px;}
 .unit-xp-bar-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .unit-xp-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:2px;transition:width 0.5s;}
