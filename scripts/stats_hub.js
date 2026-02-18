@@ -32,7 +32,7 @@ function goPage(id){
     history.pushState({page:id},'','#/'+id);
   }
   _goPageSkipPush=false;
-  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);},50);}
+  if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);},50);}
   if(id==='review')updateReviewBadge();
   if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildMotivationalQuote();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
@@ -1890,7 +1890,7 @@ function setUnit(n){
   buildProblems(n);
   buildFormulas(n);
   buildVizForUnit(n);
-  if(isVizPageActive()){drawActiveVisualizer();_recordVizHistory(n);buildVizHistory();buildVizUnitInfo(n);}
+  if(isVizPageActive()){drawActiveVisualizer();_recordVizHistory(n);buildVizHistory();buildVizUnitInfo(n);buildVizDataSummary(n);}
   filterProblems('all');
   drawDiffChart();
 }
@@ -2136,6 +2136,29 @@ function buildVizUnitInfo(unit){
     +'<div class="vui-row"><span class="vui-label">Problems:</span><span class="vui-val">'+probs.length+'</span></div>'
     +'<div class="vui-row"><span class="vui-label">XP Available:</span><span class="vui-val">'+xpAvail+'</span></div>'
     +'<div class="vui-row"><span class="vui-label">Topics:</span><span class="vui-val">'+topics.join(', ')+'</span></div>';
+}
+function buildVizDataSummary(unit){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('vizDataSummary');if(!el)return;
+  var probs=allProbs[unit]||[];
+  if(!probs.length){el.innerHTML='';return;}
+  var easy=probs.filter(function(p){return p.diff==='easy';}).length;
+  var medium=probs.filter(function(p){return p.diff==='medium';}).length;
+  var hard=probs.filter(function(p){return p.diff==='hard';}).length;
+  var xp=probs.reduce(function(s,p){return s+(p.diff==='easy'?XP_TABLE.easy:p.diff==='medium'?XP_TABLE.medium:XP_TABLE.hard);},0);
+  var formCount=(typeof FORMULAS!=='undefined'&&FORMULAS[unit])?(FORMULAS[unit].length):0;
+  var topics=[...new Set(probs.map(function(p){return p.topic;}))].length;
+  var name=typeof UNIT_META!=='undefined'&&UNIT_META[unit]?UNIT_META[unit].name:'';
+  el.innerHTML='<table class="viz-summary-table">'
+    +'<caption>Unit '+unit+' — '+name+'</caption>'
+    +'<thead><tr><th>Metric</th><th>Value</th></tr></thead>'
+    +'<tbody>'
+    +'<tr><td>Total Problems</td><td>'+probs.length+'</td></tr>'
+    +'<tr><td>Easy / Medium / Hard</td><td><span class="vs-easy">'+easy+'</span> / <span class="vs-medium">'+medium+'</span> / <span class="vs-hard">'+hard+'</span></td></tr>'
+    +'<tr><td>XP Available</td><td>'+xp+'</td></tr>'
+    +'<tr><td>Unique Topics</td><td>'+topics+'</td></tr>'
+    +'<tr><td>Formulas</td><td>'+formCount+'</td></tr>'
+    +'</tbody></table>';
 }
 function buildVizHistory(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
