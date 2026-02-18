@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();buildStudyPlan();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4262,6 +4262,45 @@ function applyTagFilter(){
     el.style.display=(prob&&activeTags.has(prob.topic))?'':'none';
   });
 }
+function buildStudyPlan(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('studyPlan');if(!el)return;
+  var streak=typeof getStreakData==='function'?getStreakData().current||0:0;
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var today=new Date().getDay();
+  var units=typeof allProbs!=='undefined'?Object.keys(allProbs).map(Number).sort(function(a,b){return a-b;}):[];
+  // Find weak units (units with wrong answers or low score)
+  var weakUnits=[];
+  units.forEach(function(u){
+    try{
+      var s=JSON.parse(localStorage.getItem('sh-practice-'+u)||'{}');
+      var ans=s.answered&&typeof s.answered==='object'?s.answered:{};
+      var probs=allProbs[u]||[];
+      var wrong=probs.filter(function(p){
+        if(p.type==='mc')return ans[p.id]!==undefined&&ans[p.id]!==p.ans;
+        if(p.type==='fr'){var v=parseFloat(ans[p.id]);return!isNaN(v)&&Math.abs(v-p.ans)>(p.tol||0.1);}
+        return false;
+      }).length;
+      if(wrong>0)weakUnits.push({u:u,wrong:wrong});
+    }catch(e){}
+  });
+  weakUnits.sort(function(a,b){return b.wrong-a.wrong;});
+  var tasks=['Practice','Review','Formulas','Visualizer','Roadmap','Practice','Rest day'];
+  var suggestions=['Work through Unit '+(units[0]||1)+' problems','Review your wrong answers','Study formulas for your current unit','Explore the visualizer for Unit '+(units[0]||1),'Check off roadmap topics','Practice Unit '+(units[1]||2)+' problems','Light review — you\'ve earned it'];
+  if(weakUnits.length>0){
+    suggestions[0]='Retry wrong problems in Unit '+weakUnits[0].u;
+    if(weakUnits.length>1)suggestions[1]='Focus on Unit '+weakUnits[1].u+' ('+weakUnits[1].wrong+' wrong)';
+  }
+  if(streak>=7)suggestions[6]='You\'re on a '+streak+'-day streak — keep going!';
+  var html='<div class="sp-title">This week\'s plan</div>';
+  for(var i=0;i<7;i++){
+    var dayIdx=(today+i)%7;
+    var isToday=i===0;
+    html+='<div class="sp-day'+(isToday?' sp-today':'')+'"><span class="sp-day-name">'+days[dayIdx]+(isToday?' (Today)':'')+'</span><span class="sp-task">'+suggestions[i]+'</span></div>';
+  }
+  el.innerHTML=html;
+}
+
 function buildMotivationalQuote(){
   if(typeof document==='undefined')return;
   var el=document.getElementById('motivationalQuote');
