@@ -298,7 +298,7 @@
         </div>
         <div class="controls">
           <div class="cg"><label class="cl" for="histPreset">Preset</label><select id="histPreset" onchange="loadPreset()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="left">Left skewed</option><option value="bimodal">Bimodal</option><option value="uniform">Uniform</option></select></div>
-          <div class="cg"><label class="cl" for="binSlider">Bins</label><input type="range" id="binSlider" min="3" max="25" value="10" oninput="drawHist()"></div>
+          <div class="cg"><label class="cl" for="binSlider">Bins <span class="sv-val" id="binCountVal">10</span></label><input type="range" id="binSlider" min="5" max="40" value="10" oninput="document.getElementById('binCountVal').textContent=this.value;drawHist()"></div>
           <div class="cg"><label class="cl" for="sizeSlider">Sample size</label><input type="range" id="sizeSlider" min="20" max="500" value="100" oninput="loadPreset()"></div>
         </div>
         <div class="data-row">
