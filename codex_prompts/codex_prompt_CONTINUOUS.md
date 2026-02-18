@@ -682,6 +682,79 @@ Allow pressing 1/2/3/4 keys to select MC answer choices when focused on a proble
 - In the global keydown handler, check if on practice page: if key is '1','2','3','4' and `focusedProblemId` is set, call `ansMC(focusedProblemId, parseInt(key)-1)`
 - Guard: only if target is not input/select/textarea and practice page is active
 
+### TASK: problem-difficulty-distribution-insight
+On the practice page, show a small text insight below the sort bar about the current unit's difficulty distribution.
+- HTML: `<div class="diff-insight" id="diffInsight"></div>` placed after sort-bar
+- `buildDiffInsight(unit)`: count easy/medium/hard problems, format as "15 problems: 5 easy • 7 medium • 3 hard"
+- Call in `buildProblems()`
+- CSS: `.diff-insight { font-size:11px; color:var(--muted); padding:2px 0 6px; }`
+
+### TASK: formula-panel-search-clear
+Add a clear (×) button to the formula search input that appears when there's text, clears it when clicked.
+- Button: `<button class="formula-search-clear" id="formulaSearchClear" style="display:none;" onclick="clearFormulaSearch()">✕</button>` placed after `#formulaSearch` input
+- `clearFormulaSearch()`: sets `#formulaSearch` value to '', calls `filterFormulas('')`, hides clear button
+- Show/hide button via `oninput` on `#formulaSearch`: `document.getElementById('formulaSearchClear').style.display=this.value?'':'none'`
+- CSS: `.formula-search-clear { ... }` — small, muted, positioned inline
+
+### TASK: practice-problem-number-display
+Show "Problem X of Y" counter in the practice score bar area that updates as problems are scrolled/visible.
+- HTML: `<span class="prob-counter" id="probCounter">Problem 1 of 15</span>` added to score-bar
+- Update in `buildProblems()` to show total count
+- Use IntersectionObserver: when a problem card enters viewport, update counter with its position index
+- Guard with `typeof IntersectionObserver !== 'undefined'`
+- CSS: `.prob-counter` — small, monospace, muted
+
+### TASK: theme-auto-switch
+Add automatic dark/light theme switching based on system preference and time of day.
+- In initialization: check `window.matchMedia('(prefers-color-scheme: dark)')` and `loadTheme()`
+- `initThemeAutoSwitch()`: if no saved preference, apply system theme; listen for `prefers-color-scheme` changes
+- Only override if user hasn't manually set a theme (`sh-theme` localStorage key)
+- Guard with `typeof window !== 'undefined' && window.matchMedia`
+
+### TASK: flashcard-progress-bar
+Add a progress bar to the flashcard session showing how many cards remain.
+- HTML: `<div class="fc-progress-bar"><div class="fc-progress-fill" id="fcProgressFill"></div></div><span class="fc-progress-text" id="fcProgressText">Card 0 of 0</span>` — above the flashcard
+- `updateFCProgress()`: reads current deck size and current index, updates fill and text
+- Call in flashcard navigation functions (flip, know, unsure, next)
+- CSS: `.fc-progress-bar`, `.fc-progress-fill`, `.fc-progress-text`
+
+### TASK: practice-difficulty-filter-counts
+Show problem counts next to difficulty filter chips.
+- Update `buildProblems()` to count easy/medium/hard/unanswered problems
+- Modify the filter chip HTML to add count badges: "Easy (5)", "Medium (7)", "Hard (3)"
+- Update counts dynamically — no, do it once in buildProblems and also when filtering
+- `updateFilterCounts()`: reads activeProbs and answered, updates chip labels
+- Guard with typeof document
+
+### TASK: roadmap-level-progress-rings
+Add a small SVG progress ring to each Level tab (L1/L2/L3) in the roadmap showing topics completed.
+- Find `<div class="sub-tabs" id="roadmapTabs">` in HTML; add SVG ring span next to each tab
+- `updateRoadmapLevelRings()`: for each level (l1/l2/l3), count checked topics vs total, draw mini ring
+- Use `stroke-dasharray/dashoffset` technique on `<circle r="8" cx="10" cy="10">`
+- Call from `buildRoadmap()` and `toggleTopic()`
+- CSS: `.rm-level-ring { display:inline-block; vertical-align:middle; }`
+
+### TASK: practice-keyboard-bookmark
+Press B key when focused on a problem card to toggle its bookmark.
+- Add `b` / `B` key handler in the global keydown listener
+- When on practice page and `focusedProblemId !== null`, call `toggleBookmark(focusedProblemId)`
+- Update shortcuts overlay to show B → Bookmark focused problem
+- Guard: only if not in input/textarea/select
+
+### TASK: viz-data-summary-table
+Add a data summary table below the active visualizer showing key statistics in a tabular format.
+- HTML: `<div class="viz-summary-table" id="vizSummaryTable"></div>` placed below `#vizHistoryRow`
+- `buildVizSummaryTable()`: reads current data from visualizer, builds HTML table with Mean/Median/StdDev/Min/Max/N
+- Call from `drawActiveVisualizer()` or update when data changes
+- CSS: `.viz-summary-table`, `.viz-summary-table table`, `.viz-summary-table td`, `.viz-summary-table th`
+
+### TASK: problem-export-unit
+Add "Export Unit Problems" button that downloads all problems in the current unit as JSON.
+- Button: `<button class="export-unit-btn" onclick="exportUnitProblems()">Export Problems</button>` in progress-actions
+- `exportUnitProblems()`: serializes `allProbs[currentUnit]` as JSON, downloads as `unit-N-problems.json`
+- Guard with `typeof Blob`, `typeof document`
+- CSS: `.export-unit-btn` — small, muted, consistent with other action buttons
+
 ---
 
 ## RULES (ALWAYS)
