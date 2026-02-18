@@ -91,6 +91,9 @@
   <canvas id="weeklyStatsChart" width="280" height="60" style="display:none;"></canvas>
   <div class="unit-progress-overview" id="unitProgressOverview"></div>
   <div class="recent-badges" id="recentBadges"></div>
+  <div class="potd-widget" id="potdWidget"></div>
+  <div class="streak-milestones" id="streakMilestones"></div>
+  <div class="xp-next-level" id="xpNextLevel"></div>
   <div class="pomo-stats" id="pomoStats"></div>
   <div class="xp-breakdown" id="xpBreakdown"></div>
   <div class="study-plan" id="studyPlan"></div>
@@ -296,7 +299,7 @@
         </div>
         <div class="controls">
           <div class="cg"><label class="cl" for="histPreset">Preset</label><select id="histPreset" onchange="loadPreset()"><option value="symmetric">Symmetric</option><option value="right">Right skewed</option><option value="left">Left skewed</option><option value="bimodal">Bimodal</option><option value="uniform">Uniform</option></select></div>
-          <div class="cg"><label class="cl" for="binSlider">Bins</label><input type="range" id="binSlider" min="3" max="25" value="10" oninput="drawHist()"></div>
+          <div class="cg"><label class="cl" for="binSlider">Bins <span class="sv-val" id="binCountVal">10</span></label><input type="range" id="binSlider" min="5" max="40" value="10" oninput="document.getElementById('binCountVal').textContent=this.value;drawHist()"></div>
           <div class="cg"><label class="cl" for="sizeSlider">Sample size</label><input type="range" id="sizeSlider" min="20" max="500" value="100" oninput="loadPreset()"></div>
         </div>
         <div class="data-row">
@@ -389,11 +392,13 @@
     <button class="export-unit-btn" onclick="exportUnitProblems()" aria-label="Export unit problems as JSON">📥 Export Problems</button>
     <button class="rand-prob-btn" onclick="jumpToRandomProblem()" aria-label="Jump to random unsolved problem">🎲 Random</button>
     <button class="kb-help-btn" id="kbHelpBtn" onclick="toggleKBHelp()" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">⌨️</button>
+    <button class="exam-mode-btn" id="examModeBtn" onclick="toggleExamMode()" title="Toggle exam mode">Exam Mode</button>
     <div class="kb-help-panel" id="kbHelpPanel" style="display:none;"><div class="kb-help-title">Keyboard Shortcuts</div><div class="kb-shortcut-row"><span class="kb-key">j / k</span><span class="kb-desc">Next / prev problem</span></div><div class="kb-shortcut-row"><span class="kb-key">h</span><span class="kb-desc">Show hint</span></div><div class="kb-shortcut-row"><span class="kb-key">b</span><span class="kb-desc">Toggle bookmark</span></div><div class="kb-shortcut-row"><span class="kb-key">Enter</span><span class="kb-desc">Submit answer</span></div><div class="kb-shortcut-row"><span class="kb-key">Esc</span><span class="kb-desc">Close panel</span></div></div>
   </header>
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>
     <div class="progress-grid" id="progressGrid" role="status" aria-live="polite"></div>
+    <div class="topic-heatmap" id="topicHeatmap"></div>
     <div class="diff-chart-row" id="diffChartRow" style="display:none;text-align:center;padding:8px 0 4px;">
       <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:4px;">Difficulty Distribution</div>
       <canvas id="diffChart" width="200" height="50"></canvas>
@@ -521,6 +526,7 @@
   </button>
   <button class="formula-pin-btn" id="formulaPinBtn" onclick="toggleFormulaPin()" title="Pin formula panel open">📌</button>
   <div class="formula-unit-nav-row"><button class="formula-unit-nav" id="formulaUnitPrev" onclick="formulaUnitNav(-1)" title="Previous unit formulas">◀</button><div class="formula-unit-label" id="formulaUnitLabel"></div><button class="formula-unit-nav" id="formulaUnitNext" onclick="formulaUnitNav(1)" title="Next unit formulas">▶</button><button class="formula-copy-all-btn" onclick="copyAllFormulas()" title="Copy all formulas">Copy All</button></div>
+  <div class="formula-recent-row" id="formulaRecentRow" style="display:none;"></div>
   <div class="formula-content" id="formulaContent" style="display:none;"></div>
   <div class="formula-resize-handle" id="formulaResizeHandle" title="Drag to resize formula panel"></div>
 </div>

@@ -1154,3 +1154,79 @@ Show a mini stats bar during flashcard session: cards seen, known count, and % k
 - `updateFCSessionStats()`: counts `fcCards` length, how many marked known (using existing `fcKnown` or tracking), computes %
 - Update after each `fcMark()` call
 - CSS: `.fc-session-stats`, `.fcs-item`
+
+### TASK: practice-problem-step-by-step-hints
+Add sequential step-by-step hint reveals to problems that have `steps` arrays.
+- In `showHint(id)`: if the problem has a `steps` array, show one step at a time instead of the full hint
+- Track revealed step count in `stepHintProgress[id]` object
+- HTML: Add "Next Step" button that appears after showing the hint, if more steps remain
+- `showNextStep(id)`: increments `stepHintProgress[id]` and re-renders the hint area
+- CSS: `.step-hint-btn`, `.step-hint-text`, `.step-count-display`
+
+### TASK: home-daily-problem-of-the-day
+Show a single "Problem of the Day" on the home page, chosen deterministically by date.
+- `buildProblemOfTheDay()`: uses `Math.floor(todayMs / 86400000) % totalProblems` to select a problem
+- HTML: `<div class="potd-widget" id="potdWidget">` with problem question and a "Go Solve →" button
+- On click, navigates to practice page and scrolls to that problem
+- CSS: `.potd-widget`, `.potd-question`, `.potd-btn`
+- Call from `goPage('home')`
+
+### TASK: formula-panel-recently-viewed
+Track recently viewed formula sections and show them in a "Recently Viewed" section.
+- `trackFormulaView(unit)`: saves unit to `sh-formula-recent` (last 3 units)
+- `buildRecentFormulaUnits()`: reads `sh-formula-recent`, shows unit name chips
+- Call `trackFormulaView(unit)` from `buildFormulas(unit)`
+- HTML: Add `<div class="formula-recent-row" id="formulaRecentRow">` above formula content
+- CSS: `.formula-recent-row`, `.formula-recent-chip`
+
+### TASK: practice-exam-mode
+Add an "Exam Mode" button that hides all feedback and hints until the user reviews at the end.
+- `toggleExamMode()`: toggles `examModeActive` boolean
+- When `examModeActive` is true: `showFB()` renders nothing, `showHint()` does nothing, hints are hidden
+- HTML: Add `<button class="exam-mode-btn" id="examModeBtn" onclick="toggleExamMode()">Exam Mode</button>` to practice header
+- When exam mode ends: re-render all answered problems with feedback
+- CSS: `.exam-mode-btn`, `.exam-mode-btn.active { border-color: var(--pink); color: var(--pink); }`
+
+### TASK: home-motivational-streak-milestones
+Show upcoming streak milestones (7, 30, 100 days) on the home page.
+- `buildStreakMilestones()`: reads current streak, shows next milestone and days remaining
+- HTML: `<div class="streak-milestones" id="streakMilestones">` in home stats area
+- Show as "🎯 7-day streak — 3 more days!" in compact format
+- Call from `goPage('home')`
+- CSS: `.streak-milestones`, `.sm-item`, `.sm-progress`
+
+### TASK: visualizer-histogram-bin-count
+Add a "Bins" control to the histogram visualizer allowing users to choose 5–40 bins.
+- HTML: Add `<div class="cg"><label class="cl">Bins <span class="sv-val" id="binCountVal">10</span></label><input type="range" id="binCount" min="5" max="40" value="10" step="1" oninput="drawHist()"></div>` to histogram controls
+- `drawHist()`: use the `#binCount` slider value for bin count instead of the fixed 20
+- Guard `document.getElementById('binCount')` with null check since existing `drawHist` calls run before this slider might exist
+
+### TASK: practice-difficulty-heatmap
+Show a heatmap-style grid on the practice page showing which topics the user got right vs wrong.
+- `buildTopicHeatmap(unit)`: for each topic in the unit, shows a colored cell (green=all correct, amber=mixed, red=all wrong, gray=unanswered)
+- HTML: `<div class="topic-heatmap" id="topicHeatmap">` below the diff chart
+- Each cell: topic name on hover, colored by performance
+- Call from `buildProblems()`
+- CSS: `.topic-heatmap`, `.th-cell`, `.th-green`, `.th-amber`, `.th-red`, `.th-gray`
+
+### TASK: flashcard-spaced-review-integration
+In the flashcard mode, when a card is marked "known", update its SRS interval in `sh-srs` data.
+- In `fcMark(known)`: if known, call `_fcUpdateSRS(fcCards[fcIndex])` — if not known, reset SRS
+- `_fcUpdateSRS(card)`: if card type is 'formula', key = 'formula-{card.name}'; if 'problem', key = 'problem-{id}'
+- Update the SRS interval: if not found, set interval=1 day; if found, multiply by 2 (capped at 30 days)
+- Save to `sh-srs` localStorage key
+
+### TASK: home-xp-progress-to-next-level
+Show how many XP are needed to reach the next level on the home page.
+- `buildXPNextLevel()`: reads XP data, computes current level threshold and next level threshold
+- HTML: `<div class="xp-next-level" id="xpNextLevel">` in home stats area
+- Show as "Level 3 → Level 4: 150 XP to go!" with a mini progress bar
+- CSS: `.xp-next-level`, `.xnl-bar`, `.xnl-fill`, `.xnl-text`
+- Call from `goPage('home')`
+
+### TASK: practice-problem-tag-chips
+Extract topic keywords from each problem's `topic` field and display as clickable chips.
+- In problem HTML template: already has `p.topic` — also add `<span class="prob-topic-chip" onclick="filterByTopic('${p.topic}')">` styled as a colored pill
+- `filterByTopic(topic)`: already exists — verify it works
+- CSS update: style `.prob-topic-chip` as a rounded pill with background color based on topic group
+- Map topics to 4 color categories: descriptive=cyan, probability=amber, inference=pink, other=purple
