@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4792,6 +4792,19 @@ function buildPOD(){
   var unitNum=prob.unit||1;
   btn.onclick=function(){goPage('practice');setUnit(unitNum);if(typeof setTimeout!=='undefined'){setTimeout(function(){var el=document.querySelector('[data-id="'+prob.id+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);}};
   widget.style.display='';
+}
+function buildProblemOfTheDay(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('potdWidget');if(!el)return;
+  // Collect all problems across all units
+  var allProbsList=[];
+  for(var u=1;u<=MAX_UNIT;u++){(allProbs[u]||[]).forEach(function(p){allProbsList.push(p);});}
+  if(!allProbsList.length){el.innerHTML='';return;}
+  var dayMs=typeof Date!=='undefined'?Math.floor(Date.now()/86400000):0;
+  var idx=dayMs%allProbsList.length;
+  var prob=allProbsList[idx];
+  var pid=prob.id,punit=prob.unit;
+  el.innerHTML='<div class="potd-header">Problem of the Day</div><div class="potd-question">'+prob.q+'</div><button class="potd-btn" onclick="goPage(\'practice\');setUnit('+punit+');setTimeout(function(){var e=document.getElementById(\'pc-'+pid+'\');if(e){e.scrollIntoView({behavior:\'smooth\',block:\'center\'});}},500);">Go Solve \u2192</button>';
 }
 function buildDailyChallenge(){
   if(typeof document==='undefined')return;
