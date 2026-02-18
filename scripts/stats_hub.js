@@ -3717,7 +3717,7 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
   var timeStr=elapsed>=60?Math.floor(elapsed/60)+'m '+(elapsed%60)+'s':elapsed+'s';
   modal.innerHTML='<h3>Unit '+_esc(unit)+' Summary</h3>'
     +'<div class="session-stats">'
-    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">_st.answered</span></div>'
+    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">answered</span></div>'
     +'<div class="session-stat"><span class="session-num">'+correctCount+'</span><span class="session-label">correct</span></div>'
     +'<div class="session-stat"><span class="session-num">'+pct+'%</span><span class="session-label">accuracy</span></div>'
     +'<div class="session-stat"><span class="session-num">'+timeStr+'</span><span class="session-label">time</span></div>'
@@ -6184,7 +6184,7 @@ function checkUnitCompletion(unit){
   var key='sh-confetti-done-'+unit;
   if(_storageRaw(key,''))return;_storageRawSave(key,'1');
   showConfetti();
-  showToast('Unit '+unit+' complete! All problems _st.answered correctly! 🎉',3000);
+  showToast('Unit '+unit+' complete! All problems answered correctly! 🎉',3000);
 }
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;
