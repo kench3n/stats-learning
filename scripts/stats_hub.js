@@ -1239,6 +1239,7 @@ buildProblems=function(unit=currentUnit){
   }
   updatePracticeNavBadge();
   updateMasteryBadge(unit);
+  buildUnitXPBar(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
@@ -1342,6 +1343,7 @@ function ansMC(id,ch){
   updatePracticeNavBadge();
   checkUnitCompletion(currentUnit);
   updateMasteryBadge(currentUnit);
+  buildUnitXPBar(currentUnit);
   if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
@@ -1370,6 +1372,7 @@ function ansFR(id){
   updatePracticeNavBadge();
   checkUnitCompletion(currentUnit);
   updateMasteryBadge(currentUnit);
+  buildUnitXPBar(currentUnit);
   if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
@@ -3675,6 +3678,29 @@ function updatePracticeNavBadge(){
   }
   if(unanswered>0){badge.textContent=unanswered;badge.style.display='';}
   else{badge.style.display='none';}
+}
+function buildUnitXPBar(unit){
+  if(typeof document==='undefined')return;
+  var row=document.getElementById('unitXPBarRow');
+  var fill=document.getElementById('unitXPBarFill');
+  var text=document.getElementById('unitXPBarText');
+  if(!row||!fill||!text)return;
+  var probs=allProbs[unit]||[];if(!probs.length){row.style.display='none';return;}
+  var state=typeof getPracticeState==='function'?getPracticeState(unit):{};
+  var ans=state.answered&&typeof state.answered==='object'?state.answered:{};
+  var earnedXP=0,totalXP=0;
+  probs.forEach(function(p){
+    var xp=p.diff==='easy'?XP_TABLE.easy:p.diff==='medium'?XP_TABLE.medium:XP_TABLE.hard;
+    totalXP+=xp;
+    if(ans[p.id]!==undefined){
+      var ok=p.type==='mc'?(+ans[p.id])===p.ans:Math.abs(parseFloat(ans[p.id])-p.ans)<=(p.tol||0.1);
+      if(ok)earnedXP+=xp;
+    }
+  });
+  var pct=totalXP>0?Math.round(earnedXP/totalXP*100):0;
+  row.style.display='';
+  fill.style.width=pct+'%';
+  text.textContent=earnedXP+' / '+totalXP+' XP ('+pct+'%)';
 }
 function updateMasteryBadge(unit){
   if(typeof document==='undefined')return;
