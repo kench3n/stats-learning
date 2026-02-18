@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();buildXPNextLevel();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4870,6 +4870,17 @@ function buildPOD(){
   var unitNum=prob.unit||1;
   btn.onclick=function(){goPage('practice');setUnit(unitNum);if(typeof setTimeout!=='undefined'){setTimeout(function(){var el=document.querySelector('[data-id="'+prob.id+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);}};
   widget.style.display='';
+}
+function buildXPNextLevel(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('xpNextLevel');if(!el)return;
+  var xp=getXPData();
+  var cur=xp.level||1;
+  var total=xp.total||0;
+  var xpInLevel=total%XP_PER_LEVEL;
+  var xpToNext=XP_PER_LEVEL-xpInLevel;
+  var pct=Math.round(xpInLevel/XP_PER_LEVEL*100);
+  el.innerHTML='<div class="xnl-text">Level '+cur+' → Level '+(cur+1)+': <b>'+xpToNext+' XP to go!</b></div><div class="xnl-bar"><div class="xnl-fill" style="width:'+pct+'%"></div></div>';
 }
 function buildStreakMilestones(){
   if(typeof document==='undefined')return;
