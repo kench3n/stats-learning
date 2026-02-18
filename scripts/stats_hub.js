@@ -987,6 +987,7 @@ html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span
   content.innerHTML=html;
   // Restore saved height
   if(typeof localStorage!=='undefined'){try{var h=parseInt(localStorage.getItem('sh-formula-height'));if(h>=100&&h<=600)content.style.maxHeight=h+'px';}catch(e){}}
+  buildFormulaSearchHistory();
 }
 
 function initFormulaResize(){
@@ -1037,7 +1038,31 @@ function filterFormulas(query){
   if(q){
     const c=document.getElementById('formulaContent');
     if(c&&c.style.display==='none')toggleFormulas();
+    // Save search history
+    if(typeof localStorage!=='undefined'){
+      try{
+        var hist=JSON.parse(localStorage.getItem('sh-formula-searches')||'[]');
+        if(!Array.isArray(hist))hist=[];
+        hist=hist.filter(function(x){return x!==q;});
+        hist.unshift(q);
+        hist=hist.slice(0,5);
+        localStorage.setItem('sh-formula-searches',JSON.stringify(hist));
+      }catch(e){}
+    }
   }
+}
+function buildFormulaSearchHistory(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('formulaHistoryRow');if(!el)return;
+  var hist=[];
+  try{hist=JSON.parse(localStorage.getItem('sh-formula-searches')||'[]');}catch(e){}
+  if(!Array.isArray(hist)||!hist.length){el.style.display='none';return;}
+  el.style.display='';
+  var html='';
+  hist.slice(0,3).forEach(function(q){
+    html+='<button class="formula-history-chip" onclick="var inp=document.getElementById(\'formulaSearch\');if(inp){inp.value='+JSON.stringify(q)+';filterFormulas('+JSON.stringify(q)+');}">'+q+'</button>';
+  });
+  el.innerHTML=html;
 }
 function formulaUnitNav(dir){
   if(typeof document==='undefined')return;

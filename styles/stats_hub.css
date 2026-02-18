@@ -653,6 +653,9 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .formula-search-wrap #formulaSearch{flex:1;padding-right:28px;}
 .formula-search-clear{position:absolute;right:6px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px;}
 .formula-search-clear:hover{color:var(--fg);}
+.formula-history-row{display:flex;gap:4px;flex-wrap:wrap;padding:4px 0;}
+.formula-history-chip{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px;font-family:'Space Mono',monospace;}
+.formula-history-chip:hover{border-color:var(--cyan);color:var(--cyan);}
 .formula-toggle{
   background:var(--bg2);border:1px solid var(--border);border-radius:8px;
   padding:10px 16px;width:100%;text-align:left;cursor:pointer;
