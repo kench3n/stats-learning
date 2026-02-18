@@ -5517,6 +5517,18 @@ function exportUnitProblems(){
   URL.revokeObjectURL(url);
   showToast('Exported unit '+currentUnit+' problems');
 }
+function jumpToRandomProblem(){
+  if(typeof document==='undefined')return;
+  var unsolved=activeProbs.filter(function(p){return answered[p.id]===undefined;});
+  if(!unsolved.length){showToast('All problems solved! Great job. \ud83c\udf89');return;}
+  var p=unsolved[Math.floor(Math.random()*unsolved.length)];
+  var card=document.getElementById('pc-'+p.id);
+  if(card&&typeof card.scrollIntoView==='function'){
+    card.scrollIntoView({behavior:'smooth',block:'center'});
+    card.classList.add('focus-highlight');
+    setTimeout(function(){card.classList.remove('focus-highlight');},1500);
+  }
+}
 function exportProgressJSON(){
   if(typeof document==='undefined')return;
   if(typeof localStorage==='undefined')return;
