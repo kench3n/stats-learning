@@ -965,10 +965,18 @@ function filterFormulas(query){
     if(matches&&nameEl)nameEl.innerHTML=q?_highlightText(rawName,q):rawName;
     if(matches&&eqEl)eqEl.innerHTML=q?_highlightText(rawEq,q):rawEq;
   });
+  var clr=document.getElementById('formulaSearchClear');
+  if(clr)clr.style.display=q?'':'none';
   if(q){
     const c=document.getElementById('formulaContent');
     if(c&&c.style.display==='none')toggleFormulas();
   }
+}
+function clearFormulaSearch(){
+  if(typeof document==='undefined')return;
+  var inp=document.getElementById('formulaSearch');
+  if(inp){inp.value='';if(typeof inp.focus==='function')inp.focus();}
+  filterFormulas('');
 }
 function toggleFormulas(){
   if(typeof document==='undefined')return;
