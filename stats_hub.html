@@ -382,6 +382,8 @@
     <button class="export-pdf-btn" onclick="exportPracticePDF(currentUnit)" aria-label="Export problems as PDF">🖨 Export PDF</button>
     <button class="export-unit-btn" onclick="exportUnitProblems()" aria-label="Export unit problems as JSON">📥 Export Problems</button>
     <button class="rand-prob-btn" onclick="jumpToRandomProblem()" aria-label="Jump to random unsolved problem">🎲 Random</button>
+    <button class="kb-help-btn" id="kbHelpBtn" onclick="toggleKBHelp()" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">⌨️</button>
+    <div class="kb-help-panel" id="kbHelpPanel" style="display:none;"><div class="kb-help-title">Keyboard Shortcuts</div><div class="kb-shortcut-row"><span class="kb-key">j / k</span><span class="kb-desc">Next / prev problem</span></div><div class="kb-shortcut-row"><span class="kb-key">h</span><span class="kb-desc">Show hint</span></div><div class="kb-shortcut-row"><span class="kb-key">b</span><span class="kb-desc">Toggle bookmark</span></div><div class="kb-shortcut-row"><span class="kb-key">Enter</span><span class="kb-desc">Submit answer</span></div><div class="kb-shortcut-row"><span class="kb-key">Esc</span><span class="kb-desc">Close panel</span></div></div>
   </header>
   <div class="progress-panel" id="progressPanel">
     <button class="progress-toggle" id="progressToggle" aria-expanded="true" onclick="toggleProgressPanel()">Progress Overview &#9662;</button>

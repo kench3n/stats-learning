@@ -3607,6 +3607,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
       const so=document.getElementById('shortcutsOverlay');if(so&&so.style.display!=='none')so.style.display='none';
       const tp=document.getElementById('tutorPanel');if(tp&&tp.style.display!=='none')tp.style.display='none';
       const sess=document.getElementById('sessionOverlay');if(sess&&sess.style.display!=='none')sess.style.display='none';
+      const kbp=document.getElementById('kbHelpPanel');if(kbp&&kbp.style.display!=='none')kbp.style.display='none';
       if(document.body.classList.contains('focus-mode'))document.body.classList.remove('focus-mode');
     }
     else if(e.key==='ArrowRight'){const fc=document.getElementById('page-flashcards');if(fc&&fc.classList.contains('active')){e.preventDefault();fcMark(true);}else{window.scrollBy(0,100);}}
@@ -5662,6 +5663,13 @@ function jumpToRandomProblem(){
     card.classList.add('focus-highlight');
     setTimeout(function(){card.classList.remove('focus-highlight');},1500);
   }
+}
+function toggleKBHelp(){
+  if(typeof document==='undefined')return;
+  var panel=document.getElementById('kbHelpPanel');
+  if(!panel)return;
+  var visible=panel.style.display!=='none';
+  panel.style.display=visible?'none':'block';
 }
 function exportProgressJSON(){
   if(typeof document==='undefined')return;
