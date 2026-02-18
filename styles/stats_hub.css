@@ -170,6 +170,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .roadmap-export-btn{margin-top:12px;padding:8px 20px;background:transparent;color:var(--purple);border:1px solid var(--purple);border-radius:8px;font-family:'Space Mono',monospace;font-size:12px;cursor:pointer;transition:all 0.2s;}
 .roadmap-export-btn:hover{background:var(--purple);color:#fff;}
 .roadmap-export-btn:focus-visible{outline:2px solid var(--purple);outline-offset:2px;}
+.roadmap-pct{display:inline-block;margin-top:8px;font-size:13px;color:var(--cyan);font-family:'Space Mono',monospace;}
 .section-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 .section-title{font-family:'Instrument Serif',serif;font-size:clamp(32px,4.5vw,50px);font-weight:400;letter-spacing:-1px;margin-bottom:6px;}
 .section-title em{font-style:italic;color:var(--cyan);}

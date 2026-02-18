@@ -517,8 +517,18 @@ function buildRoadmap(){
   restoreTopics();
   updateTopicProgress();
   updateRoadmapNavBadge();
+  updateRoadmapPct();
 }
 
+function updateRoadmapPct(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('roadmapPct');if(!el)return;
+  var total=0;['l1','l2','l3'].forEach(function(lk){(RM[lk]||[]).forEach(function(c){total+=c.topics.length;});});
+  var state=getTopicState();
+  var checked=Object.values(state).filter(Boolean).length;
+  var pct=total>0?Math.round(checked/total*100):0;
+  el.textContent=pct+'% complete';
+}
 function updateRoadmapNavBadge(){
   if(typeof document==='undefined')return;
   var badge=document.getElementById('roadmapNavBadge');if(!badge)return;
@@ -542,6 +552,7 @@ function toggleTopic(el){
   saveTopicState(s);
   updateTopicProgress();
   updateRoadmapNavBadge();
+  updateRoadmapPct();
   if(checked){
     awardXP(XP_TABLE.topic,'topic');
     recordActivity();
