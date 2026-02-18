@@ -245,7 +245,6 @@ function goPage(id){
   if(id==='create'){initCreatePage();}
 }
 function showSub(prefix,id,btn){
-  if(prefix==='viz'&&_st.currentUnit!==1)return;
   const parent=prefix==='rm'?'page-roadmap':prefix==='viz'?'page-visualizer':null;
   if(!parent)return;
   const tabBar=prefix==='rm'?document.getElementById('roadmapTabs'):document.getElementById('vizTabs');
@@ -309,14 +308,6 @@ function comb(n,k){
   for(let i=0;i<k;i++)c=c*(n-i)/(i+1);
   return c;
 }
-function debounce(fn,ms){
-  let t;
-  return function(){
-    if(typeof setTimeout!=='function'){fn();return;}
-    if(typeof clearTimeout==='function'&&t)clearTimeout(t);
-    t=setTimeout(fn,ms);
-  };
-}
 
 const XP_TABLE={easy:5,medium:10,hard:20,wrong:1,topic:3};
 const XP_PER_LEVEL=50;
@@ -326,7 +317,7 @@ const MILESTONES=[
   {id:'streak-7',name:'Week Warrior',desc:'7-day study streak',icon:'💪',check:d=>d.streak>=7},
   {id:'streak-30',name:'Monthly Master',desc:'30-day study streak',icon:'👑',check:d=>d.streak>=30},
   {id:'unit-complete',name:'Unit Clear',desc:'Complete all problems in any unit',icon:'✅',check:d=>d.unitsComplete>=1},
-  {id:'all-units',name:'Full Sweep',desc:'Complete all 11 units',icon:'🏆',check:d=>d.unitsComplete>=11},
+  {id:'all-units',name:'Full Sweep',desc:'Complete all units',icon:'🏆',check:d=>typeof MAX_UNIT!=='undefined'?d.unitsComplete>=MAX_UNIT:d.unitsComplete>=14},
   {id:'xp-100',name:'Centurion',desc:'Earn 100 XP',icon:'💯',check:d=>d.xp>=100},
   {id:'xp-500',name:'Scholar',desc:'Earn 500 XP',icon:'📚',check:d=>d.xp>=500},
   {id:'xp-1000',name:'Expert',desc:'Earn 1000 XP',icon:'🎓',check:d=>d.xp>=1000},
@@ -1684,6 +1675,15 @@ const probs=[
 
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('DOMContentLoaded',()=>{
+    // Populate unit selects dynamically from UNIT_META
+    ['vizUnitSelect','unitSelect'].forEach(function(id){
+      var sel=document.getElementById(id);if(!sel)return;
+      Object.keys(UNIT_META).forEach(function(u){
+        var o=document.createElement('option');
+        o.value=u;o.textContent='Unit '+u+': '+UNIT_META[u].name;
+        sel.appendChild(o);
+      });
+    });
     loadTheme();
     buildRoadmap();buildProblems();loadPreset();
     initFormulaResize();
@@ -1792,7 +1792,7 @@ function savePracticeState(unit,state){
 }
 function persistPracticeState(){savePracticeState(_st.currentUnit,{answered: _st.answered});if(typeof document!=='undefined')buildProgressPanel();}
 
-buildProblems=function(unit=_st.currentUnit){
+var buildProblems=function(unit=_st.currentUnit){
   // Clear leaked problem timers from previous build
   Object.keys(_st.probTimers).forEach(function(id){clearInterval(_st.probTimers[id]);});
   _st.probTimers={};_st.probTimerStart={};
@@ -5726,18 +5726,19 @@ function exportPracticePDF(unit){
   if(typeof window==='undefined')return;
   const probs=allProbs[unit]||[];
   if(!probs.length){showToast('No problems for this unit.');return;}
-  let content='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Stats Hub — Unit '+unit+': '+UNIT_META[unit].name+'</title><style>body{font-family:sans-serif;color:#111;padding:40px;max-width:700px;margin:0 auto;line-height:1.6;}h1{font-size:20px;border-bottom:2px solid #111;padding-bottom:8px;}.prob{margin-bottom:24px;page-break-inside:avoid;}.prob-head{font-size:12px;color:#555;margin-bottom:4px;}.prob-q{font-size:14px;margin-bottom:8px;}.choice{margin:4px 0 4px 20px;font-size:13px;}.answer{margin-top:12px;padding:8px 12px;background:#f0f0f0;border-radius:4px;font-size:12px;}</style></head><body><h1>Unit '+unit+': '+UNIT_META[unit].name+'</h1>';
+  const _unitName=_esc(UNIT_META[unit].name);
+  let content='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Stats Hub — Unit '+unit+': '+_unitName+'</title><style>body{font-family:sans-serif;color:#111;padding:40px;max-width:700px;margin:0 auto;line-height:1.6;}h1{font-size:20px;border-bottom:2px solid #111;padding-bottom:8px;}.prob{margin-bottom:24px;page-break-inside:avoid;}.prob-head{font-size:12px;color:#555;margin-bottom:4px;}.prob-q{font-size:14px;margin-bottom:8px;}.choice{margin:4px 0 4px 20px;font-size:13px;}.answer{margin-top:12px;padding:8px 12px;background:#f0f0f0;border-radius:4px;font-size:12px;}</style></head><body><h1>Unit '+unit+': '+_unitName+'</h1>';
   probs.forEach((p,i)=>{
-    content+='<div class="prob"><div class="prob-head">#'+(i+1)+' · '+p.diff+' · '+p.topic+'</div><div class="prob-q">'+p.q+'</div>';
-    if(p.data)content+='<div style="background:#f5f5f5;padding:8px;border-radius:4px;font-size:12px;margin-bottom:8px;">'+p.data+'</div>';
-    if(p.type==='mc'){const L='ABCD';p.ch.forEach((c,j)=>{content+='<div class="choice">'+L[j]+'. '+c+'</div>';});}
+    content+='<div class="prob"><div class="prob-head">#'+(i+1)+' · '+_esc(p.diff)+' · '+_esc(p.topic)+'</div><div class="prob-q">'+_esc(p.q)+'</div>';
+    if(p.data)content+='<div style="background:#f5f5f5;padding:8px;border-radius:4px;font-size:12px;margin-bottom:8px;">'+_esc(p.data)+'</div>';
+    if(p.type==='mc'){const L='ABCD';p.ch.forEach((c,j)=>{content+='<div class="choice">'+L[j]+'. '+_esc(c)+'</div>';});}
     else{content+='<div style="border:1px solid #ccc;padding:8px;border-radius:4px;min-height:30px;margin-top:8px;color:#999;">Your answer:</div>';}
-    content+='<div class="answer"><strong>Answer:</strong> '+(p.type==='mc'?'ABCD'[p.ans]:p.ans)+'<br><strong>Explanation:</strong> '+p.ex+'</div></div>';
+    content+='<div class="answer"><strong>Answer:</strong> '+(p.type==='mc'?'ABCD'[p.ans]:_esc(String(p.ans)))+'<br><strong>Explanation:</strong> '+_esc(p.ex)+'</div></div>';
   });
   const formulas=FORMULAS[unit]||[];
   if(formulas.length){
     content+='<div style="margin-top:32px;border-top:2px solid #111;padding-top:16px;"><h2 style="font-size:16px;">Formula Reference</h2>';
-    formulas.forEach(f=>{content+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd;font-size:12px;"><span>'+f.name+'</span><span>'+f.formula+'</span></div>';});
+    formulas.forEach(f=>{content+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd;font-size:12px;"><span>'+_esc(f.name)+'</span><span>'+_esc(f.formula)+'</span></div>';});
     content+='</div>';
   }
   content+='</body></html>';
@@ -6048,7 +6049,7 @@ function buildCustomProblemList(){
   if(!customs.length){list.innerHTML='<p style="color:var(--muted);font-size:13px;">No custom problems yet. Create your first one above!</p>';return;}
   let html='';
   customs.forEach((p,i)=>{
-    html+='<div class="custom-prob-item"><div class="custom-prob-head"><span>'+p.q.slice(0,60)+(p.q.length>60?'...':'')+'</span><span class="custom-prob-meta">Unit '+p.unit+' · '+p.diff+'</span></div><button class="custom-prob-del" onclick="deleteCustomProblem('+i+')">✕</button></div>';
+    html+='<div class="custom-prob-item"><div class="custom-prob-head"><span>'+_esc(p.q.slice(0,60))+(p.q.length>60?'...':'')+'</span><span class="custom-prob-meta">Unit '+_esc(p.unit)+' · '+_esc(p.diff)+'</span></div><button class="custom-prob-del" onclick="deleteCustomProblem('+i+')">✕</button></div>';
   });
   list.innerHTML=html;
 }
@@ -6483,10 +6484,11 @@ function generateGeneralCertificate(accuracyPct,unitsCompleted){
   if(typeof window==='undefined')return;
   var name=window.prompt('Enter your name for the certificate:','Student');
   if(!name)return;
+  var safeName=_esc(name);
   var today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   var xp=getXPData();
   var streak=getStreakData();
-  var certHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Course Completion Certificate</title><style>body{font-family:Georgia,serif;text-align:center;padding:60px;background:#fffef5;color:#1a1a2e;}.cert{border:4px double #1a1a2e;padding:60px;max-width:700px;margin:0 auto;}h1{font-size:30px;margin-bottom:8px;letter-spacing:2px;}.subtitle{font-size:13px;color:#666;letter-spacing:4px;text-transform:uppercase;margin-bottom:40px;}.name{font-size:28px;font-style:italic;margin:20px 0;color:#0095a3;font-family:Georgia,serif;}.stats{display:flex;justify-content:center;gap:40px;margin:30px 0;font-size:14px;color:#666;}.date{margin-top:40px;font-size:14px;color:#666;}.seal{font-size:52px;margin:20px 0;}</style></head><body><div class="cert"><div class="seal">🎓</div><h1>Certificate of Completion</h1><div class="subtitle">Stats Learning Hub &mdash; Course Completion</div><p>This certifies that</p><div class="name">'+name+'</div><p>has successfully completed the Statistics Learning Hub curriculum</p><div class="stats"><span>Overall Accuracy: '+accuracyPct+'%</span><span>Units Completed: '+unitsCompleted+'</span><span>Level: '+xp.level+'</span><span>XP: '+xp.total+'</span></div><div class="date">'+today+'</div></div><script>window.onload=function(){window.print();}<\/script></body></html>';
+  var certHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Course Completion Certificate</title><style>body{font-family:Georgia,serif;text-align:center;padding:60px;background:#fffef5;color:#1a1a2e;}.cert{border:4px double #1a1a2e;padding:60px;max-width:700px;margin:0 auto;}h1{font-size:30px;margin-bottom:8px;letter-spacing:2px;}.subtitle{font-size:13px;color:#666;letter-spacing:4px;text-transform:uppercase;margin-bottom:40px;}.name{font-size:28px;font-style:italic;margin:20px 0;color:#0095a3;font-family:Georgia,serif;}.stats{display:flex;justify-content:center;gap:40px;margin:30px 0;font-size:14px;color:#666;}.date{margin-top:40px;font-size:14px;color:#666;}.seal{font-size:52px;margin:20px 0;}</style></head><body><div class="cert"><div class="seal">🎓</div><h1>Certificate of Completion</h1><div class="subtitle">Stats Learning Hub &mdash; Course Completion</div><p>This certifies that</p><div class="name">'+safeName+'</div><p>has successfully completed the Statistics Learning Hub curriculum</p><div class="stats"><span>Overall Accuracy: '+accuracyPct+'%</span><span>Units Completed: '+unitsCompleted+'</span><span>Level: '+xp.level+'</span><span>XP: '+xp.total+'</span></div><div class="date">'+today+'</div></div><script>window.onload=function(){window.print();}<\/script></body></html>';
   var win=window.open('','_blank');
   if(win){win.document.write(certHtml);win.document.close();}
   awardXP(100,'general-certificate');
@@ -6718,7 +6720,7 @@ if(typeof document!=='undefined'&&typeof navigator!=='undefined'&&navigator.serv
   navigator.serviceWorker.register('./service-worker.js').catch(function(){});
 }
 if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
-  window.addEventListener('resize',debounce(function(){drawActiveVisualizer(true);},150));
+  window.addEventListener('resize',_debounce(function(){drawActiveVisualizer(true);},150));
 }
 
 // Mobile swipe navigation
