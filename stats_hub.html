@@ -339,8 +339,9 @@
         <div class="controls">
           <div class="cg"><label class="cl" for="muSlider">μ (mean) <span class="sv-val" id="muVal">0</span></label><input type="range" id="muSlider" min="-4" max="4" value="0" step="0.1" oninput="drawNorm()"></div>
           <div class="cg"><label class="cl" for="sigSlider">σ (std dev) <span class="sv-val" id="sigVal">1</span></label><input type="range" id="sigSlider" min="0.3" max="3" value="1" step="0.1" oninput="drawNorm()"></div>
-          <div class="cg"><label class="cl" for="normRegion">Region</label><select id="normRegion" onchange="drawNorm()"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option></select></div>
+          <div class="cg"><label class="cl" for="normRegion">Region</label><select id="normRegion" onchange="drawNorm()"><option value="none">None</option><option value="68" selected>68% (μ±1σ)</option><option value="95">95% (μ±2σ)</option><option value="997">99.7% (μ±3σ)</option><option value="custom">Custom z</option><option value="range">Z Range</option></select></div>
           <div class="cg" id="zGrp" style="display:none"><label class="cl" for="zSlider">z <span class="sv-val" id="zVal">1.96</span></label><input type="range" id="zSlider" min="0" max="4" value="1.96" step="0.01" oninput="drawNorm()"></div>
+          <div class="cg" id="zRangeGrp" style="display:none"><label class="cl">z1 <span class="sv-val" id="z1Val">-1.00</span></label><input type="range" id="z1Slider" min="-4" max="4" value="-1" step="0.01" oninput="drawNorm()"><label class="cl">z2 <span class="sv-val" id="z2Val">1.00</span></label><input type="range" id="z2Slider" min="-4" max="4" value="1" step="0.01" oninput="drawNorm()"></div>
         </div>
         <div class="stats-row" style="margin-top:14px" aria-label="Normal distribution statistics">
           <div class="sc"><div class="sv sv-cyan" id="nArea">68.3%</div><div class="sl">Shaded area</div></div>

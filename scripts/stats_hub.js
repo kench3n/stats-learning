@@ -827,8 +827,18 @@ function drawBox(){
 function drawNorm(){
   const mu=+document.getElementById('muSlider').value,sig=+document.getElementById('sigSlider').value,region=document.getElementById('normRegion').value;
   document.getElementById('muVal').textContent=mu.toFixed(1);document.getElementById('sigVal').textContent=sig.toFixed(1);document.getElementById('zGrp').style.display=region==='custom'?'flex':'none';
-  let k=1;if(region==='68')k=1;else if(region==='95')k=2;else if(region==='997')k=3;else if(region==='custom'){k=+document.getElementById('zSlider').value;document.getElementById('zVal').textContent=k.toFixed(2);}
-  const lo=mu-k*sig,hi=mu+k*sig;const area=region==='none'?0:(normalCDF(hi,mu,sig)-normalCDF(lo,mu,sig))*100;
+  var _zrg=document.getElementById('zRangeGrp');if(_zrg)_zrg.style.display=region==='range'?'flex':'none';
+  let k=1,lo,hi;
+  if(region==='range'){
+    var z1=+document.getElementById('z1Slider').value,z2=+document.getElementById('z2Slider').value;
+    var _z1v=document.getElementById('z1Val'),_z2v=document.getElementById('z2Val');
+    if(_z1v)_z1v.textContent=z1.toFixed(2);if(_z2v)_z2v.textContent=z2.toFixed(2);
+    lo=mu+Math.min(z1,z2)*sig;hi=mu+Math.max(z1,z2)*sig;
+  }else{
+    if(region==='68')k=1;else if(region==='95')k=2;else if(region==='997')k=3;else if(region==='custom'){k=+document.getElementById('zSlider').value;document.getElementById('zVal').textContent=k.toFixed(2);}
+    lo=mu-k*sig;hi=mu+k*sig;
+  }
+  const area=region==='none'?0:(normalCDF(hi,mu,sig)-normalCDF(lo,mu,sig))*100;
   document.getElementById('nArea').textContent=region==='none'?'—':area.toFixed(1)+'%';document.getElementById('nLeft').textContent=region==='none'?'—':lo.toFixed(2);document.getElementById('nRight').textContent=region==='none'?'—':hi.toFixed(2);
   const c=document.getElementById('normCanvas'),ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=340*dpr;ctx.scale(dpr,dpr);const W=c.offsetWidth,H=340;ctx.clearRect(0,0,W,H);
   const pad={l:44,r:24,t:24,b:44};const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;const xMin=-6,xMax=6;const toX=x=>pad.l+((x-xMin)/(xMax-xMin))*pw;const maxY=normalPDF(mu,mu,sig);const toY=y=>pad.t+ph*(1-y/maxY*0.9);
