@@ -374,6 +374,7 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .unit-xp-bar-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .unit-xp-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:2px;transition:width 0.5s;}
 .unit-xp-bar-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--amber);white-space:nowrap;}
+.diff-insight{font-size:11px;color:var(--muted);padding:2px 24px 6px;max-width:780px;margin:0 auto;}
 
 .unit-selector{
   display:flex;align-items:center;gap:10px;

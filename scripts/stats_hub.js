@@ -1240,6 +1240,7 @@ buildProblems=function(unit=currentUnit){
   updatePracticeNavBadge();
   updateMasteryBadge(unit);
   buildUnitXPBar(unit);
+  buildDiffInsight(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
   if(typeof localStorage!=='undefined'){try{activeTags=new Set(JSON.parse(localStorage.getItem('sh-active-tags')||'[]'));}catch(e){activeTags=new Set();}applyTagFilter();}
@@ -3701,6 +3702,20 @@ function buildUnitXPBar(unit){
   row.style.display='';
   fill.style.width=pct+'%';
   text.textContent=earnedXP+' / '+totalXP+' XP ('+pct+'%)';
+}
+function buildDiffInsight(unit){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('diffInsight');
+  if(!el)return;
+  var probs=allProbs[unit]||[];
+  if(!probs.length){el.textContent='';return;}
+  var easy=0,medium=0,hard=0;
+  probs.forEach(function(p){
+    if(p.diff==='easy')easy++;
+    else if(p.diff==='medium')medium++;
+    else hard++;
+  });
+  el.textContent=probs.length+' problems: '+easy+' easy \u2022 '+medium+' medium \u2022 '+hard+' hard';
 }
 function updateMasteryBadge(unit){
   if(typeof document==='undefined')return;
