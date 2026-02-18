@@ -5350,7 +5350,7 @@ function buildAchievementsPage(){
     if(id.startsWith('xp-')){var t=parseInt(id.split('-')[1]);return Math.min(100,Math.round(achData.xp/t*100));}
     if(id.startsWith('topics-')){var t=parseInt(id.split('-')[1]);return Math.min(100,Math.round(achData.topicsChecked/t*100));}
     if(id==='unit-complete')return Math.min(100,achData.unitsComplete*100);
-    if(id==='all-units')return Math.min(100,Math.round(achData.unitsComplete/11*100));
+    if(id==='all-units')return Math.min(100,Math.round(achData.unitsComplete/(typeof MAX_UNIT!=='undefined'?MAX_UNIT:14)*100));
     if(id==='perfect-unit')return Math.min(100,achData.perfectUnits*100);
     if(id==='review-10')return Math.min(100,Math.round(achData.reviewSessions/10*100));
     if(id==='review-50')return Math.min(100,Math.round(achData.reviewSessions/50*100));
