@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildXPBreakdown();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4305,6 +4305,29 @@ function buildRecentUnits(){
   });
   el.innerHTML=html;
 }
+function buildXPBreakdown(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('xpBreakdown');if(!el)return;
+  var xpData=getXPData();
+  var hist=Array.isArray(xpData.history)?xpData.history:[];
+  var cats={practice:{icon:'\u2705',label:'Practice',xp:0},streak:{icon:'\ud83d\udd25',label:'Streak',xp:0},topic:{icon:'\ud83d\uddfa\ufe0f',label:'Topics',xp:0},review:{icon:'\ud83d\udd04',label:'Review',xp:0},pomo:{icon:'\u23f0',label:'Pomodoro',xp:0},other:{icon:'\u2728',label:'Other',xp:0}};
+  hist.forEach(function(h){
+    var r=String(h.reason||'');var xp=Number(h.earned)||0;
+    if(r.startsWith('streak-'))cats.streak.xp+=xp;
+    else if(r==='topic'||r.startsWith('topic-'))cats.topic.xp+=xp;
+    else if(r.startsWith('review-'))cats.review.xp+=xp;
+    else if(r.startsWith('pomo-'))cats.pomo.xp+=xp;
+    else if(r.startsWith('practice-')||r.startsWith('streak-bonus'))cats.practice.xp+=xp;
+    else cats.other.xp+=xp;
+  });
+  var html='';
+  Object.keys(cats).forEach(function(k){
+    var c=cats[k];if(!c.xp)return;
+    html+='<div class="xp-breakdown-row"><span class="xp-cat-label">'+c.icon+' '+c.label+'</span><span class="xp-cat-amount">+'+c.xp+' XP</span></div>';
+  });
+  el.innerHTML=html?html:'<span style="color:var(--muted);font-size:12px;">No XP earned yet</span>';
+}
+
 function buildStreakMessage(){
   if(typeof document==='undefined')return;
   var el=document.getElementById('streakMessage');if(!el)return;
