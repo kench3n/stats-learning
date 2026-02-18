@@ -5660,11 +5660,11 @@ function buildFlashcards(unit){
   if(typeof document==='undefined')return;
   fcCards=[];fcIndex=0;fcKnownCount=0;fcSeenCount=0;
   (FORMULAS[unit]||[]).forEach(f=>{
-    fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula'});
+    fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula',id:f.name});
   });
   (allProbs[unit]||[]).forEach(p=>{
     const answer=p.type==='mc'?p.ch[p.ans]:String(p.ans);
-    fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem'});
+    fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem',id:p.id});
   });
   for(let i=fcCards.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -5703,7 +5703,7 @@ function _fcUpdateSRS(card,known){
   if(typeof localStorage==='undefined')return;
   try{
     var srs=JSON.parse(localStorage.getItem('sh-srs')||'{}');
-    var key=card.type==='formula'?'formula-'+(card.front||'').slice(0,20):'problem-'+(card.front||'').slice(0,20);
+    var key=card.type==='formula'?'formula-'+card.id:'problem-'+card.id;
     if(known){
       var prev=srs[key]||{interval:0};
       var newInterval=prev.interval?Math.min(prev.interval*2,30):1;
