@@ -178,6 +178,7 @@ var _st = {
   fcKnownCount: 0,
   fcSeenCount: 0,
   matchSelected: null,
+  _shortcutsTrigger: null,
   matchedPairs: 0,
   matchPairsTotal: 0,
   builderParts: [],
@@ -777,9 +778,9 @@ function buildRoadmap(){
         var _noteText=_tnotes[t.n]||'';
         var _safeN=t.n.replace(/"/g,'&quot;');
         var _noteStyle=_noteText?'':'display:none';
-        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" role="button" tabindex="0" aria-label="Add note for topic" onclick="editTopicNote(this.dataset.tn,event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editTopicNote(this.dataset.tn,event);}" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_esc(_noteText)}</span></div>`;
+        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc" aria-hidden="true"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" role="button" tabindex="0" aria-label="Add note for topic" onclick="editTopicNote(this.dataset.tn,event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editTopicNote(this.dataset.tn,event);}" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_esc(_noteText)}</span></div>`;
       });
-      html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)">Resources ↓</button></div><div class="res-panel">`;
+      html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)" aria-expanded="false">Resources ↓</button></div><div class="res-panel">`;
       (c.res||[]).forEach(r=>{
         if(r.url){
           html+=`<div class="res-item"><div class="res-type">${r.t}</div><a class="res-link" href="${r.url}" target="_blank" rel="noopener noreferrer">${r.n} ↗</a></div>`;
@@ -979,7 +980,8 @@ function updateTopicProgress(){
   const total=document.querySelectorAll('.ti').length;
   const checked=document.querySelectorAll('.ti.chk').length;
   const pct=total?checked/total*100:0;
-  document.getElementById('bpFill').style.width=pct+'%';
+  var _bpFill=document.getElementById('bpFill');if(_bpFill)_bpFill.style.width=pct+'%';
+  var _bpTrack=document.getElementById('bpTrack')||document.querySelector('.bp-track');if(_bpTrack)_bpTrack.setAttribute('aria-valuenow',Math.round(pct));
   document.getElementById('bpText').textContent=checked+' / '+total+' topics';
   document.getElementById('topicCount').textContent=checked;
   document.getElementById('topicTotal').textContent=total;
@@ -1765,7 +1767,9 @@ function setAllScores(){
   const scoreText=document.getElementById('scoreText');
   const scoreFill=document.getElementById('scoreFill');
   if(scoreText)scoreText.textContent=_st.pScore+' / '+n+' correct';
-  if(scoreFill)scoreFill.style.width=(_st.activeProbs.length?n/_st.activeProbs.length*100:0)+'%';
+  const _sPct=_st.activeProbs.length?Math.round(n/_st.activeProbs.length*100):0;
+  if(scoreFill)scoreFill.style.width=_sPct+'%';
+  var _scoreTrack=document.querySelector('.score-track');if(_scoreTrack)_scoreTrack.setAttribute('aria-valuenow',_sPct);
   updateStickyProgress();
 }
 function updateStickyProgress(){
@@ -1822,7 +1826,7 @@ var buildProblems=function(unit=_st.currentUnit){
   _st.activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
     html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" role="button" tabindex="0" onclick="showAnswerHistory('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showAnswerHistory('${p.id}');}" aria-label="View answer history for problem ${p.id}" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" role="button" tabindex="0" onclick="filterByTopic('${_esc(p.topic)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterByTopic('${_esc(p.topic)}');}" aria-label="Filter by topic: ${_esc(p.topic)}" style="cursor:pointer" title="Filter by topic">${_esc(p.topic)}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" aria-label="Report an issue with this problem" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" aria-label="Copy link to this problem" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${_esc(p.q)}</div>${p.data?'<div class="pc-data">'+_esc(p.data)+'</div>':''}</div>`;
-    if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${_esc(p.hint)}</div></div>`;}
+    if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" aria-live="polite" style="display:none;">${_esc(p.hint)}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
       p.ch.forEach((ch,j)=>{html+=`<div class="ch-btn" role="button" tabindex="0" onclick="ansMC(${p.id},${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ansMC(${p.id},${j})}" id="cb-${p.id}-${j}"><span class="lt">${L[j]}</span><span>${_esc(ch)}</span></div>`;});
@@ -1830,7 +1834,7 @@ var buildProblems=function(unit=_st.currentUnit){
     }else{
       html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." aria-label="Answer for problem ${p.id}" onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
     }
-    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" aria-label="Note for problem ${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')" oninput="var wc=this.value.trim().split(/\\s+/).filter(Boolean).length;var el=document.getElementById('nwc-${p.id}');if(el){el.textContent=wc+' / 50 words';el.classList.toggle('met',wc>=50);}">  </div><span class="note-wc" id="nwc-${p.id}">0 / 50 words</span><div class="diff-vote-row" id="dvr-${p.id}"><span class="diff-vote-label">Rate difficulty:</span><button class="diff-vote-btn" data-vote="easy" onclick="voteDiff(${p.id},\'easy\')">😅 Too Easy</button><button class="diff-vote-btn" data-vote="ok" onclick="voteDiff(${p.id},\'ok\')">✓ Just Right</button><button class="diff-vote-btn" data-vote="hard" onclick="voteDiff(${p.id},\'hard\')">😤 Too Hard</button></div></div>`;
+    html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" aria-label="Note for problem ${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')" oninput="var wc=this.value.trim().split(/\\s+/).filter(Boolean).length;var el=document.getElementById('nwc-${p.id}');if(el){el.textContent=wc+' / 50 words';el.classList.toggle('met',wc>=50);}">  </div><span class="note-wc" id="nwc-${p.id}">0 / 50 words</span><div class="diff-vote-row" id="dvr-${p.id}"><span class="diff-vote-label">Rate difficulty:</span><button class="diff-vote-btn" data-vote="easy" onclick="voteDiff(${p.id},\'easy\')" aria-pressed="false"><span aria-hidden="true">😅</span> Too Easy</button><button class="diff-vote-btn" data-vote="ok" onclick="voteDiff(${p.id},\'ok\')" aria-pressed="false">✓ Just Right</button><button class="diff-vote-btn" data-vote="hard" onclick="voteDiff(${p.id},\'hard\')" aria-pressed="false"><span aria-hidden="true">😤</span> Too Hard</button></div></div>`;
   });
   c.innerHTML=html;
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
@@ -3791,8 +3795,8 @@ function togglePomoPanel(){
   const p=document.getElementById('pomoPanel');
   if(!p)return;
   const opening=p.style.display==='none';
-  p.style.display=opening?'':'none';
-  if(opening){const first=p.querySelector('button');if(first)first.focus();}
+  if(opening){p.style.display='';const first=p.querySelector('button');if(first)first.focus();}
+  else{p.style.display='none';const trigger=document.getElementById('pomoToggle');if(trigger)trigger.focus();}
 }
 
 function setPomoTime(mins,triggerEl){
@@ -3964,11 +3968,11 @@ function toggleShortcutsHelp(){
   const el=document.getElementById('shortcutsOverlay');
   if(!el)return;
   const isOpen=el.style.display!=='none';
-  el.style.display=isOpen?'none':'flex';
-  if(!isOpen){
-    const modal=el.querySelector('.shortcuts-modal');
-    if(modal)_trapFocus(el,modal);
-  }
+  if(isOpen){el.style.display='none';if(_st._shortcutsTrigger&&typeof _st._shortcutsTrigger.focus==='function')_st._shortcutsTrigger.focus();_st._shortcutsTrigger=null;return;}
+  _st._shortcutsTrigger=typeof document!=='undefined'?document.activeElement:null;
+  el.style.display='flex';
+  const modal=el.querySelector('.shortcuts-modal');
+  if(modal)_trapFocus(el,modal);
 }
 function downloadShortcutCheatsheet(){
   if(typeof Blob==='undefined'||typeof document==='undefined')return;
@@ -4043,7 +4047,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(e.key==='d'||e.key==='D'){toggleTheme();}
     else if(e.key==='?'){toggleShortcutsHelp();}
     else if(e.key==='Escape'){
-      const so=document.getElementById('shortcutsOverlay');if(so&&so.style.display!=='none')so.style.display='none';
+      const so=document.getElementById('shortcutsOverlay');if(so&&so.style.display!=='none')toggleShortcutsHelp();
       const tp=document.getElementById('tutorPanel');if(tp&&tp.style.display!=='none')tp.style.display='none';
       const sess=document.getElementById('sessionOverlay');if(sess&&sess.style.display!=='none')sess.style.display='none';
       const kbp=document.getElementById('kbHelpPanel');if(kbp&&kbp.style.display!=='none')kbp.style.display='none';
@@ -5856,7 +5860,7 @@ function renderFlashcard(){
   if(!container)return;
   if(!_st.fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
   const card=_st.fcCards[_st.fcIndex];
-  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+_esc(card.front)+'</div><div class="fc-back" style="display:none;">'+_esc(card.back)+'</div></div>';
+  container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" aria-label="Flashcard: '+_esc(card.front)+' — press Space to flip" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+_esc(card.front)+'</div><div class="fc-back" style="display:none;">'+_esc(card.back)+'</div></div>';
   setElText('fcProgress',(_st.fcIndex+1)+' / '+_st.fcCards.length);
   var fill=document.getElementById('fcProgressFill');
   if(fill&&_st.fcCards.length>0)fill.style.width=Math.round((_st.fcIndex+1)/_st.fcCards.length*100)+'%';
@@ -5871,7 +5875,7 @@ function flipCard(){
   front.style.display=showing?'':'none';
   back.style.display=showing?'none':'';
   const card=document.getElementById('fcCard');
-  if(card)card.classList.toggle('flipped',!showing);
+  if(card){card.classList.toggle('flipped',!showing);const _fc=_st.fcCards[_st.fcIndex];if(_fc)card.setAttribute('aria-label',showing?'Flashcard: '+_esc(_fc.front)+' — press Space to flip':'Answer: '+_esc(_fc.back)+' — press Space to flip');}
 }
 
 function fcNext(){if(_st.fcIndex<_st.fcCards.length-1){_st.fcIndex++;renderFlashcard();}}

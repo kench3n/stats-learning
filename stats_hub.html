@@ -30,10 +30,10 @@
   <div class="nav-brand">Stats <em>Hub</em></div>
   <div class="nav-tabs" role="tablist" aria-label="Site sections">
     <button class="nav-tab active" id="tab-home" role="tab" aria-selected="true" aria-controls="page-home" data-action="nav" data-page="home">Home</button>
-    <button class="nav-tab" id="tab-roadmap" role="tab" aria-selected="false" aria-controls="page-roadmap" data-action="nav" data-page="roadmap">Roadmap <span class="nav-badge" id="roadmapNavBadge" style="display:none;">0</span></button>
+    <button class="nav-tab" id="tab-roadmap" role="tab" aria-selected="false" aria-controls="page-roadmap" data-action="nav" data-page="roadmap">Roadmap <span class="nav-badge" id="roadmapNavBadge" aria-hidden="true" style="display:none;">0</span></button>
     <button class="nav-tab" id="tab-visualizer" role="tab" aria-selected="false" aria-controls="page-visualizer" data-action="nav" data-page="visualizer">Visualizer</button>
-    <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" data-action="nav" data-page="practice">Practice <span class="nav-badge" id="practiceNavBadge" style="display:none;">0</span></button>
-    <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" data-action="nav" data-page="review">Review <span class="review-badge" id="reviewBadge" style="display:none;">0</span></button>
+    <button class="nav-tab" id="tab-practice" role="tab" aria-selected="false" aria-controls="page-practice" data-action="nav" data-page="practice">Practice <span class="nav-badge" id="practiceNavBadge" aria-hidden="true" style="display:none;">0</span></button>
+    <button class="nav-tab" id="tab-review" role="tab" aria-selected="false" aria-controls="page-review" data-action="nav" data-page="review">Review <span class="review-badge" id="reviewBadge" aria-hidden="true" style="display:none;">0</span></button>
     <button class="nav-tab" id="tab-achievements" role="tab" aria-selected="false" aria-controls="page-achievements" data-action="nav" data-page="achievements">Achievements</button>
     <button class="nav-tab" id="tab-flashcards" role="tab" aria-selected="false" aria-controls="page-flashcards" data-action="nav" data-page="flashcards">Flashcards</button>
     <button class="nav-tab" id="tab-create" role="tab" aria-selected="false" aria-controls="page-create" data-action="nav" data-page="create">Create</button>
@@ -398,7 +398,7 @@
         <option value="20">20 problems</option>
       </select>
       <progress id="goalProgress" max="100" value="0" style="display:none;width:100px;" aria-label="Session goal progress"></progress>
-      <svg class="goal-ring" id="goalRing" width="60" height="60" viewBox="0 0 60 60" style="display:none;" aria-label="Session goal ring">
+      <svg class="goal-ring" id="goalRing" width="60" height="60" viewBox="0 0 60 60" role="img" style="display:none;" aria-label="Session goal ring">
         <circle class="goal-ring-track" cx="30" cy="30" r="24" fill="none" stroke-width="6"/>
         <circle class="goal-ring-fill" id="goalRingFill" cx="30" cy="30" r="24" fill="none" stroke-width="6" stroke-dasharray="150.8" stroke-dashoffset="150.8" transform="rotate(-90 30 30)"/>
         <text class="goal-ring-text" id="goalRingText" x="30" y="34" text-anchor="middle" font-size="10">0%</text>
