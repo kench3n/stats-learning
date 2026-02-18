@@ -27,6 +27,53 @@ function _esc(str) {
                     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ===================== APPLICATION STATE =====================
+var _st = {
+  _goPageSkipPush: false,
+  histData: [],
+  activeDataset: null,
+  stepHintProgress: {},
+  _sessionNotesTimer: null,
+  answered: {},
+  pScore: 0,
+  currentUnit: 1,
+  activeProbs: [],
+  probTimers: {},
+  probTimerStart: {},
+  wrongAttempts: {},
+  vizDrawn: {},
+  practiceSessionStart: 0,
+  practiceSessionInterval: null,
+  focusedProblemId: null,
+  reviewQueue: [],
+  reviewIndex: 0,
+  reviewSessionCorrect: 0,
+  reviewSessionByUnit: {},
+  examModeActive: false,
+  pomoState: {running:false,seconds:25*60,total:25*60,interval:null,sessionsToday:0},
+  deferredPrompt: null,
+  focusModeActive: false,
+  sessionData: {startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0},
+  activeTags: new Set(),
+  _statsAnimated: false,
+  _activeTopic: null,
+  favFilterActive: false,
+  calDate: typeof Date!=='undefined'?new Date():null,
+  fcCards: [],
+  fcIndex: 0,
+  fcKnownCount: 0,
+  fcSeenCount: 0,
+  matchSelected: null,
+  matchedPairs: 0,
+  matchPairsTotal: 0,
+  builderParts: [],
+  builderTarget: null,
+  builderSelected: [],
+  toastTimer: null,
+  stepProgress: {},
+  intervals: []
+};
+
 // ===================== NAVIGATION =====================
 function syncTabState(tabBar,activeTab){
   if(!tabBar)return;
@@ -37,10 +84,9 @@ function syncTabState(tabBar,activeTab){
   });
 }
 
-var _goPageSkipPush=false;
 function goPage(id){
   if(typeof document==='undefined')return;
-  if(id!=='practice'&&practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
+  if(id!=='practice'&&_st.practiceSessionInterval){clearInterval(_st.practiceSessionInterval);_st.practiceSessionInterval=null;}
   const nextPage=document.getElementById('page-'+id);
   if(!nextPage)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -48,7 +94,7 @@ function goPage(id){
     var bc=document.getElementById('breadcrumb');if(!bc)return;
     var names={home:'Home',roadmap:'Roadmap',visualizer:'Visualizer',practice:'Practice',review:'Review',achievements:'Achievements',flashcards:'Flashcards',create:'Create'};
     var label=names[id]||id;
-    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+currentUnit+(typeof UNIT_META!=='undefined'&&UNIT_META[currentUnit]?' – '+UNIT_META[currentUnit].name:'');
+    if(id==='practice')label='Practice <span class="breadcrumb-sep">›</span> Unit '+_st.currentUnit+(typeof UNIT_META!=='undefined'&&UNIT_META[_st.currentUnit]?' – '+UNIT_META[_st.currentUnit].name:'');
     bc.innerHTML=label;
   })();
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -57,17 +103,17 @@ function goPage(id){
   const activeTab=document.getElementById('tab-'+id)||[...document.querySelectorAll('.nav-tab')].find(t=>t.textContent.toLowerCase()===id);
   if(activeTab){activeTab.classList.add('active');syncTabState(navTabs,activeTab);}
   if(typeof window!=='undefined'&&typeof window.scrollTo==='function')window.scrollTo(0,0);
-  if(typeof window!=='undefined'&&typeof history!=='undefined'&&history.pushState&&!_goPageSkipPush){
+  if(typeof window!=='undefined'&&typeof history!=='undefined'&&history.pushState&&!_st._goPageSkipPush){
     history.pushState({page:id},'','#/'+id);
   }
-  _goPageSkipPush=false;
+  _st._goPageSkipPush=false;
   if(id==='visualizer'&&typeof setTimeout==='function'){setTimeout(()=>{
     var savedVizTab=_storageRaw('sh-viz-tab',null);
     if(savedVizTab){var tabBtn=document.getElementById('viz-tab-'+savedVizTab);if(tabBtn)showSub('viz',savedVizTab,tabBtn);}
-    drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
+    drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(_st.currentUnit);buildVizDataSummary(_st.currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();buildXPNextLevel();}
+  if(id==='home'){_st._statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();buildLongestStreak();buildXPBreakdown();buildStudyPlan();buildPomoStats();buildUnitProgressOverview();buildRecentBadges();buildProblemOfTheDay();buildStreakMilestones();buildXPNextLevel();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=_storageRaw('sh-session-goal','0');
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -86,7 +132,7 @@ function goPage(id){
   if(id==='create'){initCreatePage();}
 }
 function showSub(prefix,id,btn){
-  if(prefix==='viz'&&currentUnit!==1)return;
+  if(prefix==='viz'&&_st.currentUnit!==1)return;
   const parent=prefix==='rm'?'page-roadmap':prefix==='viz'?'page-visualizer':null;
   if(!parent)return;
   const tabBar=prefix==='rm'?document.getElementById('roadmapTabs'):document.getElementById('vizTabs');
@@ -494,7 +540,7 @@ function awardXP(amount,reason){
   data.history.push({date:todayStr(),earned:amount,reason:String(reason||'')});
   if(data.history.length>100)data.history=data.history.slice(-100);
   saveXPData(data);
-  sessionData.xpEarned+=amount;
+  _st.sessionData.xpEarned+=amount;
   updateXPDisplay();
   showXPPopup('+'+amount+' XP');
   if(data.level>oldLevel)showToast('Level Up! You are now Level '+data.level+' 🎉');
@@ -827,36 +873,35 @@ function updateTopicProgress(){
 }
 
 // ===================== HISTOGRAM =====================
-let histData=[];
 function genData(type,n){const d=[];if(type==='symmetric')for(let i=0;i<n;i++)d.push(randn()*15+50);else if(type==='right')for(let i=0;i<n;i++)d.push(Math.exp(randn()*0.5+2));else if(type==='left')for(let i=0;i<n;i++)d.push(100-Math.exp(randn()*0.5+2));else if(type==='bimodal')for(let i=0;i<n;i++)d.push(Math.random()<0.5?randn()*8+30:randn()*8+70);else if(type==='uniform')for(let i=0;i<n;i++)d.push(rand(10,90));return d;}
-function loadPreset(){histData=genData(document.getElementById('histPreset').value,+document.getElementById('sizeSlider').value);drawHist();}
-function loadCustom(){const nums=document.getElementById('customData').value.split(/[,\s]+/).map(Number).filter(v=>!isNaN(v));if(nums.length>1){histData=nums;drawHist();}}
+function loadPreset(){_st.histData=genData(document.getElementById('histPreset').value,+document.getElementById('sizeSlider').value);drawHist();}
+function loadCustom(){const nums=document.getElementById('customData').value.split(/[,\s]+/).map(Number).filter(v=>!isNaN(v));if(nums.length>1){_st.histData=nums;drawHist();}}
 function downloadVizData(){
   if(typeof document==='undefined')return;
-  var data=typeof histData!=='undefined'&&histData.length?histData:[];
+  var data=typeof _st.histData!=='undefined'&&_st.histData.length?_st.histData:[];
   if(!data.length){showToast('No data to download');return;}
   var csv='value\n'+data.map(function(v){return String(v);}).join('\n');
   if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Download unavailable');return;}
   var blob=new Blob([csv],{type:'text/csv'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download='unit-'+currentUnit+'-data.csv';
+  a.href=url;a.download='unit-'+_st.currentUnit+'-data.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('Downloaded '+data.length+' values as CSV');
 }
 function drawHist(){
-  if(!histData.length)return;const c=document.getElementById('histCanvas'),ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=300*dpr;ctx.scale(dpr,dpr);const W=c.offsetWidth,H=300;ctx.clearRect(0,0,W,H);
-  const bins=+document.getElementById('binSlider').value;const mn=Math.min(...histData),mx=Math.max(...histData);const bw=(mx-mn)/bins||1;const counts=new Array(bins).fill(0);histData.forEach(v=>{let b=Math.min(Math.floor((v-mn)/bw),bins-1);counts[b]++;});const maxC=Math.max(...counts);
+  if(!_st.histData.length)return;const c=document.getElementById('histCanvas'),ctx=c.getContext('2d');const dpr=window.devicePixelRatio||1;c.width=c.offsetWidth*dpr;c.height=300*dpr;ctx.scale(dpr,dpr);const W=c.offsetWidth,H=300;ctx.clearRect(0,0,W,H);
+  const bins=+document.getElementById('binSlider').value;const mn=Math.min(...histData),mx=Math.max(...histData);const bw=(mx-mn)/bins||1;const counts=new Array(bins).fill(0);_st.histData.forEach(v=>{let b=Math.min(Math.floor((v-mn)/bw),bins-1);counts[b]++;});const maxC=Math.max(...counts);
   const pad={l:46,r:16,t:16,b:36};const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
   ctx.strokeStyle='#1c1c30';ctx.lineWidth=1;for(let i=0;i<=4;i++){const y=pad.t+ph*(1-i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.fillStyle='#55556888';ctx.font='10px Space Mono';ctx.textAlign='right';ctx.fillText(Math.round(maxC*i/4),pad.l-6,y+4);}
   const barW=pw/bins;counts.forEach((cc,i)=>{const x=pad.l+i*barW;const h=(cc/maxC)*ph;const y=pad.t+ph-h;const g=ctx.createLinearGradient(x,y,x,pad.t+ph);g.addColorStop(0,'rgba(6,182,212,0.7)');g.addColorStop(1,'rgba(6,182,212,0.15)');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x+1,y,barW-2,h,3);ctx.fill();});
   ctx.fillStyle='#55556888';ctx.font='10px Space Mono';ctx.textAlign='center';for(let i=0;i<=bins;i+=Math.max(1,Math.floor(bins/6)))ctx.fillText((mn+i*bw).toFixed(1),pad.l+i*barW,H-pad.b+16);
-  const m=mean(histData),med=median(histData);const mX=pad.l+((m-mn)/(mx-mn))*pw,medX=pad.l+((med-mn)/(mx-mn))*pw;
+  const m=mean(_st.histData),med=median(_st.histData);const mX=pad.l+((m-mn)/(mx-mn))*pw,medX=pad.l+((med-mn)/(mx-mn))*pw;
   ctx.setLineDash([6,4]);ctx.strokeStyle='#06b6d4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(mX,pad.t);ctx.lineTo(mX,pad.t+ph);ctx.stroke();ctx.strokeStyle='#f59e0b';ctx.beginPath();ctx.moveTo(medX,pad.t);ctx.lineTo(medX,pad.t+ph);ctx.stroke();ctx.setLineDash([]);
   ctx.font='11px DM Sans';ctx.fillStyle='#06b6d4';ctx.textAlign='left';ctx.fillText('Mean',mX+5,pad.t+12);ctx.fillStyle='#f59e0b';ctx.fillText('Median',medX+5,pad.t+26);
-  const sd=stdev(histData),q1=quantile(histData,0.25),q3=quantile(histData,0.75);
-  document.getElementById('hMean').textContent=m.toFixed(2);document.getElementById('hMedian').textContent=med.toFixed(2);document.getElementById('hMode').textContent=mode(histData).toFixed(1);document.getElementById('hSD').textContent=sd.toFixed(2);document.getElementById('hIQR').textContent=(q3-q1).toFixed(2);document.getElementById('hRange').textContent=(mx-mn).toFixed(2);
+  const sd=stdev(_st.histData),q1=quantile(_st.histData,0.25),q3=quantile(_st.histData,0.75);
+  document.getElementById('hMean').textContent=m.toFixed(2);document.getElementById('hMedian').textContent=med.toFixed(2);document.getElementById('hMode').textContent=mode(_st.histData).toFixed(1);document.getElementById('hSD').textContent=sd.toFixed(2);document.getElementById('hIQR').textContent=(q3-q1).toFixed(2);document.getElementById('hRange').textContent=(mx-mn).toFixed(2);
 }
 
 // ===================== BOXPLOT =====================
@@ -946,7 +991,6 @@ function buildComparisonStats(muA,sigA,muB,sigB){
 // ===================== FORMULA REFERENCE =====================
 
 // ===================== PHASE 17: REAL DATASETS =====================
-let activeDataset=null;
 
 const DATASETS={
   iris:{
@@ -982,21 +1026,21 @@ function loadDataset(key){
   if(!key){resetToDefaultData();return;}
   const ds=DATASETS[key];
   if(!ds)return;
-  activeDataset=ds.data.filter(v=>Number.isFinite(v));
-  if(typeof histData!=='undefined')histData=activeDataset;
+  _st.activeDataset=ds.data.filter(v=>Number.isFinite(v));
+  if(typeof _st.histData!=='undefined')_st.histData=_st.activeDataset;
   updateDataStats();
   drawHist();drawBox();drawNorm();
 }
 
 function resetToDefaultData(){
-  activeDataset=null;
+  _st.activeDataset=null;
   const dataStats=document.getElementById('dataStats');
   if(dataStats)dataStats.style.display='none';
   if(typeof document!=='undefined'){
     const preset=document.getElementById('histPreset');
     const sizeSlider=document.getElementById('sizeSlider');
     if(preset&&sizeSlider){
-      if(typeof histData!=='undefined')histData=genData(preset.value,+sizeSlider.value);
+      if(typeof _st.histData!=='undefined')_st.histData=genData(preset.value,+sizeSlider.value);
       drawHist();drawBox();drawNorm();
     }
   }
@@ -1005,10 +1049,10 @@ function resetToDefaultData(){
 function updateDataStats(){
   if(typeof document==='undefined')return;
   const panel=document.getElementById('dataStats');
-  if(!panel||!activeDataset||!activeDataset.length)return;
+  if(!panel||!_st.activeDataset||!_st.activeDataset.length)return;
   panel.style.display='';
-  const n=activeDataset.length;
-  const m=mean(activeDataset);const sd=stdev(activeDataset);const med=median(activeDataset);
+  const n=_st.activeDataset.length;
+  const m=mean(_st.activeDataset);const sd=stdev(_st.activeDataset);const med=median(_st.activeDataset);
   const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   setEl('dsN',n);setEl('dsMean',m.toFixed(2));setEl('dsStdev',sd.toFixed(2));setEl('dsMedian',med.toFixed(2));
 }
@@ -1050,9 +1094,9 @@ function loadCustomData(parsed){
   if(!parsed||!parsed.data||!parsed.headers)return;
   const numericIdx=parsed.headers.map((_,i)=>i).filter(i=>typeof (parsed.data[0]||[])[i]==='number');
   if(!numericIdx.length){showToast('No numeric columns found in CSV.');return;}
-  activeDataset=parsed.data.map(row=>row[numericIdx[0]]).filter(v=>Number.isFinite(v));
-  if(typeof histData!=='undefined')histData=activeDataset;
-  showToast('Loaded '+activeDataset.length+' values from "'+parsed.headers[numericIdx[0]]+'"');
+  _st.activeDataset=parsed.data.map(row=>row[numericIdx[0]]).filter(v=>Number.isFinite(v));
+  if(typeof _st.histData!=='undefined')_st.histData=_st.activeDataset;
+  showToast('Loaded '+_st.activeDataset.length+' values from "'+parsed.headers[numericIdx[0]]+'"');
   updateDataStats();
   drawHist();drawBox();drawNorm();
 }
@@ -1343,9 +1387,9 @@ function buildFormulaSearchHistory(){
 function formulaUnitNav(dir){
   if(typeof document==='undefined')return;
   var maxUnit=typeof MAX_UNIT!=='undefined'?MAX_UNIT:14;
-  var next=Math.min(Math.max(1,(typeof currentUnit!=='undefined'?currentUnit:1)+dir),maxUnit);
-  if(next===(typeof currentUnit!=='undefined'?currentUnit:1))return;
-  currentUnit=next;
+  var next=Math.min(Math.max(1,(typeof _st.currentUnit!=='undefined'?_st.currentUnit:1)+dir),maxUnit);
+  if(next===(typeof _st.currentUnit!=='undefined'?_st.currentUnit:1))return;
+  _st.currentUnit=next;
   buildFormulas(next);
   buildProblems(next);
   var sel=document.getElementById('unitSelect');if(sel)sel.value=String(next);
@@ -1353,7 +1397,7 @@ function formulaUnitNav(dir){
 }
 function copyAllFormulas(){
   if(typeof document==='undefined')return;
-  var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[currentUnit]?FORMULAS[currentUnit]:[];
+  var formulas=typeof FORMULAS!=='undefined'&&FORMULAS[_st.currentUnit]?FORMULAS[_st.currentUnit]:[];
   if(!formulas.length){showToast('No formulas available');return;}
   var text=formulas.map(function(f){return f.name+': '+f.formula;}).join('\n');
   if(typeof navigator!=='undefined'&&navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
@@ -1414,10 +1458,9 @@ function loadFormulaPin(){
 }
 
 // ===================== HINT SYSTEM =====================
-var stepHintProgress={};
 function showHint(id){
   if(typeof document==='undefined')return;
-  if(examModeActive){showToast('Hints disabled in Exam Mode');return;}
+  if(_st.examModeActive){showToast('Hints disabled in Exam Mode');return;}
   const ht=document.getElementById('ht-'+id);
   const hb=document.getElementById('hb-'+id);
   if(hb)hb.style.display='none';
@@ -1425,23 +1468,23 @@ function showHint(id){
   if(typeof localStorage!=='undefined'){
     try{
       var usage=_storage('sh-hint-usage',{});
-      var key='unit-'+currentUnit;
+      var key='unit-'+_st.currentUnit;
       usage[key]=(usage[key]||0)+1;
       _storageSave('sh-hint-usage',usage);
       buildHintUsageInfo();
     }catch(e){}
   }
   if(!ht){return;}
-  var prob=activeProbs.find(function(p){return String(p.id)===String(id);});
+  var prob=_st.activeProbs.find(function(p){return String(p.id)===String(id);});
   if(prob&&prob.steps&&prob.steps.length){
-    stepHintProgress[id]=stepHintProgress[id]||0;
+    _st.stepHintProgress[id]=_st.stepHintProgress[id]||0;
     _renderStepHint(id,prob,ht);
   }else{
     ht.style.display='block';
   }
 }
 function _renderStepHint(id,prob,ht){
-  var step=stepHintProgress[id]||0;
+  var step=_st.stepHintProgress[id]||0;
   var steps=prob.steps||[];
   var stepsHtml='<div class="step-hint-text"><div class="step-count-display">Step '+(step+1)+' of '+steps.length+'</div>';
   for(var i=0;i<=step;i++){stepsHtml+='<div class="step-hint-line">'+steps[i]+'</div>';}
@@ -1456,10 +1499,10 @@ function _renderStepHint(id,prob,ht){
 }
 function showNextStep(id){
   if(typeof document==='undefined')return;
-  var prob=activeProbs.find(function(p){return String(p.id)===String(id);});
+  var prob=_st.activeProbs.find(function(p){return String(p.id)===String(id);});
   if(!prob||!prob.steps)return;
-  stepHintProgress[id]=(stepHintProgress[id]||0)+1;
-  if(stepHintProgress[id]>=prob.steps.length)stepHintProgress[id]=prob.steps.length-1;
+  _st.stepHintProgress[id]=(_st.stepHintProgress[id]||0)+1;
+  if(_st.stepHintProgress[id]>=prob.steps.length)_st.stepHintProgress[id]=prob.steps.length-1;
   var ht=document.getElementById('ht-'+id);
   if(ht)_renderStepHint(id,prob,ht);
 }
@@ -1468,18 +1511,17 @@ function buildHintUsageInfo(){
   var el=document.getElementById('hintUsageLabel');if(!el)return;
   try{
     var usage=_storage('sh-hint-usage',{});
-    var count=usage['unit-'+currentUnit]||0;
+    var count=usage['unit-'+_st.currentUnit]||0;
     el.textContent=count>0?'Hints used: '+count:'';
   }catch(e){}
 }
 
-var _sessionNotesTimer=null;
 function saveSessionNotes(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('sessionNotes');if(!el)return;
-  if(_sessionNotesTimer)clearTimeout(_sessionNotesTimer);
-  _sessionNotesTimer=setTimeout(function(){
-    _storageRawSave('sh-session-notes-'+currentUnit,el.value);
+  if(_st._sessionNotesTimer)clearTimeout(_st._sessionNotesTimer);
+  _st._sessionNotesTimer=setTimeout(function(){
+    _storageRawSave('sh-session-notes-'+_st.currentUnit,el.value);
   },500);
 }
 function loadSessionNotes(unit){
@@ -1527,7 +1569,6 @@ const probs=[
 {id:20,diff:'hard',topic:'Coefficient of Variation',q:'Dataset A: mean=100, SD=15. Dataset B: mean=20, SD=6. Which has MORE relative variability?',data:'A: mean=100, SD=15. B: mean=20, SD=6',type:'mc',ans:1,ch:['Dataset A (CV=15%)','Dataset B (CV=30%)','Equal relative variability','Cannot compare'],ex:'CV_A=15/100=15%. CV_B=6/20=30%. B has more relative spread.',hint:'Coefficient of Variation (CV) = SD/mean * 100%. Use it to compare spread across different scales.'}
 ];
 
-let answered={},pScore=0;
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   document.addEventListener('DOMContentLoaded',()=>{
     loadTheme();
@@ -1554,7 +1595,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
       const hashPage=window.location.hash.replace('#/','');
       const validPages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
       if(validPages.indexOf(hashPage)!==-1&&hashPage!=='home'){
-        _goPageSkipPush=true;goPage(hashPage);
+        _st._goPageSkipPush=true;goPage(hashPage);
       }
     }
   });
@@ -1562,12 +1603,12 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
   if(typeof window!=='undefined'){
     window.addEventListener('popstate',function(e){
       if(e.state&&e.state.page){
-        _goPageSkipPush=true;goPage(e.state.page);
+        _st._goPageSkipPush=true;goPage(e.state.page);
       } else if(typeof window!=='undefined'&&window.location&&window.location.hash){
         const hashPage=window.location.hash.replace('#/','');
         const validPages=['home','roadmap','visualizer','practice','review','achievements','flashcards','create'];
         if(validPages.indexOf(hashPage)!==-1){
-          _goPageSkipPush=true;goPage(hashPage);
+          _st._goPageSkipPush=true;goPage(hashPage);
         }
       }
     });
@@ -1594,25 +1635,15 @@ const UNIT_META={
 const MAX_UNIT=Object.keys(UNIT_META).length;
 
 let allProbs={1:probs.map(p=>({unit:1,tol:p.tol||0.01,...p}))};
-let currentUnit=1;
-let activeProbs=allProbs[1];
-let probTimers={},probTimerStart={};
-let wrongAttempts={};
-let vizDrawn={};
-let practiceSessionStart=0,practiceSessionInterval=null;
-let focusedProblemId=null;
-let reviewQueue=[];
-let reviewIndex=0;
-let reviewSessionCorrect=0;
-let reviewSessionByUnit={};
+_st.activeProbs=allProbs[1];
 
 function setElText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
 function setAllScores(){
-  const n=Object.keys(answered).length;
+  const n=Object.keys(_st.answered).length;
   const scoreText=document.getElementById('scoreText');
   const scoreFill=document.getElementById('scoreFill');
-  if(scoreText)scoreText.textContent=pScore+' / '+n+' correct';
-  if(scoreFill)scoreFill.style.width=(activeProbs.length?n/activeProbs.length*100:0)+'%';
+  if(scoreText)scoreText.textContent=_st.pScore+' / '+n+' correct';
+  if(scoreFill)scoreFill.style.width=(_st.activeProbs.length?n/_st.activeProbs.length*100:0)+'%';
   updateStickyProgress();
 }
 function updateStickyProgress(){
@@ -1621,11 +1652,11 @@ function updateStickyProgress(){
   var spFill=document.getElementById('stickyProgressFill');
   var spText=document.getElementById('stickyProgressText');
   if(!sp)return;
-  var n=typeof answered!=='undefined'?Object.keys(answered).length:0;
-  var total=typeof activeProbs!=='undefined'?activeProbs.length:0;
+  var n=typeof _st.answered!=='undefined'?Object.keys(_st.answered).length:0;
+  var total=typeof _st.activeProbs!=='undefined'?_st.activeProbs.length:0;
   var pct=total>0?Math.round(n/total*100):0;
   if(spFill)spFill.style.width=pct+'%';
-  if(spText)spText.textContent=pScore+' / '+n+' correct';
+  if(spText)spText.textContent=_st.pScore+' / '+n+' correct';
 }
 function initStickyProgress(){
   if(typeof document==='undefined'||typeof IntersectionObserver==='undefined')return;
@@ -1646,24 +1677,24 @@ function getPracticeState(unit){
 function savePracticeState(unit,state){
   _storageSave('sh-practice-'+unit,state);
 }
-function persistPracticeState(){savePracticeState(currentUnit,{answered});if(typeof document!=='undefined')buildProgressPanel();}
+function persistPracticeState(){savePracticeState(_st.currentUnit,{answered: _st.answered});if(typeof document!=='undefined')buildProgressPanel();}
 
-buildProblems=function(unit=currentUnit){
-  activeProbs=allProbs[unit]||[];
-  wrongAttempts={};stepHintProgress={};
+buildProblems=function(unit=_st.currentUnit){
+  _st.activeProbs=allProbs[unit]||[];
+  _st.wrongAttempts={};_st.stepHintProgress={};
   // Session timer
-  if(practiceSessionInterval){clearInterval(practiceSessionInterval);practiceSessionInterval=null;}
-  practiceSessionStart=Date.now();
-  if(typeof setInterval!=='undefined'){practiceSessionInterval=setInterval(function(){var el=typeof document!=='undefined'&&document.getElementById('sessionTime');if(!el)return;var s=Math.floor((Date.now()-practiceSessionStart)/1000);var m=Math.floor(s/60);var ss=s%60;el.textContent=(m>0?m+'m ':'')+ss+'s';},1000);}
+  if(_st.practiceSessionInterval){clearInterval(_st.practiceSessionInterval);_st.practiceSessionInterval=null;}
+  _st.practiceSessionStart=Date.now();
+  if(typeof setInterval!=='undefined'){_st.practiceSessionInterval=setInterval(function(){var el=typeof document!=='undefined'&&document.getElementById('sessionTime');if(!el)return;var s=Math.floor((Date.now()-_st.practiceSessionStart)/1000);var m=Math.floor(s/60);var ss=s%60;el.textContent=(m>0?m+'m ':'')+ss+'s';},1000);}
   const c=document.getElementById('probContainer');if(!c)return;
   const bm=getBookmarks();
   const notes=getNotes();
   var _ratings={};
   try{if(typeof localStorage!=='undefined')_ratings=_storage('sh-ratings',{})||{};}catch(e){}
   let html='';
-  activeProbs.forEach((p,p_idx)=>{
+  _st.activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="focusedProblemId='${p.id}'" onblur="focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
     if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
@@ -1679,15 +1710,15 @@ buildProblems=function(unit=currentUnit){
     const obs=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         const id=entry.target.dataset.id;
-        if(entry.isIntersecting&&!probTimers[id]){
-          probTimerStart[id]=Date.now();
-          var _prob=activeProbs.find(function(x){return String(x.id)===id;});
+        if(entry.isIntersecting&&!_st.probTimers[id]){
+          _st.probTimerStart[id]=Date.now();
+          var _prob=_st.activeProbs.find(function(x){return String(x.id)===id;});
           var _expSecs=_prob?(_prob.diff==='easy'?60:_prob.diff==='medium'?180:300):180;
-          probTimers[id]=setInterval(function(){
+          _st.probTimers[id]=setInterval(function(){
             if(typeof document==='undefined')return;
             const el=document.getElementById('timer-'+id);
             if(!el)return;
-            const secs=Math.floor((Date.now()-probTimerStart[id])/1000);
+            const secs=Math.floor((Date.now()-_st.probTimerStart[id])/1000);
             const m=Math.floor(secs/60),s=secs%60;
             el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
             el.classList.toggle('timer-warn',secs>=_expSecs&&secs<_expSecs*2);
@@ -1700,7 +1731,7 @@ buildProblems=function(unit=currentUnit){
   }
   // Problem counter observer
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
-    var total=activeProbs.length;
+    var total=_st.activeProbs.length;
     var counterObs=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         if(entry.isIntersecting){
@@ -1736,20 +1767,20 @@ buildProblems=function(unit=currentUnit){
   _saveRecentUnit(unit);
   buildTagFilter();
   var savedSort=_storageRaw('sh-problem-sort','default');if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}
-  if(typeof localStorage!=='undefined'){try{activeTags=new Set(_storage('sh-active-tags',[]));}catch(e){activeTags=new Set();}applyTagFilter();}
+  if(typeof localStorage!=='undefined'){try{_st.activeTags=new Set(_storage('sh-active-tags',[]));}catch(e){_st.activeTags=new Set();}applyTagFilter();}
   if(typeof localStorage!=='undefined'){try{var collSet=new Set(_storage('sh-collapsed-'+unit,[]));collSet.forEach(function(cid){var card=document.getElementById('pc-'+cid);if(card){card.classList.add('pc-collapsed');var btn=card.querySelector('.card-collapse-btn');if(btn)btn.textContent='▸';}});}catch(e){}}
   const saved=getPracticeState(unit);
-  answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
-  pScore=0;
-  activeProbs.forEach(p=>{
-    if(answered[p.id]===undefined)return;
+  _st.answered=saved.answered&&typeof saved.answered==='object'?saved.answered:{};
+  _st.pScore=0;
+  _st.activeProbs.forEach(p=>{
+    if(_st.answered[p.id]===undefined)return;
     if(p.type==='mc'){
-      const ch=+answered[p.id],ok=ch===p.ans;if(ok)pScore++;
+      const ch=+_st.answered[p.id],ok=ch===p.ans;if(ok)_st.pScore++;
       p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+p.id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
       showFB(p.id,ok,ok?p.ex:'Correct answer: '+p.ch[p.ans]+'. '+p.ex);
     }else{
-      const v=parseFloat(answered[p.id]);if(!Number.isFinite(v))return;
-      const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
+      const v=parseFloat(_st.answered[p.id]);if(!Number.isFinite(v))return;
+      const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)_st.pScore++;
       const inp=document.getElementById('fi-'+p.id);if(inp){inp.value=String(v);inp.disabled=true;inp.style.borderColor=ok?'var(--green)':'var(--red)';}
       showFB(p.id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);
     }
@@ -1757,7 +1788,7 @@ buildProblems=function(unit=currentUnit){
   setAllScores();
   // Touch swipe gestures for MC answer selection
   if(typeof document!=='undefined'&&typeof window!=='undefined'&&'ontouchstart' in window){
-    activeProbs.forEach(function(p){
+    _st.activeProbs.forEach(function(p){
       if(p.type!=='mc')return;
       var card=document.getElementById('pc-'+p.id);if(!card)return;
       var tx=0,ty=0;
@@ -1790,9 +1821,9 @@ function refreshGoalProgress(){
   var goal=0;
   goal=parseInt(_storageRaw('sh-session-goal','0'))||0;
   if(!goal){progress.style.display='none';if(ring)ring.style.display='none';text.textContent='';return;}
-  var answered=0;
-  if(typeof sessionData!=='undefined')answered=sessionData.problemsAnswered||0;
-  var pct=Math.min(Math.round(answered/goal*100),100);
+  var answeredCount=0;
+  if(typeof _st.sessionData!=='undefined')answeredCount=_st.sessionData.problemsAnswered||0;
+  var pct=Math.min(Math.round(answeredCount/goal*100),100);
   progress.style.display='none';
   if(ring){
     ring.style.display='';
@@ -1800,8 +1831,8 @@ function refreshGoalProgress(){
     if(ringFill)ringFill.setAttribute('stroke-dashoffset',String(Math.round(circ*(1-pct/100)*10)/10));
     if(ringText)ringText.textContent=pct+'%';
   }
-  text.textContent=answered+' / '+goal;
-  if(answered>=goal&&goal>0&&pct===100){
+  text.textContent=answeredCount+' / '+goal;
+  if(answeredCount>=goal&&goal>0&&pct===100){
     if(typeof showToast!=='undefined'&&!document.getElementById('goalProgress').dataset.toasted){document.getElementById('goalProgress').dataset.toasted='1';showToast('Session goal reached! Great work.');}
   }else{
     var pg=document.getElementById('goalProgress');if(pg)pg.dataset.toasted='';
@@ -1848,12 +1879,12 @@ function showAnswerHistory(probId){
   document.body.appendChild(overlay);
 }
 function ansMC(id,ch){
-  if(answered[id]!==undefined)return;
-  if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
-  const p=activeProbs.find(x=>x.id===id);if(!p)return;
+  if(_st.answered[id]!==undefined)return;
+  if(_st.probTimers[id]){clearInterval(_st.probTimers[id]);delete _st.probTimers[id];}
+  const p=_st.activeProbs.find(x=>x.id===id);if(!p)return;
   const ok=ch===p.ans;_recordAnswerHistory(id,ch,ok);
-  answered[id]=ch;if(ok)pScore++;
-  if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
+  _st.answered[id]=ch;if(ok)_st.pScore++;
+  if(!ok&&p.hint){_st.wrongAttempts[id]=(_st.wrongAttempts[id]||0)+1;if(_st.wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans){el.classList.add('right');if(!ok)el.classList.add('flash-correct');}else if(j===ch&&!ok){el.classList.add('wrong');el.classList.add('flash-wrong');}});
   var _ansLabel=ok?null:('ABCD'[ch]+'. '+p.ch[ch]);
   showFB(id,ok,p.ex,_ansLabel);
@@ -1861,7 +1892,7 @@ function ansMC(id,ch){
   persistPracticeState();
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
-  sessionData.problemsAnswered++;if(ok)sessionData.correct++;
+  _st.sessionData.problemsAnswered++;if(ok)_st.sessionData.correct++;
   updateWeeklyProgress('problems',1);
   recordActivity();
   _recordTodayActivity(p.id,p.unit,ok);
@@ -1870,28 +1901,28 @@ function ansMC(id,ch){
   updateWeakSpots();
   refreshGoalProgress();
   updatePracticeNavBadge();
-  checkUnitCompletion(currentUnit);
-  updateMasteryBadge(currentUnit);
-  buildUnitXPBar(currentUnit);
+  checkUnitCompletion(_st.currentUnit);
+  updateMasteryBadge(_st.currentUnit);
+  buildUnitXPBar(_st.currentUnit);
   if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
 function ansFR(id){
-  if(answered[id]!==undefined)return;
-  if(probTimers[id]){clearInterval(probTimers[id]);delete probTimers[id];}
-  const p=activeProbs.find(x=>x.id===id);if(!p)return;
+  if(_st.answered[id]!==undefined)return;
+  if(_st.probTimers[id]){clearInterval(_st.probTimers[id]);delete _st.probTimers[id];}
+  const p=_st.activeProbs.find(x=>x.id===id);if(!p)return;
   const inp=document.getElementById('fi-'+id);if(!inp)return;
   const v=parseFloat(inp.value);if(!Number.isFinite(v))return;
   const ok=Math.abs(v-p.ans)<=(p.tol||0.1);_recordAnswerHistory(id,v,ok);
-  answered[id]=v;if(ok)pScore++;
-  if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
+  _st.answered[id]=v;if(ok)_st.pScore++;
+  if(!ok&&p.hint){_st.wrongAttempts[id]=(_st.wrongAttempts[id]||0)+1;if(_st.wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
   showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex,ok?null:String(v));
   addToReview(p.id,ok);
   persistPracticeState();
   const diff=p.diff||'medium';
   awardXP(ok?XP_TABLE[diff]:XP_TABLE.wrong,p.id);
-  sessionData.problemsAnswered++;if(ok)sessionData.correct++;
+  _st.sessionData.problemsAnswered++;if(ok)_st.sessionData.correct++;
   updateWeeklyProgress('problems',1);
   recordActivity();
   _recordTodayActivity(p.id,p.unit,ok);
@@ -1900,19 +1931,19 @@ function ansFR(id){
   updateWeakSpots();
   refreshGoalProgress();
   updatePracticeNavBadge();
-  checkUnitCompletion(currentUnit);
-  updateMasteryBadge(currentUnit);
-  buildUnitXPBar(currentUnit);
+  checkUnitCompletion(_st.currentUnit);
+  updateMasteryBadge(_st.currentUnit);
+  buildUnitXPBar(_st.currentUnit);
   if(typeof setTimeout==='function')setTimeout(function(){autoScrollToNext(id);},300);
 }
 
 function autoScrollToNext(currentId){
   if(typeof document==='undefined')return;
-  var probs=activeProbs||[];
+  var probs=_st.activeProbs||[];
   var idx=probs.findIndex(function(p){return p.id===currentId;});
   if(idx<0)return;
   for(var i=idx+1;i<probs.length;i++){
-    if(answered[probs[i].id]===undefined){
+    if(_st.answered[probs[i].id]===undefined){
       var el=document.getElementById('pc-'+probs[i].id);
       if(el&&typeof el.scrollIntoView==='function')el.scrollIntoView({behavior:'smooth',block:'center'});
       return;
@@ -1938,10 +1969,10 @@ function startReview(){
     return;
   }
 
-  reviewQueue=dueIds.slice(0,10);
-  reviewIndex=0;
-  reviewSessionCorrect=0;
-  reviewSessionByUnit={};
+  _st.reviewQueue=dueIds.slice(0,10);
+  _st.reviewIndex=0;
+  _st.reviewSessionCorrect=0;
+  _st.reviewSessionByUnit={};
 
   const btn=document.getElementById('startReviewBtn');
   const card=document.getElementById('reviewCard');
@@ -1952,14 +1983,14 @@ function startReview(){
 
 function showReviewCard(){
   if(typeof document==='undefined')return;
-  if(reviewIndex>=reviewQueue.length){endReview();return;}
+  if(_st.reviewIndex>=_st.reviewQueue.length){endReview();return;}
 
-  const probId=reviewQueue[reviewIndex];
+  const probId=_st.reviewQueue[_st.reviewIndex];
   const prob=findProblemById(probId);
-  if(!prob){reviewIndex++;showReviewCard();return;}
+  if(!prob){_st.reviewIndex++;showReviewCard();return;}
 
   const progress=document.getElementById('reviewProgress');
-  if(progress)progress.textContent=(reviewIndex+1)+' / '+reviewQueue.length;
+  if(progress)progress.textContent=(_st.reviewIndex+1)+' / '+_st.reviewQueue.length;
 
   const card=document.getElementById('reviewCardInner');
   if(!card)return;
@@ -1985,19 +2016,19 @@ function showReviewCard(){
 
 function reviewMC(probId,chosen){
   if(typeof document==='undefined')return;
-  if(reviewIndex>=reviewQueue.length)return;
+  if(_st.reviewIndex>=_st.reviewQueue.length)return;
 
-  const activeId=String(reviewQueue[reviewIndex]);
+  const activeId=String(_st.reviewQueue[_st.reviewIndex]);
   if(String(probId)!==activeId)return;
   const prob=findProblemById(activeId);
   if(!prob||prob.type!=='mc')return;
 
   const ok=chosen===prob.ans;
-  if(ok)reviewSessionCorrect++;
+  if(ok)_st.reviewSessionCorrect++;
   var _rUnit=prob.unit||1;
-  if(!reviewSessionByUnit[_rUnit])reviewSessionByUnit[_rUnit]={correct:0,total:0};
-  reviewSessionByUnit[_rUnit].total++;
-  if(ok)reviewSessionByUnit[_rUnit].correct++;
+  if(!_st.reviewSessionByUnit[_rUnit])_st.reviewSessionByUnit[_rUnit]={correct:0,total:0};
+  _st.reviewSessionByUnit[_rUnit].total++;
+  if(ok)_st.reviewSessionByUnit[_rUnit].correct++;
 
   (prob.ch||[]).forEach((_,j)=>{
     const el=document.getElementById('rv-'+activeId+'-'+j);
@@ -2029,15 +2060,15 @@ function reviewMC(probId,chosen){
   recordActivity();
   updateReviewBadge();
 
-  if(typeof setTimeout==='function')setTimeout(()=>{reviewIndex++;showReviewCard();},ok?1500:3000);
-  else{reviewIndex++;showReviewCard();}
+  if(typeof setTimeout==='function')setTimeout(()=>{_st.reviewIndex++;showReviewCard();},ok?1500:3000);
+  else{_st.reviewIndex++;showReviewCard();}
 }
 
 function reviewFR(probId){
   if(typeof document==='undefined')return;
-  if(reviewIndex>=reviewQueue.length)return;
+  if(_st.reviewIndex>=_st.reviewQueue.length)return;
 
-  const activeId=String(reviewQueue[reviewIndex]);
+  const activeId=String(_st.reviewQueue[_st.reviewIndex]);
   if(String(probId)!==activeId)return;
   const prob=findProblemById(activeId);
   if(!prob||prob.type!=='fr')return;
@@ -2048,11 +2079,11 @@ function reviewFR(probId){
   if(!Number.isFinite(v))return;
 
   const ok=Math.abs(v-prob.ans)<=(prob.tol||0.1);
-  if(ok)reviewSessionCorrect++;
+  if(ok)_st.reviewSessionCorrect++;
   var _rUnit=prob.unit||1;
-  if(!reviewSessionByUnit[_rUnit])reviewSessionByUnit[_rUnit]={correct:0,total:0};
-  reviewSessionByUnit[_rUnit].total++;
-  if(ok)reviewSessionByUnit[_rUnit].correct++;
+  if(!_st.reviewSessionByUnit[_rUnit])_st.reviewSessionByUnit[_rUnit]={correct:0,total:0};
+  _st.reviewSessionByUnit[_rUnit].total++;
+  if(ok)_st.reviewSessionByUnit[_rUnit].correct++;
 
   inp.disabled=true;
   inp.style.borderColor=ok?'var(--green)':'var(--red)';
@@ -2080,8 +2111,8 @@ function reviewFR(probId){
   recordActivity();
   updateReviewBadge();
 
-  if(typeof setTimeout==='function')setTimeout(()=>{reviewIndex++;showReviewCard();},ok?1500:3000);
-  else{reviewIndex++;showReviewCard();}
+  if(typeof setTimeout==='function')setTimeout(()=>{_st.reviewIndex++;showReviewCard();},ok?1500:3000);
+  else{_st.reviewIndex++;showReviewCard();}
 }
 
 function drawReviewChart(canvas,byUnit){
@@ -2115,22 +2146,22 @@ function endReview(){
   const btn=document.getElementById('startReviewBtn');
   if(btn){btn.style.display='';btn.textContent='Start Another Session';}
 
-  const total=reviewQueue.length;
-  const pct=total?Math.round(reviewSessionCorrect/total*100):0;
-  showToast('Session complete! '+reviewSessionCorrect+'/'+total+' correct ('+pct+'%)');
+  const total=_st.reviewQueue.length;
+  const pct=total?Math.round(_st.reviewSessionCorrect/total*100):0;
+  showToast('Session complete! '+_st.reviewSessionCorrect+'/'+total+' correct ('+pct+'%)');
 
   const meta=getReviewMeta();
   meta.sessions=(meta.sessions||0)+1;
   saveReviewMeta(meta);
 
   awardXP(10,'review-session-'+meta.sessions);
-  sessionData.reviewsDone++;
+  _st.sessionData.reviewsDone++;
   updateWeeklyProgress('review',1);
   checkMilestones();
   updateReviewBadge();
 
   // Show chart if session had problems from >1 unit
-  var unitKeys=Object.keys(reviewSessionByUnit);
+  var unitKeys=Object.keys(_st.reviewSessionByUnit);
   if(unitKeys.length>1&&typeof document!=='undefined'){
     var overlay=document.createElement('div');
     overlay.className='session-overlay';
@@ -2138,19 +2169,19 @@ function endReview(){
     var modal=document.createElement('div');
     modal.className='session-modal';
     modal.onclick=function(e){e.stopPropagation();};
-    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+reviewSessionCorrect+'/'+total+' correct ('+pct+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
+    modal.innerHTML='<h3>Session Summary</h3><p style="font-size:13px;color:var(--muted);margin:4px 0 12px;">'+_st.reviewSessionCorrect+'/'+total+' correct ('+pct+'%)</p><canvas id="reviewChart" width="300" height="120" style="display:block;margin:0 auto;background:var(--bg2);border-radius:6px;"></canvas><button class="session-close" id="reviewChartClose" style="margin-top:16px;">Close</button>';
     var _closeBtn=modal.querySelector('#reviewChartClose');
     if(_closeBtn)_closeBtn.onclick=function(){overlay.remove();};
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
     var canvas=document.getElementById('reviewChart');
-    drawReviewChart(canvas,reviewSessionByUnit);
+    drawReviewChart(canvas,_st.reviewSessionByUnit);
   }
 
-  reviewQueue=[];
-  reviewIndex=0;
-  reviewSessionCorrect=0;
-  reviewSessionByUnit={};
+  _st.reviewQueue=[];
+  _st.reviewIndex=0;
+  _st.reviewSessionCorrect=0;
+  _st.reviewSessionByUnit={};
 }
 
 function updateReviewBadge(){
@@ -2254,26 +2285,25 @@ function updateDailyDigest(){
   }
 }
 
-var examModeActive=false;
 function toggleExamMode(){
   if(typeof document==='undefined')return;
-  examModeActive=!examModeActive;
+  _st.examModeActive=!_st.examModeActive;
   var btn=document.getElementById('examModeBtn');
-  if(btn)btn.classList.toggle('active',examModeActive);
-  if(examModeActive){showToast('Exam Mode ON — feedback hidden until you finish');}
+  if(btn)btn.classList.toggle('active',_st.examModeActive);
+  if(_st.examModeActive){showToast('Exam Mode ON — feedback hidden until you finish');}
   else{
     showToast('Exam Mode OFF — showing feedback');
-    // Re-render feedback for answered problems
-    activeProbs.forEach(function(p){
-      if(answered[p.id]!==undefined){
-        if(p.type==='mc'){var ok=(+answered[p.id])===p.ans;showFB(p.id,ok,ok?p.ex:'Correct: '+p.ch[p.ans]+'. '+p.ex);}
-        else{var v=parseFloat(answered[p.id]);var ok2=Math.abs(v-p.ans)<=(p.tol||0.1);showFB(p.id,ok2,ok2?p.ex:'Correct: '+p.ans+'. '+p.ex);}
+    // Re-render feedback for _st.answered problems
+    _st.activeProbs.forEach(function(p){
+      if(_st.answered[p.id]!==undefined){
+        if(p.type==='mc'){var ok=(+_st.answered[p.id])===p.ans;showFB(p.id,ok,ok?p.ex:'Correct: '+p.ch[p.ans]+'. '+p.ex);}
+        else{var v=parseFloat(_st.answered[p.id]);var ok2=Math.abs(v-p.ans)<=(p.tol||0.1);showFB(p.id,ok2,ok2?p.ex:'Correct: '+p.ans+'. '+p.ex);}
       }
     });
   }
 }
 function showFB(id,ok,ex,userAnswerLabel){
-  if(examModeActive)return;
+  if(_st.examModeActive)return;
   const fb=document.getElementById('fb-'+id),pc=document.getElementById('pc-'+id),b=document.getElementById('fbx-'+id);
   if(!fb||!pc||!b)return;
   fb.classList.add('show');
@@ -2289,7 +2319,7 @@ function showFB(id,ok,ex,userAnswerLabel){
     b.appendChild(prev);
   }
   const _ann=document.getElementById('a11yAnnounce');if(_ann)_ann.textContent=ok?'Correct!':'Incorrect. '+ex;
-  const unit=allProbs[currentUnit]||[];
+  const unit=allProbs[_st.currentUnit]||[];
   const prob=unit.find(function(p){return String(p.id)===String(id);});
   if(prob&&prob.steps&&prob.steps.length){
     const stepsDiv=document.createElement('div');
@@ -2363,7 +2393,7 @@ function updatePScore(){setAllScores()}
 
 function showUnitInfo(){
   if(typeof document==='undefined'||typeof window==='undefined')return;
-  var unit=currentUnit;
+  var unit=_st.currentUnit;
   var meta=UNIT_META[unit];
   if(!meta)return;
   var probs=(allProbs[unit]||[]);
@@ -2389,7 +2419,7 @@ function showUnitInfo(){
 }
 function setUnit(n){
   if(!UNIT_META[n])return;
-  currentUnit=n;
+  _st.currentUnit=n;
   if(typeof document!=='undefined'){var bc=document.getElementById('breadcrumb');if(bc&&bc.textContent.startsWith('Practice')){var unitName=UNIT_META[n]?UNIT_META[n].name:'';bc.innerHTML='Practice <span class="breadcrumb-sep">›</span> Unit '+n+(unitName?' – '+unitName:'');}};
   _storageRawSave('sh-filter-unit',String(n));
   const sel=document.getElementById('unitSelect');if(sel)sel.value=String(n);
@@ -2789,7 +2819,7 @@ function isVizPageActive(){
   return !!(vizPage&&vizPage.classList.contains('active'));
 }
 
-function buildVizForUnit(unit=currentUnit){
+function buildVizForUnit(unit=_st.currentUnit){
   const tabs=document.getElementById('vizTabs');
   const panels=document.getElementById('viz-panels');
   const dynamic=document.getElementById('viz-dynamic');
@@ -2797,27 +2827,27 @@ function buildVizForUnit(unit=currentUnit){
   if(unit===1){
     tabs.style.display='flex';panels.style.display='block';
     dynamic.style.display='none';dynamic.innerHTML='';
-    vizDrawn[1]=false;
+    _st.vizDrawn[1]=false;
     return;
   }
   tabs.style.display='none';panels.style.display='none';
   dynamic.style.display='block';dynamic.innerHTML=vizTemplate(unit);
-  vizDrawn[unit]=false;
+  _st.vizDrawn[unit]=false;
 }
 
 function drawActiveVisualizer(force){
   if(!isVizPageActive())return;
-  if(currentUnit===1){
-    if(vizDrawn[1]&&!force)return;
+  if(_st.currentUnit===1){
+    if(_st.vizDrawn[1]&&!force)return;
     drawHist();drawBox();drawNorm();drawComp();
-    vizDrawn[1]=true;
+    _st.vizDrawn[1]=true;
     return;
   }
-  if(vizDrawn[currentUnit]&&!force)return;
-  const v=allViz[currentUnit];
+  if(_st.vizDrawn[_st.currentUnit]&&!force)return;
+  const v=allViz[_st.currentUnit];
   if(v&&typeof v.draw==='function'){
     v.draw();
-    vizDrawn[currentUnit]=true;
+    _st.vizDrawn[_st.currentUnit]=true;
   }
 }
 
@@ -3472,7 +3502,7 @@ function drawDiffChart(){
   var canvas=document.getElementById('diffChart');
   var row=document.getElementById('diffChartRow');
   if(!canvas||typeof canvas.getContext!=='function')return;
-  var probs=(allProbs[currentUnit]||[]);
+  var probs=(allProbs[_st.currentUnit]||[]);
   if(!probs.length){if(row)row.style.display='none';return;}
   var easy=probs.filter(function(p){return p.diff==='easy';}).length;
   var med=probs.filter(function(p){return p.diff==='medium';}).length;
@@ -3546,9 +3576,9 @@ function toggleProgressPanel(){
 
 function resetUnit(unit){
   if(typeof document==='undefined')return;
-  var answeredCount=Object.keys(answered).length;
-  var correctCount=pScore;
-  var elapsed=practiceSessionStart?Math.round((Date.now()-practiceSessionStart)/1000):0;
+  var answeredCount=Object.keys(_st.answered).length;
+  var correctCount=_st.pScore;
+  var elapsed=_st.practiceSessionStart?Math.round((Date.now()-_st.practiceSessionStart)/1000):0;
   if(answeredCount>0){
     showUnitResetSummary(unit,answeredCount,correctCount,elapsed);
   }else{
@@ -3568,7 +3598,7 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
   var timeStr=elapsed>=60?Math.floor(elapsed/60)+'m '+(elapsed%60)+'s':elapsed+'s';
   modal.innerHTML='<h3>Unit '+unit+' Summary</h3>'
     +'<div class="session-stats">'
-    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">answered</span></div>'
+    +'<div class="session-stat"><span class="session-num">'+answeredCount+'</span><span class="session-label">_st.answered</span></div>'
     +'<div class="session-stat"><span class="session-num">'+correctCount+'</span><span class="session-label">correct</span></div>'
     +'<div class="session-stat"><span class="session-num">'+pct+'%</span><span class="session-label">accuracy</span></div>'
     +'<div class="session-stat"><span class="session-num">'+timeStr+'</span><span class="session-label">time</span></div>'
@@ -3583,9 +3613,9 @@ function showUnitResetSummary(unit,answeredCount,correctCount,elapsed){
 
 function _doResetUnit(unit){
   if(typeof localStorage!=='undefined')localStorage.removeItem('sh-practice-'+unit);
-  answered={};
-  pScore=0;
-  buildProblems(currentUnit);
+  _st.answered={};
+  _st.pScore=0;
+  buildProblems(_st.currentUnit);
   buildProgressPanel();
   updateReviewBadge();
 }
@@ -3606,9 +3636,9 @@ function resetAllProgress(){
     localStorage.removeItem('sh-custom-problems');
     localStorage.removeItem('sh-ratings');
   }
-  answered={};
-  pScore=0;
-  buildProblems(currentUnit);
+  _st.answered={};
+  _st.pScore=0;
+  buildProblems(_st.currentUnit);
   buildRoadmap();
   buildProgressPanel();
   updateStreakDisplay();
@@ -3619,7 +3649,6 @@ function resetAllProgress(){
 
 
 // ===================== POMODORO TIMER =====================
-let pomoState={running:false,seconds:25*60,total:25*60,interval:null,sessionsToday:0};
 
 function togglePomoPanel(){
   if(typeof document==='undefined')return;
@@ -3628,37 +3657,37 @@ function togglePomoPanel(){
 }
 
 function setPomoTime(mins){
-  if(pomoState.running)return;
-  pomoState.seconds=mins*60;
-  pomoState.total=mins*60;
+  if(_st.pomoState.running)return;
+  _st.pomoState.seconds=mins*60;
+  _st.pomoState.total=mins*60;
   updatePomoDisplay();
   document.querySelectorAll('.pomo-preset').forEach(b=>b.classList.remove('active'));
   if(typeof event!=='undefined'&&event&&event.target)event.target.classList.add('active');
 }
 
 function startPomo(){
-  if(pomoState.running)return;
-  pomoState.running=true;
+  if(_st.pomoState.running)return;
+  _st.pomoState.running=true;
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
   const label=document.getElementById('pomoLabel');
   if(startBtn)startBtn.style.display='none';
   if(pauseBtn)pauseBtn.style.display='';
   if(label)label.textContent='Focusing...';
-  pomoState.interval=setInterval(()=>{
-    pomoState.seconds--;
+  _st.pomoState.interval=setInterval(()=>{
+    _st.pomoState.seconds--;
     updatePomoDisplay();
-    if(pomoState.seconds<=0){
-      clearInterval(pomoState.interval);
-      pomoState.running=false;
+    if(_st.pomoState.seconds<=0){
+      clearInterval(_st.pomoState.interval);
+      _st.pomoState.running=false;
       pomoComplete();
     }
   },1000);
 }
 
 function pausePomo(){
-  clearInterval(pomoState.interval);
-  pomoState.running=false;
+  clearInterval(_st.pomoState.interval);
+  _st.pomoState.running=false;
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
   const label=document.getElementById('pomoLabel');
@@ -3668,9 +3697,9 @@ function pausePomo(){
 }
 
 function resetPomo(){
-  clearInterval(pomoState.interval);
-  pomoState.running=false;
-  pomoState.seconds=pomoState.total;
+  clearInterval(_st.pomoState.interval);
+  _st.pomoState.running=false;
+  _st.pomoState.seconds=_st.pomoState.total;
   updatePomoDisplay();
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
@@ -3682,29 +3711,29 @@ function resetPomo(){
 
 function updatePomoDisplay(){
   if(typeof document==='undefined')return;
-  const m=Math.floor(pomoState.seconds/60);
-  const s=pomoState.seconds%60;
+  const m=Math.floor(_st.pomoState.seconds/60);
+  const s=_st.pomoState.seconds%60;
   const el=document.getElementById('pomoDisplay');
   if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  if(pomoState.running)document.title='('+m+':'+String(s).padStart(2,'0')+') Stats Hub';
+  if(_st.pomoState.running)document.title='('+m+':'+String(s).padStart(2,'0')+') Stats Hub';
   else document.title='Stats Learning Hub';
 }
 
 function pomoComplete(){
   if(typeof document==='undefined')return;
-  pomoState.sessionsToday++;
-  setElText('pomoSessions',pomoState.sessionsToday);
+  _st.pomoState.sessionsToday++;
+  setElText('pomoSessions',_st.pomoState.sessionsToday);
   const label=document.getElementById('pomoLabel');
   const startBtn=document.getElementById('pomoStart');
   const pauseBtn=document.getElementById('pomoPause');
   if(label)label.textContent='Break time! 🎉';
   if(startBtn)startBtn.style.display='';
   if(pauseBtn)pauseBtn.style.display='none';
-  const xp=pomoState.total>=2700?35:pomoState.total>=1500?20:pomoState.total>=900?10:15;
+  const xp=_st.pomoState.total>=2700?35:_st.pomoState.total>=1500?20:_st.pomoState.total>=900?10:15;
   awardXP(xp,'pomo-session');
   recordActivity();
-  var sessionSolved=typeof sessionData!=='undefined'?sessionData.problemsAnswered||0:0;
-  var sessionCorrect=typeof sessionData!=='undefined'?sessionData.correct||0:0;
+  var sessionSolved=typeof _st.sessionData!=='undefined'?_st.sessionData.problemsAnswered||0:0;
+  var sessionCorrect=typeof _st.sessionData!=='undefined'?_st.sessionData.correct||0:0;
   var sessionMsg='Focus session complete! +'+xp+' XP.';
   if(sessionSolved>0)sessionMsg+=' You solved '+sessionSolved+' problem'+(sessionSolved===1?'':'s')+' ('+sessionCorrect+' correct) in this session.';
   sessionMsg+=' Take a break.';
@@ -3718,13 +3747,13 @@ function pomoComplete(){
     // Also save to sh-pomodoro-log
     var log=[];
     log=_storage('sh-pomodoro-log',[]);
-    log.push({date:today,minutes:Math.round(pomoState.total/60)});
+    log.push({date:today,minutes:Math.round(_st.pomoState.total/60)});
     if(log.length>50)log=log.slice(-50);
     _storageSave('sh-pomodoro-log',log);
   }
   buildPomoHistory();
-  pomoState.seconds=5*60;
-  pomoState.total=5*60;
+  _st.pomoState.seconds=5*60;
+  _st.pomoState.total=5*60;
   updatePomoDisplay();
 }
 
@@ -3847,13 +3876,13 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     // Keyboard MC answer selection on practice page
     var _pp=document.getElementById('page-practice');
     var _isPractice=_pp&&_pp.classList.contains('active');
-    if(_isPractice&&focusedProblemId!==null&&(e.key==='1'||e.key==='2'||e.key==='3'||e.key==='4')){
+    if(_isPractice&&_st.focusedProblemId!==null&&(e.key==='1'||e.key==='2'||e.key==='3'||e.key==='4')){
       var _idx=parseInt(e.key)-1;
-      var _prob=typeof activeProbs!=='undefined'?activeProbs.find(function(x){return String(x.id)===String(focusedProblemId);}):null;
+      var _prob=typeof _st.activeProbs!=='undefined'?_st.activeProbs.find(function(x){return String(x.id)===String(_st.focusedProblemId);}):null;
       if(_prob&&_prob.type==='mc'&&_idx<_prob.ch.length){ansMC(_prob.id,_idx);return;}
     }
-    if(_isPractice&&focusedProblemId!==null&&(e.key==='b'||e.key==='B')){
-      toggleBookmark(String(focusedProblemId));return;
+    if(_isPractice&&_st.focusedProblemId!==null&&(e.key==='b'||e.key==='B')){
+      toggleBookmark(String(_st.focusedProblemId));return;
     }
     if(e.key==='1'){goPage('home');}
     else if(e.key==='2'){goPage('roadmap');}
@@ -3909,14 +3938,11 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
 
 
 // ===================== PWA INSTALL =====================
-let deferredPrompt=null;
-let focusModeActive=false;
-let sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
 
 if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('beforeinstallprompt',function(e){
     e.preventDefault();
-    deferredPrompt=e;
+    _st.deferredPrompt=e;
     if(_storageRaw('sh-install-dismissed',''))return;
     const banner=document.getElementById('installBanner');
     if(banner)banner.style.display='flex';
@@ -3925,7 +3951,7 @@ if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
   window.addEventListener('appinstalled',function(){
     const banner=document.getElementById('installBanner');
     if(banner)banner.style.display='none';
-    deferredPrompt=null;
+    _st.deferredPrompt=null;
     showToast('App installed! Access Stats Hub from your home screen.');
   });
 
@@ -3950,11 +3976,11 @@ if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
 }
 
 function installPWA(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function(result){
+  if(!_st.deferredPrompt)return;
+  _st.deferredPrompt.prompt();
+  _st.deferredPrompt.userChoice.then(function(result){
     if(result.outcome==='accepted')awardXP(25,'pwa-install');
-    deferredPrompt=null;
+    _st.deferredPrompt=null;
     const banner=document.getElementById('installBanner');
     if(banner)banner.style.display='none';
   });
@@ -4013,14 +4039,14 @@ function updateWeakSpots(){
 
 function toggleFocusMode(){
   if(typeof document==='undefined')return;
-  focusModeActive=!focusModeActive;
-  document.body.classList.toggle('focus-mode',focusModeActive);
+  _st.focusModeActive=!_st.focusModeActive;
+  document.body.classList.toggle('focus-mode',_st.focusModeActive);
   ['breadcrumb','quickStatsRow','recentActivity'].forEach(function(id){
-    var el=document.getElementById(id);if(el){el.classList.toggle('focus-mode-hidden',focusModeActive);}
+    var el=document.getElementById(id);if(el){el.classList.toggle('focus-mode-hidden',_st.focusModeActive);}
   });
   const btn=document.getElementById('focusBtn');
-  if(btn)btn.textContent=focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
-  if(focusModeActive){
+  if(btn)btn.textContent=_st.focusModeActive?'✕ Exit Focus':'🎯 Focus Mode';
+  if(_st.focusModeActive){
     const probs=document.querySelectorAll('.pc');
     for(const pc of probs){
       if(!pc.classList.contains('correct')&&!pc.classList.contains('incorrect')){
@@ -4036,8 +4062,8 @@ function toggleFocusMode(){
 
 function showSessionSummary(){
   if(typeof document==='undefined')return;
-  const elapsed=Math.round((Date.now()-sessionData.startTime)/60000);
-  if(sessionData.problemsAnswered===0&&sessionData.reviewsDone===0)return;
+  const elapsed=Math.round((Date.now()-_st.sessionData.startTime)/60000);
+  if(_st.sessionData.problemsAnswered===0&&_st.sessionData.reviewsDone===0)return;
   const overlay=document.createElement('div');
   overlay.className='session-overlay';
   overlay.onclick=function(){overlay.remove();};
@@ -4047,19 +4073,19 @@ function showSessionSummary(){
   modal.innerHTML=`<h3>Session Summary</h3>
     <div class="session-stats">
       <div class="session-stat"><span class="session-num">${elapsed}</span><span class="session-label">minutes</span></div>
-      <div class="session-stat"><span class="session-num">${sessionData.problemsAnswered}</span><span class="session-label">problems</span></div>
-      <div class="session-stat"><span class="session-num">${sessionData.correct}</span><span class="session-label">correct</span></div>
-      <div class="session-stat"><span class="session-num">+${sessionData.xpEarned}</span><span class="session-label">XP earned</span></div>
+      <div class="session-stat"><span class="session-num">${_st.sessionData.problemsAnswered}</span><span class="session-label">problems</span></div>
+      <div class="session-stat"><span class="session-num">${_st.sessionData.correct}</span><span class="session-label">correct</span></div>
+      <div class="session-stat"><span class="session-num">+${_st.sessionData.xpEarned}</span><span class="session-label">XP earned</span></div>
     </div>
     <div class="session-message">${getSessionMessage()}</div>
     <button class="session-close" onclick="this.closest('.session-overlay').remove()">Nice! 🎉</button>`;
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-  sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
+  _st.sessionData={startTime:Date.now(),problemsAnswered:0,correct:0,xpEarned:0,reviewsDone:0};
 }
 
 function getSessionMessage(){
-  const pct=sessionData.problemsAnswered?Math.round(sessionData.correct/sessionData.problemsAnswered*100):0;
+  const pct=_st.sessionData.problemsAnswered?Math.round(_st.sessionData.correct/_st.sessionData.problemsAnswered*100):0;
   if(pct>=90)return'Incredible accuracy! You\'re on fire.';
   if(pct>=70)return'Solid session. Keep building momentum.';
   if(pct>=50)return'Good effort! Review the tricky ones tomorrow.';
@@ -4325,8 +4351,8 @@ function updatePracticeNavBadge(){
   var badge=document.getElementById('practiceNavBadge');
   if(!badge)return;
   var unanswered=0;
-  if(typeof activeProbs!=='undefined'&&typeof answered!=='undefined'){
-    unanswered=activeProbs.filter(function(p){return answered[p.id]===undefined;}).length;
+  if(typeof _st.activeProbs!=='undefined'&&typeof _st.answered!=='undefined'){
+    unanswered=_st.activeProbs.filter(function(p){return _st.answered[p.id]===undefined;}).length;
   }
   if(unanswered>0){badge.textContent=unanswered;badge.style.display='';}
   else{badge.style.display='none';}
@@ -4409,10 +4435,10 @@ function jumpToProblem(){
   if(!input)return;
   var pid=parseInt(input.value);
   if(!pid)return;
-  // Search in activeProbs first
+  // Search in _st.activeProbs first
   var found=false;
-  if(typeof activeProbs!=='undefined'){
-    var local=activeProbs.find(function(p){return p.id===pid;});
+  if(typeof _st.activeProbs!=='undefined'){
+    var local=_st.activeProbs.find(function(p){return p.id===pid;});
     if(local){
       var el=document.getElementById('pc-'+pid);
       if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--cyan)';setTimeout(function(){el.style.outline='';},1500);found=true;}
@@ -4477,7 +4503,7 @@ function toggleCollapse(btn){
   var card=btn.closest('.pc');
   if(!card)return;
   var id=card.dataset.id;
-  var unit=typeof currentUnit!=='undefined'?currentUnit:1;
+  var unit=typeof _st.currentUnit!=='undefined'?_st.currentUnit:1;
   card.classList.toggle('pc-collapsed');
   var collapsed=card.classList.contains('pc-collapsed');
   btn.textContent=collapsed?'▸':'▾';
@@ -4495,7 +4521,7 @@ function toggleExpandAll(){
   var cards=document.querySelectorAll('.pc');if(!cards.length)return;
   var anyCollapsed=Array.from(cards).some(function(c){return c.classList.contains('pc-collapsed');});
   var btn=document.getElementById('expandAllBtn');
-  var unit=typeof currentUnit!=='undefined'?currentUnit:1;
+  var unit=typeof _st.currentUnit!=='undefined'?_st.currentUnit:1;
   if(anyCollapsed){
     // Expand all
     cards.forEach(function(c){c.classList.remove('pc-collapsed');var b=c.querySelector('.card-collapse-btn');if(b)b.textContent='▾';});
@@ -4509,35 +4535,34 @@ function toggleExpandAll(){
     if(typeof localStorage!=='undefined')try{_storageSave('sh-collapsed-'+unit,ids);}catch(e){}
   }
 }
-var activeTags=new Set();
 function buildTagFilter(){
   if(typeof document==='undefined')return;
   var bar=document.getElementById('tagFilterBar');
   if(!bar)return;
   var topics=[];
   var seen={};
-  (activeProbs||[]).forEach(function(p){
+  (_st.activeProbs||[]).forEach(function(p){
     if(p.topic&&!seen[p.topic]){seen[p.topic]=true;topics.push(p.topic);}
   });
   if(!topics.length){bar.style.display='none';return;}
   bar.style.display='flex';
-  var html='<button class="tag-filter-chip tag-all-chip'+(activeTags.size===0?' active':'')+'" onclick="clearTagFilter()">All Topics</button>';
+  var html='<button class="tag-filter-chip tag-all-chip'+(_st.activeTags.size===0?' active':'')+'" onclick="clearTagFilter()">All Topics</button>';
   topics.forEach(function(t){
     var enc=t.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    var isActive=activeTags.has(t);
+    var isActive=_st.activeTags.has(t);
     html+='<button class="tag-filter-chip'+(isActive?' active':'')+'" onclick="toggleTag(this,'+JSON.stringify(t)+')">'+enc+'</button>';
   });
   bar.innerHTML=html;
 }
 function toggleTag(btn,topic){
-  if(activeTags.has(topic))activeTags.delete(topic);
-  else activeTags.add(topic);
+  if(_st.activeTags.has(topic))_st.activeTags.delete(topic);
+  else _st.activeTags.add(topic);
   if(typeof localStorage!=='undefined')try{_storageSave('sh-active-tags',[...activeTags]);}catch(e){}
   applyTagFilter();
   buildTagFilter();
 }
 function clearTagFilter(){
-  activeTags=new Set();
+  _st.activeTags=new Set();
   _storageSave('sh-active-tags',[]);
   applyTagFilter();
   buildTagFilter();
@@ -4545,10 +4570,10 @@ function clearTagFilter(){
 function applyTagFilter(){
   if(typeof document==='undefined')return;
   document.querySelectorAll('.pc').forEach(function(el){
-    if(!activeTags.size){el.style.display='';return;}
+    if(!_st.activeTags.size){el.style.display='';return;}
     var id=el.id.replace('pc-','');
-    var prob=(activeProbs||[]).find(function(p){return String(p.id)===id;});
-    el.style.display=(prob&&activeTags.has(prob.topic))?'':'none';
+    var prob=(_st.activeProbs||[]).find(function(p){return String(p.id)===id;});
+    el.style.display=(prob&&_st.activeTags.has(prob.topic))?'':'none';
   });
 }
 function buildStudyPlan(){
@@ -4806,7 +4831,6 @@ function buildStreakHeatmap(){
   html+='</div>';
   el.innerHTML=html;
 }
-var _statsAnimated=false;
 function _animateCounter(el,target,suffix,duration){
   if(typeof requestAnimationFrame==='undefined'){el.textContent=target+(suffix||'');return;}
   var start=Date.now();var from=parseInt(el.textContent)||0;
@@ -4837,7 +4861,7 @@ function buildQuickStats(){
   var acc=totalAttempted>0?Math.round(totalCorrect/totalAttempted*100):0;
   var streak=0;
   try{var sd=_storage('sh-streak',{});streak=sd.current||0;}catch(e){}
-  var setEl=function(id,v,suffix){var e=document.getElementById(id);if(!e)return;if(!_statsAnimated)_animateCounter(e,v,suffix||'',600);else e.textContent=v+(suffix||'');};
+  var setEl=function(id,v,suffix){var e=document.getElementById(id);if(!e)return;if(!_st._statsAnimated)_animateCounter(e,v,suffix||'',600);else e.textContent=v+(suffix||'');};
   setEl('qsAttempted',totalAttempted);
   setEl('qsCorrect',totalCorrect);
   setEl('qsAccuracy',acc,'%');
@@ -4845,7 +4869,7 @@ function buildQuickStats(){
   var todayCount=0;
   if(typeof localStorage!=='undefined'){try{var act=_storage('sh-activity',{});todayCount=act[typeof todayStr!=='undefined'?todayStr():new Date().toISOString().slice(0,10)]||0;}catch(e){}}
   setEl('qsToday',todayCount);
-  _statsAnimated=true;
+  _st._statsAnimated=true;
   var unitsStarted=0;
   if(typeof allProbs!=='undefined'&&typeof getPracticeState!=='undefined'){
     for(var u2=1;u2<=MAX_UNIT;u2++){
@@ -5269,7 +5293,7 @@ function updateBookmarkUI(probId){
 
 function printProblemSet(){
   if(typeof window==='undefined'||typeof document==='undefined')return;
-  var probs=activeProbs||[];
+  var probs=_st.activeProbs||[];
   if(!probs.length){showToast('No problems to print.');return;}
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Stats Hub — Problem Set</title>';
   html+='<style>body{font-family:Georgia,serif;padding:40px;color:#1a1a2e;max-width:800px;margin:0 auto;}h1{font-size:20px;margin-bottom:4px;}';
@@ -5278,7 +5302,7 @@ function printProblemSet(){
   html+='.pdata{font-size:12px;background:#f5f5f5;padding:8px 12px;border-radius:4px;margin-bottom:8px;white-space:pre-line;font-family:monospace;}';
   html+='.blank{height:48px;border-bottom:1px solid #ccc;margin-top:8px;}</style></head><body>';
   html+='<h1>Stats Learning Hub — Practice Problems</h1>';
-  html+='<div class="meta">Unit '+currentUnit+' &middot; '+probs.length+' problems &middot; '+new Date().toLocaleDateString()+'</div>';
+  html+='<div class="meta">Unit '+_st.currentUnit+' &middot; '+probs.length+' problems &middot; '+new Date().toLocaleDateString()+'</div>';
   probs.forEach(function(p,i){
     html+='<div class="problem"><div class="pnum">#'+(i+1)+'. ['+p.diff+'] '+p.topic+'</div>';
     html+='<div class="pq">'+p.q+'</div>';
@@ -5352,7 +5376,7 @@ function searchProblems(){
   if(clearBtn)clearBtn.style.display=query?'':'none';
   if(!query){
     document.querySelectorAll('.pc').forEach(el=>el.style.display='');
-    setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+    setElText('practiceUnitTag','Unit '+_st.currentUnit+' - '+UNIT_META[_st.currentUnit].name);
     _storageRawSave('sh-filter-search','');
     return;
   }
@@ -5376,7 +5400,7 @@ function clearSearch(){
   const input=document.getElementById('searchInput');
   if(input)input.value='';
   searchProblems();
-  setElText('practiceUnitTag','Unit '+currentUnit+' - '+UNIT_META[currentUnit].name);
+  setElText('practiceUnitTag','Unit '+_st.currentUnit+' - '+UNIT_META[_st.currentUnit].name);
 }
 function sortProblems(method){
   if(typeof document==='undefined')return;
@@ -5389,8 +5413,8 @@ function sortProblems(method){
   cards.sort(function(a,b){
     var ida=parseInt(a.id.replace('pc-',''))||0;
     var idb=parseInt(b.id.replace('pc-',''))||0;
-    var pa=(activeProbs||[]).find(function(p){return String(p.id)===String(ida);});
-    var pb=(activeProbs||[]).find(function(p){return String(p.id)===String(idb);});
+    var pa=(_st.activeProbs||[]).find(function(p){return String(p.id)===String(ida);});
+    var pb=(_st.activeProbs||[]).find(function(p){return String(p.id)===String(idb);});
     if(method==='easy-first'){return (diffOrder[pa&&pa.diff]||0)-(diffOrder[pb&&pb.diff]||0);}
     if(method==='hard-first'){return (diffOrder[pb&&pb.diff]||0)-(diffOrder[pa&&pa.diff]||0);}
     if(method==='id-asc'){return ida-idb;}
@@ -5405,10 +5429,9 @@ function applySearchChip(term){
   if(input){input.value=term;searchProblems();}
 }
 
-var _activeTopic=null;
 function filterByTopic(topic){
   if(typeof document==='undefined')return;
-  _activeTopic=topic;
+  _st._activeTopic=topic;
   var bar=document.getElementById('topicFocusBar');
   var label=document.getElementById('topicFocusLabel');
   if(bar)bar.style.display='';
@@ -5421,7 +5444,7 @@ function filterByTopic(topic){
 }
 function clearTopicFocus(){
   if(typeof document==='undefined')return;
-  _activeTopic=null;
+  _st._activeTopic=null;
   var bar=document.getElementById('topicFocusBar');if(bar)bar.style.display='none';
   document.querySelectorAll('.pc').forEach(function(el){el.style.display='';});
 }
@@ -5456,11 +5479,11 @@ function filterProblems(filter){
   const chip=document.querySelector('.filter-chip[data-filter="'+filter+'"]');
   if(chip)chip.classList.add('active');
   const bm=getBookmarks();
-  const state=getPracticeState(currentUnit);
+  const state=getPracticeState(_st.currentUnit);
   const ans=state.answered||{};
   document.querySelectorAll('.pc').forEach(el=>{
     const id=el.id.replace('pc-','');
-    const prob=activeProbs.find(p=>String(p.id)===id);
+    const prob=_st.activeProbs.find(p=>String(p.id)===id);
     if(!prob){el.style.display='none';return;}
     let show=true;
     if(filter==='unanswered')show=ans[id]===undefined;
@@ -5473,17 +5496,16 @@ function filterProblems(filter){
     else if(filter==='easy')show=prob.diff==='easy';
     else if(filter==='medium')show=prob.diff==='medium';
     else if(filter==='hard')show=prob.diff==='hard';
-    if(show&&favFilterActive)show=!!bm[id];
+    if(show&&_st.favFilterActive)show=!!bm[id];
     el.style.display=show?'':'none';
   });
   _storageRawSave('sh-filter-diff',filter);
 }
-var favFilterActive=false;
 function toggleFavFilter(){
   if(typeof document==='undefined')return;
-  favFilterActive=!favFilterActive;
+  _st.favFilterActive=!_st.favFilterActive;
   var btn=document.getElementById('favFilterBtn');
-  if(btn)btn.classList.toggle('active',favFilterActive);
+  if(btn)btn.classList.toggle('active',_st.favFilterActive);
   // Re-apply current filter
   var cur=document.querySelector('.filter-chip.active');
   var curFilter=cur?cur.getAttribute('data-filter'):'all';
@@ -5492,7 +5514,6 @@ function toggleFavFilter(){
 
 
 // ===================== PHASE 15: ANALYTICS, PDF EXPORT, CALENDAR =====================
-let calDate=typeof Date!=='undefined'?new Date():null;
 
 function showAnalytics(type,evt){
   if(typeof document==='undefined')return;
@@ -5612,9 +5633,9 @@ function buildCalendar(){
   if(typeof document==='undefined')return;
   const grid=document.getElementById('calGrid');
   const monthLabel=document.getElementById('calMonth');
-  if(!grid||!monthLabel||!calDate)return;
-  const year=calDate.getFullYear(),month=calDate.getMonth();
-  monthLabel.textContent=calDate.toLocaleString('default',{month:'long',year:'numeric'});
+  if(!grid||!monthLabel||!_st.calDate)return;
+  const year=_st.calDate.getFullYear(),month=_st.calDate.getMonth();
+  monthLabel.textContent=_st.calDate.toLocaleString('default',{month:'long',year:'numeric'});
   const firstDay=new Date(year,month,1).getDay();
   const daysInMonth=new Date(year,month+1,0).getDate();
   const streak=getStreakData();const history=streak.history||[];
@@ -5628,14 +5649,11 @@ function buildCalendar(){
   grid.innerHTML=html;
 }
 
-function calPrev(){if(calDate){calDate.setMonth(calDate.getMonth()-1);buildCalendar();}}
-function calNext(){if(calDate){calDate.setMonth(calDate.getMonth()+1);buildCalendar();}}
+function calPrev(){if(_st.calDate){_st.calDate.setMonth(_st.calDate.getMonth()-1);buildCalendar();}}
+function calNext(){if(_st.calDate){_st.calDate.setMonth(_st.calDate.getMonth()+1);buildCalendar();}}
 
 
 // ===================== PHASE 16: FLASHCARDS, MATCHING, FORMULA BUILDER =====================
-let fcCards=[],fcIndex=0,fcKnownCount=0,fcSeenCount=0;
-let matchSelected=null,matchedPairs=0,matchPairsTotal=0;
-let builderParts=[],builderTarget=null,builderSelected=[];
 
 function initFlashcardsPage(){
   if(typeof document==='undefined')return;
@@ -5666,17 +5684,17 @@ function setFCMode(mode){
 
 function buildFlashcards(unit){
   if(typeof document==='undefined')return;
-  fcCards=[];fcIndex=0;fcKnownCount=0;fcSeenCount=0;
+  _st.fcCards=[];_st.fcIndex=0;_st.fcKnownCount=0;_st.fcSeenCount=0;
   (FORMULAS[unit]||[]).forEach(f=>{
-    fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula',id:f.name});
+    _st.fcCards.push({front:'What is the formula for '+f.name+'?',back:f.formula,type:'formula',id:f.name});
   });
   (allProbs[unit]||[]).forEach(p=>{
     const answer=p.type==='mc'?p.ch[p.ans]:String(p.ans);
-    fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem',id:p.id});
+    _st.fcCards.push({front:p.q,back:answer+' — '+p.ex,type:'problem',id:p.id});
   });
-  for(let i=fcCards.length-1;i>0;i--){
+  for(let i=_st.fcCards.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
-    [fcCards[i],fcCards[j]]=[fcCards[j],fcCards[i]];
+    [_st.fcCards[i],_st.fcCards[j]]=[_st.fcCards[j],_st.fcCards[i]];
   }
   renderFlashcard();
 }
@@ -5685,12 +5703,12 @@ function renderFlashcard(){
   if(typeof document==='undefined')return;
   const container=document.getElementById('fcContainer');
   if(!container)return;
-  if(!fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
-  const card=fcCards[fcIndex];
+  if(!_st.fcCards.length){container.innerHTML='<p style="text-align:center;color:var(--muted)">No flashcards for this unit.</p>';return;}
+  const card=_st.fcCards[_st.fcIndex];
   container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+card.front+'</div><div class="fc-back" style="display:none;">'+card.back+'</div></div>';
-  setElText('fcProgress',(fcIndex+1)+' / '+fcCards.length);
+  setElText('fcProgress',(_st.fcIndex+1)+' / '+_st.fcCards.length);
   var fill=document.getElementById('fcProgressFill');
-  if(fill&&fcCards.length>0)fill.style.width=Math.round((fcIndex+1)/fcCards.length*100)+'%';
+  if(fill&&_st.fcCards.length>0)fill.style.width=Math.round((_st.fcIndex+1)/_st.fcCards.length*100)+'%';
 }
 
 function flipCard(){
@@ -5705,8 +5723,8 @@ function flipCard(){
   if(card)card.classList.toggle('flipped',!showing);
 }
 
-function fcNext(){if(fcIndex<fcCards.length-1){fcIndex++;renderFlashcard();}}
-function fcPrev(){if(fcIndex>0){fcIndex--;renderFlashcard();}}
+function fcNext(){if(_st.fcIndex<_st.fcCards.length-1){_st.fcIndex++;renderFlashcard();}}
+function fcPrev(){if(_st.fcIndex>0){_st.fcIndex--;renderFlashcard();}}
 function _fcUpdateSRS(card,known){
   if(typeof localStorage==='undefined')return;
   try{
@@ -5723,18 +5741,18 @@ function _fcUpdateSRS(card,known){
   }catch(e){}
 }
 function fcMark(known){
-  if(known)awardXP(2,'flashcard-'+fcIndex);
-  fcSeenCount++;if(known)fcKnownCount++;
-  if(fcCards[fcIndex])_fcUpdateSRS(fcCards[fcIndex],known);
+  if(known)awardXP(2,'flashcard-'+_st.fcIndex);
+  _st.fcSeenCount++;if(known)_st.fcKnownCount++;
+  if(_st.fcCards[_st.fcIndex])_fcUpdateSRS(_st.fcCards[_st.fcIndex],known);
   updateFCSessionStats();
   fcNext();
 }
 function updateFCSessionStats(){
   if(typeof document==='undefined')return;
   var el=document.getElementById('fcSessionStats');if(!el)return;
-  var total=fcCards.length||1;
-  var pct=fcSeenCount>0?Math.round(fcKnownCount/fcSeenCount*100):0;
-  el.innerHTML='<span class="fcs-item">Seen: <b>'+fcSeenCount+'/'+total+'</b></span><span class="fcs-item">Known: <b>'+fcKnownCount+'</b></span><span class="fcs-item">Score: <b>'+pct+'%</b></span>';
+  var total=_st.fcCards.length||1;
+  var pct=_st.fcSeenCount>0?Math.round(_st.fcKnownCount/_st.fcSeenCount*100):0;
+  el.innerHTML='<span class="fcs-item">Seen: <b>'+_st.fcSeenCount+'/'+total+'</b></span><span class="fcs-item">Known: <b>'+_st.fcKnownCount+'</b></span><span class="fcs-item">Score: <b>'+pct+'%</b></span>';
 }
 
 function startMatchGame(unit){
@@ -5748,18 +5766,18 @@ function startMatchGame(unit){
     return;
   }
   const pool=[...formulas].sort(()=>Math.random()-0.5).slice(0,Math.min(6,formulas.length));
-  matchPairsTotal=pool.length;matchedPairs=0;matchSelected=null;
+  _st.matchPairsTotal=pool.length;_st.matchedPairs=0;_st.matchSelected=null;
   const left=pool.map((f,i)=>({id:i,text:f.name,matched:false})).sort(()=>Math.random()-0.5);
   const right=pool.map((f,i)=>({id:i,text:f.formula,matched:false})).sort(()=>Math.random()-0.5);
   if(status)status.textContent='Match each term with its formula. '+pool.length+' pairs to find.';
   function render(){
     let html='<div class="match-cols"><div class="match-col">';
     left.forEach(l=>{
-      html+='<div class="match-item '+(l.matched?'match-done':'')+(matchSelected&&matchSelected.side===0&&matchSelected.id===l.id&&!l.matched?' match-sel':'')+'" id="ml-'+l.id+'" onclick="matchClick(0,'+l.id+')">'+l.text+'</div>';
+      html+='<div class="match-item '+(l.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===0&&_st.matchSelected.id===l.id&&!l.matched?' match-sel':'')+'" id="ml-'+l.id+'" onclick="matchClick(0,'+l.id+')">'+l.text+'</div>';
     });
     html+='</div><div class="match-col">';
     right.forEach(r=>{
-      html+='<div class="match-item '+(r.matched?'match-done':'')+(matchSelected&&matchSelected.side===1&&matchSelected.id===r.id&&!r.matched?' match-sel':'')+'" id="mr-'+r.id+'" onclick="matchClick(1,'+r.id+')">'+r.text+'</div>';
+      html+='<div class="match-item '+(r.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===1&&_st.matchSelected.id===r.id&&!r.matched?' match-sel':'')+'" id="mr-'+r.id+'" onclick="matchClick(1,'+r.id+')">'+r.text+'</div>';
     });
     html+='</div></div>';
     board.innerHTML=html;
@@ -5770,45 +5788,45 @@ function startMatchGame(unit){
 
 window.matchClick=function(side,id){
   const left=window._matchLeft;const right=window._matchRight;const render=window._matchRender;const status=window._matchStatus;
-  if(!matchSelected){
-    matchSelected={side,id};render();return;
+  if(!_st.matchSelected){
+    _st.matchSelected={side,id};render();return;
   }
-  if(matchSelected.side===side){matchSelected={side,id};render();return;}
-  const lId=side===1?matchSelected.id:id;
-  const rId=side===1?id:matchSelected.id;
+  if(_st.matchSelected.side===side){_st.matchSelected={side,id};render();return;}
+  const lId=side===1?_st.matchSelected.id:id;
+  const rId=side===1?id:_st.matchSelected.id;
   const lItem=left.find(x=>x.id===lId);
   const rItem=right.find(x=>x.id===rId);
   if(lId===rId){
     if(lItem)lItem.matched=true;if(rItem)rItem.matched=true;
-    matchedPairs++;
-    matchSelected=null;
+    _st.matchedPairs++;
+    _st.matchSelected=null;
     render();
-    if(matchedPairs>=matchPairsTotal){
-      if(status)status.textContent='🎉 All '+matchedPairs+' pairs matched! +20 XP';
+    if(_st.matchedPairs>=_st.matchPairsTotal){
+      if(status)status.textContent='🎉 All '+_st.matchedPairs+' pairs matched! +20 XP';
       awardXP(20,'match-game');
     }
   }else{
     const lEl=document.getElementById('ml-'+lId);const rEl=document.getElementById('mr-'+rId);
     if(lEl)lEl.classList.add('match-wrong');if(rEl)rEl.classList.add('match-wrong');
     setTimeout(()=>{if(lEl)lEl.classList.remove('match-wrong');if(rEl)rEl.classList.remove('match-wrong');},600);
-    matchSelected=null;render();
+    _st.matchSelected=null;render();
   }
 };
 
 function startFormulaBuilder(unit){
   if(typeof document==='undefined')return;
-  const target=document.getElementById('builderTarget');
+  const target=document.getElementById('_st.builderTarget');
   const piecesEl=document.getElementById('builderPieces');
   const ansEl=document.getElementById('builderAnswer');
   const statusEl=document.getElementById('builderStatus');
   if(!target)return;
   const formulas=FORMULAS[unit]||[];
   if(!formulas.length){target.innerHTML='<p style="color:var(--muted)">No formulas for this unit.</p>';return;}
-  builderTarget=formulas[Math.floor(Math.random()*formulas.length)];
-  builderParts=builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
-  builderSelected=[];
+  _st.builderTarget=formulas[Math.floor(Math.random()*formulas.length)];
+  _st.builderParts=_st.builderTarget.formula.split(/([+\-*/=()²√Σ])/g).filter(p=>p.trim());
+  _st.builderSelected=[];
   const shuffled=[...builderParts].sort(()=>Math.random()-0.5);
-  target.innerHTML='Build the formula for: <strong>'+builderTarget.name+'</strong>';
+  target.innerHTML='Build the formula for: <strong>'+_st.builderTarget.name+'</strong>';
   if(piecesEl){
     window._builderShuffled=shuffled;piecesEl.innerHTML=shuffled.map((p,i)=>'<button class="builder-piece" id="bp-'+i+'" onclick="builderPick('+i+')">'+(p||'').replace(/</g,'&lt;')+'</button>').join('');
   }
@@ -5819,19 +5837,19 @@ function startFormulaBuilder(unit){
 window.builderPick=function(idx){
   if(typeof document==='undefined')return;
   const piece=(window._builderShuffled||[])[idx]||'';
-  builderSelected.push(piece);
+  _st.builderSelected.push(piece);
   const btn=document.getElementById('bp-'+idx);
   if(btn)btn.disabled=true;
   const slots=document.getElementById('builderSlots');
-  if(slots)slots.innerHTML=builderSelected.map(p=>'<span class="builder-slot">'+p+'</span>').join(' ');
+  if(slots)slots.innerHTML=_st.builderSelected.map(p=>'<span class="builder-slot">'+p+'</span>').join(' ');
 };
 
 function builderCheck(){
   if(typeof document==='undefined')return;
   const status=document.getElementById('builderStatus');
-  if(!builderTarget||!builderParts.length)return;
-  const correct=builderSelected.join('')===builderParts.join('');
-  if(status)status.textContent=correct?'✅ Correct! +10 XP':'❌ Not quite. The formula is: '+builderTarget.formula;
+  if(!_st.builderTarget||!_st.builderParts.length)return;
+  const correct=_st.builderSelected.join('')===_st.builderParts.join('');
+  if(status)status.textContent=correct?'✅ Correct! +10 XP':'❌ Not quite. The formula is: '+_st.builderTarget.formula;
   if(correct)awardXP(10,'formula-builder');
 }
 
@@ -6018,7 +6036,6 @@ function rateProblem(probId,rating){
   if(rd)rd.textContent='\u2605'.repeat(rating);
 }
 
-let toastTimer=null;
 function showConfetti(){
   if(typeof document==='undefined')return;
   var colors=['var(--cyan)','var(--amber)','var(--green)','var(--pink)','var(--purple)'];
@@ -6034,12 +6051,12 @@ function checkUnitCompletion(unit){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var probs=allProbs[unit]||[];
   if(!probs.length)return;
-  var allCorrect=probs.every(function(p){return answered[p.id]==='correct'||answered[p.id]===p.ans||(typeof answered[p.id]==='number'&&Math.abs(answered[p.id]-p.ans)<=(p.tol||0.1));});
+  var allCorrect=probs.every(function(p){return _st.answered[p.id]==='correct'||_st.answered[p.id]===p.ans||(typeof _st.answered[p.id]==='number'&&Math.abs(_st.answered[p.id]-p.ans)<=(p.tol||0.1));});
   if(!allCorrect)return;
   var key='sh-confetti-done-'+unit;
   if(_storageRaw(key,''))return;_storageRawSave(key,'1');
   showConfetti();
-  showToast('Unit '+unit+' complete! All problems answered correctly! 🎉',3000);
+  showToast('Unit '+unit+' complete! All problems _st.answered correctly! 🎉',3000);
 }
 function showToast(msg,duration=2000){
   if(typeof document==='undefined')return;
@@ -6047,28 +6064,28 @@ function showToast(msg,duration=2000){
   if(!toast)return;
   toast.textContent=msg;
   toast.classList.add('toast-visible');
-  if(toastTimer)clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{toast.classList.remove('toast-visible');},duration);
+  if(_st.toastTimer)clearTimeout(_st.toastTimer);
+  _st.toastTimer=setTimeout(()=>{toast.classList.remove('toast-visible');},duration);
   const ann=document.getElementById('a11yAnnounce');if(ann)ann.textContent=msg;
 }
 
 function exportUnitProblems(){
   if(typeof document==='undefined')return;
-  var probs=allProbs[currentUnit]||[];
+  var probs=allProbs[_st.currentUnit]||[];
   if(!probs.length){showToast('No problems to export');return;}
-  var json=JSON.stringify({unit:currentUnit,name:typeof UNIT_META!=='undefined'&&UNIT_META[currentUnit]?UNIT_META[currentUnit].name:'',exported:new Date().toISOString(),problems:probs},null,2);
+  var json=JSON.stringify({unit:_st.currentUnit,name:typeof UNIT_META!=='undefined'&&UNIT_META[_st.currentUnit]?UNIT_META[_st.currentUnit].name:'',exported:new Date().toISOString(),problems:probs},null,2);
   if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function'){showToast('Export unavailable');return;}
   var blob=new Blob([json],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download='unit-'+currentUnit+'-problems.json';
+  a.href=url;a.download='unit-'+_st.currentUnit+'-problems.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('Exported unit '+currentUnit+' problems');
+  showToast('Exported unit '+_st.currentUnit+' problems');
 }
 function jumpToRandomProblem(){
   if(typeof document==='undefined')return;
-  var unsolved=activeProbs.filter(function(p){return answered[p.id]===undefined;});
+  var unsolved=_st.activeProbs.filter(function(p){return _st.answered[p.id]===undefined;});
   if(!unsolved.length){showToast('All problems solved! Great job. \ud83c\udf89');return;}
   var p=unsolved[Math.floor(Math.random()*unsolved.length)];
   var card=document.getElementById('pc-'+p.id);
@@ -6197,7 +6214,7 @@ function importProgressJSON(file){
           _storageSave('sh-notes',data.notes);
         }
       }
-      buildProblems(currentUnit);
+      buildProblems(_st.currentUnit);
       buildRoadmap();
       buildProgressPanel();
       updateStreakDisplay();
@@ -6381,21 +6398,20 @@ function generateCertificate(){
   showToast('Congratulations! Certificate generated. 🎓');
 }
 
-let stepProgress={};
 
 function revealNextStep(probId,total){
   if(typeof document==='undefined')return;
-  if(!stepProgress[probId])stepProgress[probId]=0;
-  const idx=stepProgress[probId];
+  if(!_st.stepProgress[probId])_st.stepProgress[probId]=0;
+  const idx=_st.stepProgress[probId];
   if(idx>=total)return;
   const step=document.getElementById('step-'+probId+'-'+idx);
   if(step)step.classList.remove('hidden');
-  stepProgress[probId]++;
+  _st.stepProgress[probId]++;
   const btn=document.getElementById('stepBtn-'+probId);
-  if(stepProgress[probId]>=total){
+  if(_st.stepProgress[probId]>=total){
     if(btn)btn.style.display='none';
   }else{
-    if(btn)btn.textContent='Show Step '+(stepProgress[probId]+1)+' →';
+    if(btn)btn.textContent='Show Step '+(_st.stepProgress[probId]+1)+' →';
   }
 }
 
