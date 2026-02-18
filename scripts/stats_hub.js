@@ -1424,7 +1424,8 @@ function ansMC(id,ch){
   answered[id]=ch;const ok=ch===p.ans;if(ok)pScore++;
   if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   p.ch.forEach((_,j)=>{const el=document.getElementById('cb-'+id+'-'+j);if(!el)return;el.classList.add('dis');el.setAttribute('aria-disabled','true');if(j===p.ans)el.classList.add('right');else if(j===ch&&!ok)el.classList.add('wrong');});
-  showFB(id,ok,p.ex);
+  var _ansLabel=ok?null:('ABCD'[ch]+'. '+p.ch[ch]);
+  showFB(id,ok,p.ex,_ansLabel);
   addToReview(p.id,ok);
   persistPracticeState();
   const diff=p.diff||'medium';
@@ -1453,7 +1454,7 @@ function ansFR(id){
   answered[id]=v;const ok=Math.abs(v-p.ans)<=(p.tol||0.1);if(ok)pScore++;
   if(!ok&&p.hint){wrongAttempts[id]=(wrongAttempts[id]||0)+1;if(wrongAttempts[id]>=2&&typeof showHint!=='undefined'){showHint(String(id));showToast('Hint revealed after 2 incorrect attempts.');}}
   inp.style.borderColor=ok?'var(--green)':'var(--red)';inp.disabled=true;
-  showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex);
+  showFB(id,ok,ok?p.ex:'Correct answer: '+p.ans+'. '+p.ex,ok?null:String(v));
   addToReview(p.id,ok);
   persistPracticeState();
   const diff=p.diff||'medium';
@@ -1821,7 +1822,7 @@ function updateDailyDigest(){
   }
 }
 
-function showFB(id,ok,ex){
+function showFB(id,ok,ex,userAnswerLabel){
   const fb=document.getElementById('fb-'+id),pc=document.getElementById('pc-'+id),b=document.getElementById('fbx-'+id);
   if(!fb||!pc||!b)return;
   fb.classList.add('show');
@@ -1830,6 +1831,12 @@ function showFB(id,ok,ex){
   const s=document.createElement('strong');
   s.textContent=ok?'Correct!':'Not quite.';
   b.appendChild(s);
+  if(!ok&&userAnswerLabel){
+    var prev=document.createElement('div');
+    prev.className='fb-prev-answer';
+    prev.textContent='Your answer: '+userAnswerLabel;
+    b.appendChild(prev);
+  }
   const _ann=document.getElementById('a11yAnnounce');if(_ann)_ann.textContent=ok?'Correct!':'Incorrect. '+ex;
   const unit=allProbs[currentUnit]||[];
   const prob=unit.find(function(p){return String(p.id)===String(id);});

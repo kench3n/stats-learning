@@ -443,6 +443,7 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .fb-ok{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.18);color:var(--green);}
 .fb-no{background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.12);color:#fca5a5;}
 .fb-box strong{color:var(--text);}.fb-box .ex{color:var(--dim);margin-top:4px;display:block;}
+.fb-prev-answer{font-size:11px;color:var(--muted);margin-top:4px;}
 
 /* ===================== REVIEW ===================== */
 .review-stats{display:flex;gap:24px;justify-content:center;margin:24px 0;flex-wrap:wrap;}
