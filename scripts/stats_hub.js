@@ -61,6 +61,7 @@ var _drawNormD=_debounce(function(){if(typeof drawNorm==='function')drawNorm();}
 var _drawCompD=_debounce(function(){if(typeof drawComp==='function')drawComp();},16);
 var _drawBoxD=_debounce(function(){if(typeof drawBox==='function')drawBox();},16);
 var _drawHistD=_debounce(function(){if(typeof drawHist==='function')drawHist();},16);
+var _loadPresetD=_debounce(function(){if(typeof loadPreset==='function')loadPreset();},80);
 // ===================== EVENT DELEGATION =====================
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   // Click delegation
@@ -107,7 +108,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(action==='drawNorm'){_drawNormD();}
     else if(action==='drawComp'){_drawCompD();}
     else if(action==='drawBox'){_drawBoxD();}
-    else if(action==='loadPreset'){loadPreset();}
+    else if(action==='loadPreset'){_loadPresetD();}
     else if(action==='searchRoadmap'){searchRoadmapTopics(e.target.value);}
     else if(action==='searchProblems'){searchProblems();}
     else if(action==='filterFormulas'){filterFormulas(e.target.value);}
@@ -1793,6 +1794,8 @@ function savePracticeState(unit,state){
 function persistPracticeState(){savePracticeState(_st.currentUnit,{answered: _st.answered});if(typeof document!=='undefined')buildProgressPanel();}
 
 var buildProblems=function(unit=_st.currentUnit){
+  // Disconnect previous observer to prevent memory leaks
+  if(_st._probObserver){_st._probObserver.disconnect();_st._probObserver=null;}
   // Clear leaked problem timers from previous build
   Object.keys(_st.probTimers).forEach(function(id){clearInterval(_st.probTimers[id]);});
   _st.probTimers={};_st.probTimerStart={};
@@ -1810,21 +1813,21 @@ var buildProblems=function(unit=_st.currentUnit){
   let html='';
   _st.activeProbs.forEach((p,p_idx)=>{
     const dc=p.diff==='easy'?'d-e':p.diff==='medium'?'d-m':'d-h';
-    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${p.topic}')" style="cursor:pointer" title="Filter by topic">${p.topic}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${p.q}</div>${p.data?'<div class="pc-data">'+p.data+'</div>':''}</div>`;
-    if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${p.hint}</div></div>`;}
+    html+=`<div class="pc" id="pc-${p.id}" data-id="${p.id}" style="animation-delay:${p_idx*0.03}s" tabindex="0" onfocus="_st.focusedProblemId='${p.id}'" onblur="_st.focusedProblemId=null"><div class="pc-head"><span class="pc-num" onclick="showAnswerHistory('${p.id}')" title="View answer history" style="cursor:pointer">#${p.id}</span><span class="pc-diff ${dc}" title="Community: ${40+(p.id%50)}% correct (${50+(p.id%150)} attempts)">${p.diff}</span><span class="prob-rating-display" id="prd-${p.id}">${_ratings[p.id]?'★'.repeat(_ratings[p.id]):''}</span><span class="pc-topic" onclick="filterByTopic('${_esc(p.topic)}')" style="cursor:pointer" title="Filter by topic">${_esc(p.topic)}</span><span class="solve-time">~${p.diff==='easy'?1:p.diff==='medium'?3:5} min</span><a href="#" class="viz-link" onclick="goPage('visualizer');setUnit(${p.unit});return false;" title="Open Unit ${p.unit} visualizer">📊 Visualize</a><button class="bm-btn ${bm[p.id]?'bookmarked':''}" id="bm-${p.id}" onclick="toggleBookmark('${p.id}')" aria-label="Bookmark problem">${bm[p.id]?'★':'☆'}</button><button class="report-btn" onclick="reportProblem('${p.id}',${p.unit})" title="Report an issue">⚠</button><span class="prob-timer" id="timer-${p.id}">⏱ 0:00</span><button class="card-collapse-btn" onclick="toggleCollapse(this)" aria-label="Collapse problem" title="Collapse">▾</button><button class="prob-link-btn" onclick="copyProblemLink('${p.id}')" title="Copy link to this problem">🔗</button><button class="prob-share-btn" onclick="shareProblem('${p.id}')" title="Share problem text">Share</button></div><div class="pc-body"><div class="pc-q">${_esc(p.q)}</div>${p.data?'<div class="pc-data">'+_esc(p.data)+'</div>':''}</div>`;
+    if(p.hint){html+=`<div class="hint-row"><button class="hint-btn" onclick="showHint('${p.id}')" id="hb-${p.id}">💡 Show Hint</button><div class="hint-text" id="ht-${p.id}" style="display:none;">${_esc(p.hint)}</div></div>`;}
     if(p.type==='mc'){
       html+='<div class="choices" id="ch-'+p.id+'">';const L='ABCD';
-      p.ch.forEach((ch,j)=>{html+=`<div class="ch-btn" role="button" tabindex="0" onclick="ansMC(${p.id},${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ansMC(${p.id},${j})}" id="cb-${p.id}-${j}"><span class="lt">${L[j]}</span><span>${ch}</span></div>`;});
+      p.ch.forEach((ch,j)=>{html+=`<div class="ch-btn" role="button" tabindex="0" onclick="ansMC(${p.id},${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ansMC(${p.id},${j})}" id="cb-${p.id}-${j}"><span class="lt">${L[j]}</span><span>${_esc(ch)}</span></div>`;});
       html+='</div>';
     }else{
-      html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
+      html+=`<div class="fr-row"><input type="text" id="fi-${p.id}" placeholder="Your answer..." aria-label="Answer for problem ${p.id}" onkeydown="if(event.key==='Enter')ansFR(${p.id})"><button onclick="ansFR(${p.id})">Check</button></div>`;
     }
     html+=`<div class="fb" id="fb-${p.id}"><div class="fb-box" id="fbx-${p.id}"></div></div><div class="note-row"><input type="text" class="note-input" id="note-${p.id}" placeholder="Add a note..." value="${(notes[p.id]||'').replace(/"/g,'&quot;')}" onchange="saveNote('${p.id}')" oninput="var wc=this.value.trim().split(/\\s+/).filter(Boolean).length;var el=document.getElementById('nwc-${p.id}');if(el){el.textContent=wc+' / 50 words';el.classList.toggle('met',wc>=50);}">  </div><span class="note-wc" id="nwc-${p.id}">0 / 50 words</span><div class="diff-vote-row" id="dvr-${p.id}"><span class="diff-vote-label">Rate difficulty:</span><button class="diff-vote-btn" data-vote="easy" onclick="voteDiff(${p.id},\'easy\')">😅 Too Easy</button><button class="diff-vote-btn" data-vote="ok" onclick="voteDiff(${p.id},\'ok\')">✓ Just Right</button><button class="diff-vote-btn" data-vote="hard" onclick="voteDiff(${p.id},\'hard\')">😤 Too Hard</button></div></div>`;
   });
   c.innerHTML=html;
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
     var total=_st.activeProbs.length;
-    var obs=new IntersectionObserver(function(entries){
+    var obs=_st._probObserver=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         var id=entry.target.dataset.id;
         if(entry.isIntersecting){
@@ -2115,11 +2118,11 @@ function showReviewCard(){
     html+='<div class="choices">';
     const labels='ABCD';
     (prob.ch||[]).forEach((ch,j)=>{
-      html+=`<div class="ch-btn" role="button" tabindex="0" onclick="reviewMC('${pid}',${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();reviewMC('${pid}',${j})}" id="rv-${pid}-${j}"><span class="lt">${labels[j]||''}</span><span>${ch}</span></div>`;
+      html+=`<div class="ch-btn" role="button" tabindex="0" onclick="reviewMC('${pid}',${j})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();reviewMC('${pid}',${j})}" id="rv-${pid}-${j}"><span class="lt">${labels[j]||''}</span><span>${_esc(ch)}</span></div>`;
     });
     html+='</div>';
   }else{
-    html+=`<div class="fr-row"><input type="text" id="rv-fi-${pid}" placeholder="Your answer..." onkeydown="if(event.key==='Enter')reviewFR('${pid}')"><button onclick="reviewFR('${pid}')">Check</button></div>`;
+    html+=`<div class="fr-row"><input type="text" id="rv-fi-${pid}" placeholder="Your answer..." aria-label="Answer for review problem ${pid}" onkeydown="if(event.key==='Enter')reviewFR('${pid}')"><button onclick="reviewFR('${pid}')">Check</button></div>`;
   }
 
   html+=`<div class="fb" id="rv-fb-${pid}"><div class="fb-box" id="rv-fbx-${pid}"></div></div>`;
@@ -3939,7 +3942,13 @@ function loadTheme(){
 function toggleShortcutsHelp(){
   if(typeof document==='undefined')return;
   const el=document.getElementById('shortcutsOverlay');
-  if(el)el.style.display=el.style.display==='none'?'flex':'none';
+  if(!el)return;
+  const isOpen=el.style.display!=='none';
+  el.style.display=isOpen?'none':'flex';
+  if(!isOpen){
+    const modal=el.querySelector('.shortcuts-modal');
+    if(modal)_trapFocus(el,modal);
+  }
 }
 function downloadShortcutCheatsheet(){
   if(typeof Blob==='undefined'||typeof document==='undefined')return;
@@ -5104,7 +5113,7 @@ function buildDailyChallenge(){
         html+='<div class="dc-ch" id="dc-ch-'+i+'-'+j+'" onclick="dcAnsMC('+i+','+j+')">'+ch+'</div>';
       });
     }else{
-      html+='<div class="dc-fr"><input type="text" id="dc-fi-'+i+'" placeholder="Your answer..." onkeydown="if(event.key===&quot;Enter&quot;)dcAnsFR('+i+')"><button onclick="dcAnsFR('+i+')">Check</button></div>';
+      html+='<div class="dc-fr"><input type="text" id="dc-fi-'+i+'" placeholder="Your answer..." aria-label="Answer for daily challenge question '+(i+1)+'" onkeydown="if(event.key===&quot;Enter&quot;)dcAnsFR('+i+')"><button onclick="dcAnsFR('+i+')">Check</button></div>';
     }
     html+='<div class="dc-fb" id="dc-fb-'+i+'"></div></div>';
   });
@@ -5890,11 +5899,13 @@ function startMatchGame(unit){
   function render(){
     let html='<div class="match-cols"><div class="match-col">';
     left.forEach(l=>{
-      html+='<div class="match-item '+(l.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===0&&_st.matchSelected.id===l.id&&!l.matched?' match-sel':'')+'" id="ml-'+l.id+'" onclick="matchClick(0,'+l.id+')">'+l.text+'</div>';
+      var cls='match-item '+(l.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===0&&_st.matchSelected.id===l.id&&!l.matched?' match-sel':'');
+      html+='<div class="'+cls+'" id="ml-'+l.id+'" role="button" tabindex="0" aria-pressed="'+(!l.matched&&_st.matchSelected&&_st.matchSelected.side===0&&_st.matchSelected.id===l.id?'true':'false')+'" onclick="matchClick(0,'+l.id+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();matchClick(0,'+l.id+');}">'+_esc(l.text)+'</div>';
     });
     html+='</div><div class="match-col">';
     right.forEach(r=>{
-      html+='<div class="match-item '+(r.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===1&&_st.matchSelected.id===r.id&&!r.matched?' match-sel':'')+'" id="mr-'+r.id+'" onclick="matchClick(1,'+r.id+')">'+r.text+'</div>';
+      var cls='match-item '+(r.matched?'match-done':'')+(_st.matchSelected&&_st.matchSelected.side===1&&_st.matchSelected.id===r.id&&!r.matched?' match-sel':'');
+      html+='<div class="'+cls+'" id="mr-'+r.id+'" role="button" tabindex="0" aria-pressed="'+(!r.matched&&_st.matchSelected&&_st.matchSelected.side===1&&_st.matchSelected.id===r.id?'true':'false')+'" onclick="matchClick(1,'+r.id+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();matchClick(1,'+r.id+');}">'+_esc(r.text)+'</div>';
     });
     html+='</div></div>';
     board.innerHTML=html;
@@ -6561,8 +6572,27 @@ function findTutorResponse(query){
 
 function toggleTutor(){
   if(typeof document==='undefined')return;
-  const panel=document.getElementById('tutorPanel');
-  if(panel)panel.style.display=panel.style.display==='none'?'flex':'none';
+  var panel=document.getElementById('tutorPanel');
+  if(!panel)return;
+  var isOpen=panel.style.display!=='none';
+  if(isOpen){
+    panel.style.display='none';
+    if(panel._tutorPrevFocus&&panel._tutorPrevFocus.focus)panel._tutorPrevFocus.focus();
+    if(panel._tutorKeyHandler)panel.removeEventListener('keydown',panel._tutorKeyHandler);
+  } else {
+    panel._tutorPrevFocus=document.activeElement;
+    panel.style.display='flex';
+    var focusable=panel.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+    if(focusable.length)focusable[0].focus();
+    panel._tutorKeyHandler=function(e){
+      if(e.key==='Escape'){toggleTutor();return;}
+      if(e.key!=='Tab'||!focusable.length)return;
+      var first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+      else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+    };
+    panel.addEventListener('keydown',panel._tutorKeyHandler);
+  }
 }
 
 function sendTutorMessage(){
