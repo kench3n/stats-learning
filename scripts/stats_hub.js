@@ -76,7 +76,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     else if(action==='filter'){filterProblems(el.dataset.val);}
     else if(action==='searchChip'){applySearchChip(el.dataset.val);}
     else if(action==='analytics'){showAnalytics(el.dataset.val,e);}
-    else if(action==='pomoTime'){setPomoTime(+el.dataset.val);}
+    else if(action==='pomoTime'){setPomoTime(+el.dataset.val,el);}
     else if(action==='fcMode'){setFCMode(el.dataset.val);}
     else if(action==='fcMark'){fcMark(el.dataset.val==='true');}
     else if(action==='formulaNav'){formulaUnitNav(+el.dataset.dir);}
@@ -3775,13 +3775,13 @@ function togglePomoPanel(){
   if(p)p.style.display=p.style.display==='none'?'':'none';
 }
 
-function setPomoTime(mins){
+function setPomoTime(mins,triggerEl){
   if(_st.pomoState.running)return;
   _st.pomoState.seconds=mins*60;
   _st.pomoState.total=mins*60;
   updatePomoDisplay();
   document.querySelectorAll('.pomo-preset').forEach(b=>b.classList.remove('active'));
-  if(typeof event!=='undefined'&&event&&event.target)event.target.classList.add('active');
+  if(triggerEl)triggerEl.classList.add('active');
 }
 
 function startPomo(){
