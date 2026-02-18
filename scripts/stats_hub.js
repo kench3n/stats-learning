@@ -1169,10 +1169,36 @@ function buildPinnedFormulas(unit,container){
   div.innerHTML=html;
   if(container&&container.parentNode)container.parentNode.insertBefore(div,container);
 }
+function trackFormulaView(unit){
+  if(typeof localStorage==='undefined')return;
+  try{
+    var recent=JSON.parse(localStorage.getItem('sh-formula-recent')||'[]');
+    recent=recent.filter(function(u){return u!==unit;});
+    recent.unshift(unit);
+    recent=recent.slice(0,3);
+    localStorage.setItem('sh-formula-recent',JSON.stringify(recent));
+  }catch(e){}
+  buildRecentFormulaUnits();
+}
+function buildRecentFormulaUnits(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('formulaRecentRow');if(!el)return;
+  var recent=[];
+  try{recent=JSON.parse(localStorage.getItem('sh-formula-recent')||'[]');}catch(e){}
+  if(!recent.length){el.style.display='none';return;}
+  el.style.display='';
+  var html='<span class="formula-recent-label">Recent:</span>';
+  recent.forEach(function(u){
+    var name=typeof UNIT_META!=='undefined'&&UNIT_META[u]?UNIT_META[u].name:'Unit '+u;
+    html+='<button class="formula-recent-chip" onclick="buildFormulas('+u+')">'+name+'</button>';
+  });
+  el.innerHTML=html;
+}
 function buildFormulas(unit){
   if(typeof document==='undefined')return;
   const content=document.getElementById('formulaContent');
   if(!content)return;
+  trackFormulaView(unit);
   var lbl=document.getElementById('formulaUnitLabel');
   if(lbl){var un=typeof UNIT_META!=='undefined'&&UNIT_META[unit]?UNIT_META[unit].name:'';lbl.textContent=un?'Unit '+unit+': '+un:'';};
   const formulas=FORMULAS[unit]||[];

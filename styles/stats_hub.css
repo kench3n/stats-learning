@@ -1365,3 +1365,7 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .potd-question{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5;}
 .potd-btn{padding:6px 14px;background:none;border:1px solid var(--cyan);border-radius:6px;color:var(--cyan);cursor:pointer;font-size:12px;font-family:'Space Mono',monospace;transition:background 0.2s;}
 .potd-btn:hover{background:rgba(6,182,212,0.1);}
+.formula-recent-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 0 6px;font-size:11px;}
+.formula-recent-label{color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;white-space:nowrap;}
+.formula-recent-chip{padding:2px 8px;border:1px solid var(--border);border-radius:10px;background:none;color:var(--muted);cursor:pointer;font-size:10px;font-family:'Space Mono',monospace;transition:border-color 0.2s,color 0.2s;}
+.formula-recent-chip:hover{border-color:var(--cyan);color:var(--cyan);}
