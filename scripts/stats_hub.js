@@ -1018,6 +1018,7 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
     loadTheme();
     buildRoadmap();buildProblems();loadPreset();
     initFormulaResize();
+    initStickyProgress();
     updateStreakDisplay();
     updateXPDisplay();
     updateMilestoneDisplay();
@@ -1095,6 +1096,32 @@ function setAllScores(){
   const scoreFill=document.getElementById('scoreFill');
   if(scoreText)scoreText.textContent=pScore+' / '+n+' correct';
   if(scoreFill)scoreFill.style.width=(activeProbs.length?n/activeProbs.length*100:0)+'%';
+  updateStickyProgress();
+}
+function updateStickyProgress(){
+  if(typeof document==='undefined')return;
+  var sp=document.getElementById('stickyProgress');
+  var spFill=document.getElementById('stickyProgressFill');
+  var spText=document.getElementById('stickyProgressText');
+  if(!sp)return;
+  var n=typeof answered!=='undefined'?Object.keys(answered).length:0;
+  var total=typeof activeProbs!=='undefined'?activeProbs.length:0;
+  var pct=total>0?Math.round(n/total*100):0;
+  if(spFill)spFill.style.width=pct+'%';
+  if(spText)spText.textContent=pScore+' / '+n+' correct';
+}
+function initStickyProgress(){
+  if(typeof document==='undefined'||typeof IntersectionObserver==='undefined')return;
+  var scoreBar=document.querySelector('.score-bar');if(!scoreBar)return;
+  var sp=document.getElementById('stickyProgress');if(!sp)return;
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      var active=document.getElementById('page-practice');
+      var isPractice=active&&active.classList.contains('active');
+      sp.style.display=(!e.isIntersecting&&isPractice)?'':'none';
+    });
+  },{threshold:0});
+  obs.observe(scoreBar);
 }
 function getPracticeState(unit){
   if(typeof localStorage==='undefined')return{};
