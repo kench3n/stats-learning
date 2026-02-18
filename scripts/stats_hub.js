@@ -27,6 +27,22 @@ function _esc(str) {
                     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ===================== DEBOUNCED STORAGE SAVE =====================
+var _pendingSaves={};
+function _storageSaveSoon(key,val){
+  _pendingSaves[key]=val;
+  _flushSaves();
+}
+var _flushSaves=_debounce(function(){
+  var keys=Object.keys(_pendingSaves);
+  for(var i=0;i<keys.length;i++){_storageSave(keys[i],_pendingSaves[keys[i]]);}
+  _pendingSaves={};
+},300);
+// ===================== DEBOUNCED DRAW WRAPPERS =====================
+var _drawNormD=_debounce(function(){if(typeof drawNorm==='function')drawNorm();},16);
+var _drawCompD=_debounce(function(){if(typeof drawComp==='function')drawComp();},16);
+var _drawBoxD=_debounce(function(){if(typeof drawBox==='function')drawBox();},16);
+var _drawHistD=_debounce(function(){if(typeof drawHist==='function')drawHist();},16);
 // ===================== EVENT DELEGATION =====================
 if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
   // Click delegation
@@ -69,10 +85,10 @@ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')
   document.addEventListener('input',function(e){
     var action=e.target.dataset?e.target.dataset.action:null;
     if(!action)return;
-    if(action==='binSlider'){var bv=document.getElementById('binCountVal');if(bv)bv.textContent=e.target.value;drawHist();}
-    else if(action==='drawNorm'){drawNorm();}
-    else if(action==='drawComp'){drawComp();}
-    else if(action==='drawBox'){drawBox();}
+    if(action==='binSlider'){var bv=document.getElementById('binCountVal');if(bv)bv.textContent=e.target.value;_drawHistD();}
+    else if(action==='drawNorm'){_drawNormD();}
+    else if(action==='drawComp'){_drawCompD();}
+    else if(action==='drawBox'){_drawBoxD();}
     else if(action==='loadPreset'){loadPreset();}
     else if(action==='searchRoadmap'){searchRoadmapTopics(e.target.value);}
     else if(action==='searchProblems'){searchProblems();}
@@ -1759,6 +1775,9 @@ function savePracticeState(unit,state){
 function persistPracticeState(){savePracticeState(_st.currentUnit,{answered: _st.answered});if(typeof document!=='undefined')buildProgressPanel();}
 
 buildProblems=function(unit=_st.currentUnit){
+  // Clear leaked problem timers from previous build
+  Object.keys(_st.probTimers).forEach(function(id){clearInterval(_st.probTimers[id]);});
+  _st.probTimers={};_st.probTimerStart={};
   _st.activeProbs=allProbs[unit]||[];
   _st.wrongAttempts={};_st.stepHintProgress={};
   // Session timer
@@ -1786,34 +1805,28 @@ buildProblems=function(unit=_st.currentUnit){
   });
   c.innerHTML=html;
   if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
-    const obs=new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        const id=entry.target.dataset.id;
-        if(entry.isIntersecting&&!_st.probTimers[id]){
-          _st.probTimerStart[id]=Date.now();
-          var _prob=_st.activeProbs.find(function(x){return String(x.id)===id;});
-          var _expSecs=_prob?(_prob.diff==='easy'?60:_prob.diff==='medium'?180:300):180;
-          _st.probTimers[id]=setInterval(function(){
-            if(typeof document==='undefined')return;
-            const el=document.getElementById('timer-'+id);
-            if(!el)return;
-            const secs=Math.floor((Date.now()-_st.probTimerStart[id])/1000);
-            const m=Math.floor(secs/60),s=secs%60;
-            el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
-            el.classList.toggle('timer-warn',secs>=_expSecs&&secs<_expSecs*2);
-            el.classList.toggle('timer-over',secs>=_expSecs*2);
-          },1000);
-        }
-      });
-    },{threshold:0.5});
-    document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
-  }
-  // Problem counter observer
-  if(typeof IntersectionObserver!=='undefined'&&typeof document!=='undefined'){
     var total=_st.activeProbs.length;
-    var counterObs=new IntersectionObserver(function(entries){
+    var obs=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
+        var id=entry.target.dataset.id;
         if(entry.isIntersecting){
+          // Timer start
+          if(!_st.probTimers[id]){
+            _st.probTimerStart[id]=Date.now();
+            var _prob=_st.activeProbs.find(function(x){return String(x.id)===id;});
+            var _expSecs=_prob?(_prob.diff==='easy'?60:_prob.diff==='medium'?180:300):180;
+            _st.probTimers[id]=setInterval(function(){
+              if(typeof document==='undefined')return;
+              var el=document.getElementById('timer-'+id);
+              if(!el)return;
+              var secs=Math.floor((Date.now()-_st.probTimerStart[id])/1000);
+              var m=Math.floor(secs/60),s=secs%60;
+              el.textContent='⏱ '+m+':'+(s<10?'0':'')+s;
+              el.classList.toggle('timer-warn',secs>=_expSecs&&secs<_expSecs*2);
+              el.classList.toggle('timer-over',secs>=_expSecs*2);
+            },1000);
+          }
+          // Problem counter
           var cards=Array.from(document.querySelectorAll('.pc'));
           var idx=cards.indexOf(entry.target)+1;
           var ctr=document.getElementById('probCounter');
@@ -1821,7 +1834,7 @@ buildProblems=function(unit=_st.currentUnit){
         }
       });
     },{threshold:0.5});
-    document.querySelectorAll('.pc').forEach(function(card){counterObs.observe(card);});
+    document.querySelectorAll('.pc').forEach(function(card){obs.observe(card);});
   }
   if(typeof localStorage!=='undefined'){
     try{
@@ -1922,7 +1935,7 @@ function voteDiff(probId,vote){
   try{
     var votes=_storage('sh-diff-votes',{});
     votes[String(probId)]=vote;
-    _storageSave('sh-diff-votes',votes);
+    _storageSaveSoon('sh-diff-votes',votes);
   }catch(e){}
   if(typeof document==='undefined')return;
   var row=document.getElementById('dvr-'+probId);
@@ -3480,18 +3493,18 @@ function drawRegOut(){
   const canvas=document.getElementById('regCanvas');
   if(canvas&&!canvas.dataset.bound){
     canvas.dataset.bound='1';
-    canvas.addEventListener('mousemove',e=>{
-      const r=canvas.getBoundingClientRect();
-      const x=e.clientX-r.left,y=e.clientY-r.top;
+    canvas.addEventListener('mousemove',_throttle(function(e){
+      var r=canvas.getBoundingClientRect();
+      var x=e.clientX-r.left,y=e.clientY-r.top;
       vizState.u11.mouse={x,y};
-      const hit=vizState.u11.hotspots.find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h);
-      const newHover=hit?hit.key:'';
+      var hit=vizState.u11.hotspots.find(function(h){return x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h;});
+      var newHover=hit?hit.key:'';
       if(newHover!==vizState.u11.hover){
         vizState.u11.hover=newHover;
         setElText('u11Tip',hit?hit.tip:'Hover a highlighted value for explanation.');
         drawRegOut();
       }
-    });
+    },16));
     canvas.addEventListener('mouseleave',()=>{
       if(vizState.u11.hover!==''){
         vizState.u11.hover='';
@@ -4591,7 +4604,7 @@ function toggleCollapse(btn){
       var key='sh-collapsed-'+unit;
       var set=new Set(_storage(key,[]));
       if(collapsed)set.add(String(id));else set.delete(String(id));
-      _storageSave(key,[...set]);
+      _storageSaveSoon(key,[...set]);
     }catch(e){}
   }
 }
