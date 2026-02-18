@@ -769,7 +769,7 @@ function buildRoadmap(){
         var _noteText=_tnotes[t.n]||'';
         var _safeN=t.n.replace(/"/g,'&quot;');
         var _noteStyle=_noteText?'':'display:none';
-        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" onclick="editTopicNote(this.dataset.tn,event)" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_noteText}</span></div>`;
+        html+=`<div class="ti" role="checkbox" tabindex="0" aria-checked="false" onclick="toggleTopic(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTopic(this)}"><div class="tc"></div><span class="tn">${t.n}</span>${t.tag?`<span class="tt tt-${t.tag}">${t.tag}</span>`:''}<span class="topic-note-icon" data-tn="${_safeN}" onclick="editTopicNote(this.dataset.tn,event)" title="Add note">📝</span><span class="topic-note-text" style="${_noteStyle}">${_esc(_noteText)}</span></div>`;
       });
       html+=`</div><div class="res-tog"><button class="res-btn" onclick="toggleRes(this)">Resources ↓</button></div><div class="res-panel">`;
       (c.res||[]).forEach(r=>{
