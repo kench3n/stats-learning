@@ -1078,3 +1078,79 @@ Below the Compare visualizer, show a summary table comparing stats of both distr
 - Show side-by-side stats table: Metric | Group A | Group B
 - Call when compare tab is active and data changes
 - CSS: `.compare-stats-table`, `.cst-row`, `.cst-header`
+
+### TASK: practice-answer-history
+Show a per-problem answer history panel when user clicks a problem's "#X" id badge.
+- `buildAnswerHistory(probId)`: reads `sh-answers-history-{probId}` (array of {time, val, correct}), shows last 5 attempts
+- Add `data-hist` attribute to `.pc-num` span and onclick handler `showAnswerHistory(id)`
+- Modal: "Last Attempts" title, each row shows time-ago + answer + ✓/✗ icon
+- CSS: `.answer-hist-modal`, `.ah-row`, `.ah-val`, `.ah-status`
+- Store attempt data in `checkAnswer()` — append to the history array before saving answered state
+
+### TASK: home-activity-heatmap-tooltip
+Add a tooltip to the streak heatmap cells showing exact date and problems solved.
+- Each heatmap cell: add `title="YYYY-MM-DD: N problems"` attribute
+- `buildStreakHeatmap()`: already builds cells — update the existing cell HTML to include the title attribute
+- On hover the native tooltip should show the date info
+- No additional JavaScript needed beyond updating the title attribute in cell generation
+
+### TASK: formula-panel-search-highlight
+Highlight matched text in formula names/formulas when a search query is active.
+- In `filterFormulas(query)`: after filtering, for each visible formula row, wrap matched substrings in `<mark>` tags
+- `_highlightText(text, query)`: returns text with matched substrings wrapped in `<mark>`
+- Apply to both the formula name span and the formula code span
+- CSS: `.formula-list mark { background: color-mix(in srgb, var(--amber) 30%, transparent); color: var(--text); border-radius: 2px; }`
+- Guard: only apply if query length >= 2
+
+### TASK: practice-session-notes
+Add a freeform session notes textarea that persists per unit and is shown below the problems list.
+- HTML: `<div class="session-notes-panel" id="sessionNotesPanel">` with a `<textarea id="sessionNotes" placeholder="Session notes…">` and autosave
+- `saveSessionNotes()`: saves `sessionNotes.value` to `sh-session-notes-{unit}`
+- `loadSessionNotes(unit)`: reads and populates the textarea
+- Call `loadSessionNotes(currentUnit)` from `buildProblems()`
+- Autosave on `oninput` with 500ms debounce using `clearTimeout` / `setTimeout`
+- CSS: `.session-notes-panel`, `#sessionNotes`
+
+### TASK: home-longest-streak-display
+Show the user's longest ever streak alongside the current streak on the home page.
+- `buildLongestStreak()`: reads `sh-activity` history, computes the longest consecutive day streak ever
+- HTML: Add `<span class="longest-streak" id="longestStreak">` next to the streak counter
+- Show as "(best: N🔥)" in small muted text
+- Call from `goPage('home')`
+- CSS: `.longest-streak`
+
+### TASK: visualizer-normal-shade-area
+In the Normal Distribution visualizer, add a shaded area between two z-score sliders.
+- Add two range inputs: `z1` (default -1) and `z2` (default +1) to the normal viz controls
+- `drawNorm()`: shade the area between z1 and z2 under the curve with a semi-transparent fill
+- Show the shaded probability P(z1 < Z < z2) in a stat value display
+- CSS: no new classes needed — reuse existing stat display elements
+
+### TASK: practice-problem-favorites-filter
+Add a "Favorites Only" toggle button to the practice filter bar that filters to bookmarked problems.
+- HTML: Add `<button class="fav-filter-btn" id="favFilterBtn" onclick="toggleFavFilter()">★ Favorites</button>` to filter area
+- `toggleFavFilter()`: toggles `favFilterActive` boolean, re-renders problem list
+- In `buildProblems()` or filter function: if `favFilterActive`, only show problems whose ID is in `sh-bookmarks`
+- CSS: `.fav-filter-btn`, `.fav-filter-btn.active { border-color: var(--amber); color: var(--amber); }`
+
+### TASK: roadmap-search-highlight
+Highlight matched text in roadmap topic names when a search query is typed.
+- In the roadmap search handler: for each visible topic element, wrap matched substrings in `<mark>` tags
+- `_highlightRoadmapText(el, query)`: finds `.rm-topic-name` within the element, applies highlight
+- Remove highlights when search is cleared
+- CSS: `.roadmap-list mark { background: color-mix(in srgb, var(--cyan) 20%, transparent); border-radius: 2px; }`
+
+### TASK: home-recent-badges-display
+Show the 3 most recently earned badges on the home page.
+- `buildRecentBadges()`: reads `sh-badges` localStorage, gets last 3 earned badges, renders them
+- HTML: `<div class="recent-badges" id="recentBadges">` in home stats area
+- Show each as badge icon + name + "earned N days ago" text
+- Call from `goPage('home')`
+- CSS: `.recent-badges`, `.rb-item`, `.rb-icon`, `.rb-name`, `.rb-when`
+
+### TASK: flashcard-session-stats
+Show a mini stats bar during flashcard session: cards seen, known count, and % known.
+- HTML: Add `<div class="fc-session-stats" id="fcSessionStats">` above the progress bar
+- `updateFCSessionStats()`: counts `fcCards` length, how many marked known (using existing `fcKnown` or tracking), computes %
+- Update after each `fcMark()` call
+- CSS: `.fc-session-stats`, `.fcs-item`
