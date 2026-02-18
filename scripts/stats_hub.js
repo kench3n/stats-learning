@@ -980,9 +980,18 @@ function buildFormulas(unit){
   const formulas=FORMULAS[unit]||[];
   if(!formulas.length){content.innerHTML='';return;}
   let html='';
+  const _FTAG_STOP=['of','the','and','for','a','an','in','to','with','by','on','at','is','are','from','or','if'];
+  function _formulaTags(name){
+    var words=name.replace(/[^a-zA-Z0-9\s]/g,' ').split(/\s+/).filter(function(w){return w.length>=3&&_FTAG_STOP.indexOf(w.toLowerCase())<0;});
+    var seen={},tags=[];
+    words.forEach(function(w){var lw=w.toLowerCase();if(!seen[lw]){seen[lw]=1;tags.push(w);}});
+    return tags.slice(0,3);
+  }
   formulas.forEach(f=>{
     var favs2=[];if(typeof localStorage!=='undefined'){try{var _fp=JSON.parse(localStorage.getItem('sh-formula-favs')||'[]');if(Array.isArray(_fp))favs2=_fp;}catch(e){}}const isFav=favs2.indexOf(f.name)>=0;
-html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button></div>`;
+    var _ftags=_formulaTags(f.name);
+    var _tagsHtml=_ftags.length?'<div class="formula-tags" data-tags="'+_ftags.join(' ').toLowerCase()+'">'+_ftags.map(function(t){return'<span class="formula-tag">'+t+'</span>';}).join('')+'</div>':'';
+html+=`<div class="formula-row"><span class="formula-name">${f.name}</span><span class="formula-eq" onclick="quickCopyFormula(this)" title="Click to copy">${f.formula}</span><button class="formula-copy-btn" onclick="copyFormula(this)" title="Copy formula">⎘</button><button class="formula-fav-btn${isFav?' active':''}" onclick="toggleFormulaFav(this)" title="Favorite">${isFav?'★':'☆'}</button>${_tagsHtml}</div>`;
   });
   content.innerHTML=html;
   // Restore saved height
@@ -1028,7 +1037,9 @@ function filterFormulas(query){
     const rawEq=eqEl?eqEl.getAttribute('data-raw')||eqEl.textContent:'';
     if(nameEl&&!nameEl.getAttribute('data-raw'))nameEl.setAttribute('data-raw',nameEl.textContent);
     if(eqEl&&!eqEl.getAttribute('data-raw'))eqEl.setAttribute('data-raw',eqEl.textContent);
-    const matches=!q||(rawName.toLowerCase().indexOf(q)>=0)||(rawEq.toLowerCase().indexOf(q)>=0);
+    const tagsEl=row.querySelector('.formula-tags');
+    const rawTags=tagsEl?tagsEl.getAttribute('data-tags')||'':'';
+    const matches=!q||(rawName.toLowerCase().indexOf(q)>=0)||(rawEq.toLowerCase().indexOf(q)>=0)||(rawTags.indexOf(q)>=0);
     row.style.display=matches?'':'none';
     if(matches&&nameEl)nameEl.innerHTML=q?_highlightText(rawName,q):rawName;
     if(matches&&eqEl)eqEl.innerHTML=q?_highlightText(rawEq,q):rawEq;

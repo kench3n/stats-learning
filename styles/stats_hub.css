@@ -656,6 +656,8 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .formula-history-row{display:flex;gap:4px;flex-wrap:wrap;padding:4px 0;}
 .formula-history-chip{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px;font-family:'Space Mono',monospace;}
 .formula-history-chip:hover{border-color:var(--cyan);color:var(--cyan);}
+.formula-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
+.formula-tag{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--bg);border:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;}
 .formula-toggle{
   background:var(--bg2);border:1px solid var(--border);border-radius:8px;
   padding:10px 16px;width:100%;text-align:left;cursor:pointer;
