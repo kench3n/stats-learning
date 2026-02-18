@@ -838,6 +838,25 @@ function drawComp(){
   ctx.beginPath();for(let x=xMin;x<=xMax;x+=0.02){const px=toX(x),py=toY(normalPDF(x,muA,sigA));x===xMin?ctx.moveTo(px,py):ctx.lineTo(px,py);}ctx.strokeStyle='#06b6d4';ctx.lineWidth=2.5;ctx.stroke();
   ctx.beginPath();for(let x=xMin;x<=xMax;x+=0.02){const px=toX(x),py=toY(normalPDF(x,muB,sigB));x===xMin?ctx.moveTo(px,py):ctx.lineTo(px,py);}ctx.strokeStyle='#f472b6';ctx.lineWidth=2.5;ctx.stroke();
   ctx.font='12px DM Sans';ctx.fillStyle='#06b6d4';ctx.textAlign='center';ctx.fillText('A',toX(muA),toY(normalPDF(muA,muA,sigA))-10);ctx.fillStyle='#f472b6';ctx.fillText('B',toX(muB),toY(normalPDF(muB,muB,sigB))-10);
+  buildComparisonStats(muA,sigA,muB,sigB);
+}
+function buildComparisonStats(muA,sigA,muB,sigB){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('compareStatsTable');
+  if(!el)return;
+  var iqrA=Math.round(sigA*1.349*100)/100;
+  var iqrB=Math.round(sigB*1.349*100)/100;
+  var rows=[
+    ['Mean',muA.toFixed(2),muB.toFixed(2)],
+    ['Std Dev',sigA.toFixed(2),sigB.toFixed(2)],
+    ['Median',muA.toFixed(2),muB.toFixed(2)],
+    ['IQR',iqrA.toFixed(2),iqrB.toFixed(2)]
+  ];
+  var html='<div class="cst-row cst-header"><span>Metric</span><span style="color:var(--cyan)">Group A</span><span style="color:var(--pink)">Group B</span></div>';
+  rows.forEach(function(r){
+    html+='<div class="cst-row"><span>'+r[0]+'</span><span>'+r[1]+'</span><span>'+r[2]+'</span></div>';
+  });
+  el.innerHTML=html;
 }
 
 // ===================== PRACTICE =====================
