@@ -38,7 +38,7 @@ function goPage(id){
     drawActiveVisualizer();buildVizHistory();buildVizUnitInfo(currentUnit);buildVizDataSummary(currentUnit);
   },50);}
   if(id==='review')updateReviewBadge();
-  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();}
+  if(id==='home'){_statsAnimated=false;updateDailyDigest();buildDailyChallenge();buildWeeklyGoals();buildQuickStats();buildRecentActivity();buildStreakMessage();buildStreakHeatmap();buildWeeklyStatsChart();buildRecentUnits();buildMotivationalQuote();checkStreakFreeze();buildFreezeInfo();}
   if(id==='practice'&&typeof localStorage!=='undefined'){
     var savedGoal=localStorage.getItem('sh-session-goal')||'0';
     if(typeof setTimeout!=='undefined'){setTimeout(function(){var sg=typeof document!=='undefined'?document.getElementById('sessionGoal'):null;if(sg)sg.value=savedGoal;refreshGoalProgress();},15);}
@@ -4280,6 +4280,39 @@ function buildStreakMessage(){
   else msg='Impressive! '+streak+' days straight — you\'re unstoppable.';
   el.textContent=msg;
 }
+function buildWeeklyStatsChart(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var canvas=document.getElementById('weeklyStatsChart');if(!canvas)return;
+  var ctx=canvas.getContext?canvas.getContext('2d'):null;if(!ctx)return;
+  var activity={};
+  try{activity=JSON.parse(localStorage.getItem('sh-activity')||'{}');}catch(e){}
+  var days=[],counts=[],today=todayStr();
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var ds=d.toISOString().slice(0,10);
+    days.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]);
+    counts.push(activity[ds]||0);
+  }
+  var maxC=Math.max.apply(null,counts)||1;
+  var W=canvas.width,H=canvas.height;
+  var dpr=typeof window!=='undefined'&&window.devicePixelRatio?window.devicePixelRatio:1;
+  canvas.width=W*dpr;canvas.height=H*dpr;ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  var barW=Math.floor((W-30)/7)-4;
+  var todayIdx=6;
+  counts.forEach(function(c,i){
+    var x=15+i*(barW+4);
+    var barH=c>0?Math.max(4,Math.floor((c/maxC)*(H-20))):2;
+    var y=H-20-barH;
+    ctx.fillStyle=i===todayIdx?'rgba(34,211,238,0.9)':'rgba(34,211,238,0.4)';
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,barW,barH,2):ctx.rect(x,y,barW,barH);ctx.fill();
+    ctx.fillStyle='rgba(150,150,170,0.7)';ctx.font='9px monospace';ctx.textAlign='center';
+    ctx.fillText(days[i],x+barW/2,H-4);
+    if(c>0){ctx.fillStyle='rgba(200,200,220,0.9)';ctx.fillText(c,x+barW/2,y-2);}
+  });
+  canvas.style.display='block';
+}
+
 function buildStreakHeatmap(){
   if(typeof document==='undefined'||typeof localStorage==='undefined')return;
   var el=document.getElementById('streakHeatmap');if(!el)return;
