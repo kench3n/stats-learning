@@ -764,3 +764,78 @@ Add "Export Unit Problems" button that downloads all problems in the current uni
 - One task per git commit
 - Use Python for any file writes with regex or special characters
 - After all tasks done: invent 10 more, append here, keep going
+
+### TASK: practice-streak-heatmap
+Add a GitHub-style activity heatmap on the home page showing practice activity over the last 12 weeks.
+- HTML: `<div class="streak-heatmap" id="streakHeatmap"></div>` in home stats area after quick stats
+- `buildStreakHeatmap()`: reads `sh-activity` localStorage array of ISO date strings, builds 12-week grid of day cells
+- Each cell is a `<div class="hm-day" title="YYYY-MM-DD: N sessions">` colored by activity count (0=muted, 1=dim, 2=mid, 3+=bright)
+- Call in `goPage('home')` block
+- CSS: `.streak-heatmap`, `.hm-week`, `.hm-day`, `.hm-day[data-level="0/1/2/3"]`
+
+### TASK: roadmap-topic-search
+Add a search input to the roadmap page that highlights matching topics.
+- HTML: `<input type="text" id="rmSearch" placeholder="Search topics..." oninput="searchRoadmapTopics(this.value)" class="rm-search-input">` above `#roadmapTabs`
+- `searchRoadmapTopics(q)`: for each `.ti` element, show/hide based on `.tn` text match, wrap match in `<mark>` tag
+- If query is empty, show all topics
+- CSS: `.rm-search-input`, `.ti mark` for highlight color
+
+### TASK: achievement-share-text
+Add a Share button to each unlocked achievement badge that copies a formatted celebration text.
+- In achievement badge render (where badges are shown), add `<button class="ach-share-btn" onclick="shareAchievement('${m.id}')">Share</button>` to unlocked badges only
+- `shareAchievement(id)`: finds milestone by id, formats "I just earned '${name}' on Stats Learning Hub! ${icon} ${desc}", copies to clipboard via navigator.clipboard
+- Guard with `typeof navigator !== 'undefined' && navigator.clipboard`
+- CSS: `.ach-share-btn` — small, subtle button next to badge
+
+### TASK: problem-steps-toggle
+Show step-by-step solution in the feedback area with a toggle button.
+- The `p.steps` array already exists on some problems (array of step strings)
+- After answering, if `p.steps && p.steps.length > 0`, append toggle button to feedback box
+- `<button class="steps-toggle-btn" onclick="toggleSteps('${p.id}')">Show Steps</button><ol class="steps-list" id="steps-${p.id}" style="display:none;">${steps html}</ol>`
+- `toggleSteps(id)`: shows/hides the steps list, updates button text
+- CSS: `.steps-list`, `.steps-toggle-btn`, `li` inside steps
+
+### TASK: practice-topic-focus
+Clicking the topic label on a problem card filters the problem list to show only that topic.
+- Update `.pc-topic` span: add `onclick="filterByTopic('${p.topic}')"` and `style="cursor:pointer"` 
+- `filterByTopic(topic)`: shows only `.pc` elements whose topic matches, updates a `#topicFocusLabel` indicator showing the active topic filter
+- HTML: `<span class="topic-focus-label" id="topicFocusLabel" style="display:none;"></span>` with `<button onclick="clearTopicFocus()">✕ Clear</button>` in sort-bar
+- `clearTopicFocus()`: restores all visible problems
+- CSS: `.topic-focus-label`, `.pc-topic:hover`
+
+### TASK: home-recent-units
+Show recently visited practice units on the home page as quick-access chips.
+- Save to `sh-recent-units` localStorage array (max 5 units) whenever `buildProblems()` is called
+- HTML: `<div class="recent-units-row" id="recentUnitsRow"></div>` in home page stats section
+- `buildRecentUnits()`: reads `sh-recent-units`, renders clickable chips with unit name, clicking goes to practice page and sets unit
+- Call from `goPage('home')` and `buildProblems()`
+- CSS: `.recent-units-row`, `.recent-unit-chip`
+
+### TASK: daily-challenge-history
+Show the last 5 daily challenges and whether they were completed on the home or DC section.
+- `buildDCHistory()`: reads `sh-dc-done` localStorage object (date → boolean), shows last 5 dates
+- HTML: `<div class="dc-history" id="dcHistory"></div>` below the daily challenge card
+- Each row: date label + ✓/✗ indicator
+- Call from `buildDailyChallenge()`
+- CSS: `.dc-history`, `.dc-hist-row`, `.dc-hist-done`, `.dc-hist-miss`
+
+### TASK: formula-panel-unit-jump
+Add unit navigation buttons (prev/next) to the formula panel to switch units without leaving the practice page.
+- HTML: `<button class="formula-unit-nav" id="formulaUnitPrev" onclick="formulaUnitNav(-1)">◀</button><button class="formula-unit-nav" id="formulaUnitNext" onclick="formulaUnitNav(1)">▶</button>` in the formula panel header area near the unit label
+- `formulaUnitNav(dir)`: adjusts `currentUnit` by dir (clamp 1-MAX_UNIT), calls `buildFormulas(currentUnit)`, updates the selector
+- CSS: `.formula-unit-nav` — small arrow buttons
+
+### TASK: roadmap-progress-certificate
+Show a congratulations modal when 100% of roadmap topics are checked.
+- `checkRoadmapComplete()`: counts checked vs total topics; if 100% and not yet shown (`sh-cert-shown` key), show certificate modal
+- HTML modal: `<div class="cert-modal" id="certModal" style="display:none;"><div class="cert-body"><h2>Roadmap Complete!</h2><p>You've mastered all topics.</p><button onclick="document.getElementById('certModal').style.display='none'">Close</button></div></div>` (add to HTML)
+- Call `checkRoadmapComplete()` from `toggleTopic()` when topic is marked done
+- CSS: `.cert-modal`, `.cert-body`
+
+### TASK: viz-histogram-bins-control
+Add a bins count input/slider to the histogram visualizer so users can change the number of bins.
+- HTML: Add `<label>Bins: <input type="range" id="histBins" min="3" max="30" value="10" oninput="document.getElementById('histBinsVal').textContent=this.value;drawHistogram()"></label><span id="histBinsVal">10</span>` to the histogram controls area
+- In `drawHistogram()`: read bin count from `#histBins` element (default 10), use that instead of hardcoded bin count
+- Guard with typeof document
+- CSS: `#histBins` styling consistent with other range inputs
+
