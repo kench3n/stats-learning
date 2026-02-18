@@ -1106,7 +1106,9 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .pc-diff{cursor:help;}
 .formula-copy-btn{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;font-size:12px;padding:1px 6px;margin-left:auto;opacity:0.6;transition:opacity 0.2s,color 0.2s;}
 .formula-copy-btn:hover{opacity:1;color:var(--cyan);}
-.note-wc{font-size:10px;color:var(--muted);padding:0 12px 4px;display:block;}
+.note-wc{font-size:10px;color:var(--muted);padding:0 12px 4px;display:block;transition:color 0.3s;}
+.note-wc.met{color:var(--green);}
+.note-wc.met::after{content:' ✓';}
 .breadcrumb{font-size:12px;color:var(--muted);padding:6px 20px;background:var(--bg2);border-bottom:1px solid var(--border);}
 .breadcrumb-sep{color:var(--muted);margin:0 4px;font-size:12px;}
 .compare-mode{display:flex;flex-wrap:wrap;gap:10px;}
