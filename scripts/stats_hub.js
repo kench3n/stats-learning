@@ -5296,9 +5296,21 @@ function filterProblems(filter){
     else if(filter==='easy')show=prob.diff==='easy';
     else if(filter==='medium')show=prob.diff==='medium';
     else if(filter==='hard')show=prob.diff==='hard';
+    if(show&&favFilterActive)show=!!bm[id];
     el.style.display=show?'':'none';
   });
   if(typeof localStorage!=='undefined')try{localStorage.setItem('sh-filter-diff',filter);}catch(e){};
+}
+var favFilterActive=false;
+function toggleFavFilter(){
+  if(typeof document==='undefined')return;
+  favFilterActive=!favFilterActive;
+  var btn=document.getElementById('favFilterBtn');
+  if(btn)btn.classList.toggle('active',favFilterActive);
+  // Re-apply current filter
+  var cur=document.querySelector('.filter-chip.active');
+  var curFilter=cur?cur.getAttribute('data-filter'):'all';
+  filterProblems(curFilter||'all');
 }
 
 
