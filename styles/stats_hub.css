@@ -853,6 +853,9 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .achieve-badge-desc{font-size:10px;color:var(--muted);line-height:1.4;margin-bottom:6px;font-family:'Space Mono',monospace;}
 .achieve-badge-earned{font-size:11px;color:var(--green);font-family:'Space Mono',monospace;}
 .achieve-badge-locked{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.ach-progress{height:3px;background:var(--border);border-radius:2px;margin:6px 0;overflow:hidden;}
+.ach-progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.5s;}
+.achieve-badge-card.achieved .ach-progress-fill{background:var(--cyan);}
 
 .heatmap{display:flex;flex-wrap:wrap;gap:3px;max-width:500px;margin:12px auto 0;}
 .heatmap-cell{width:12px;height:12px;border-radius:2px;}

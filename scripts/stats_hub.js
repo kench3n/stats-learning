@@ -4238,13 +4238,41 @@ function buildAchievementsPage(){
   const milestones=typeof MILESTONES!=='undefined'?MILESTONES:[];
   let badgeHtml='';
   if(!milestones.length){badgeGrid.innerHTML='<p style="color:var(--muted)">No badges yet. Keep practicing!</p>';return;}
+  // Build achievement data for progress calculation
+  var achData={totalCorrect:totalCorrect,streak:streak.current||0,unitsComplete:0,xp:xp.total||0,topicsChecked:0,perfectUnits:0,reviewSessions:0,mastered:0};
+  // Count units complete and perfect
+  for(var _u in summary){var _r=summary[_u];if(_r&&_r.total>0&&_r.total===_r.correct)achData.perfectUnits++;if(_r&&_r.total>0)achData.unitsComplete++;}
+  // Count topics
+  try{var _ts=getTopicState?getTopicState():{};achData.topicsChecked=Object.values(_ts).filter(Boolean).length;}catch(e){}
+  // Count review sessions
+  try{var _rv=getReviewMeta?getReviewMeta():{};achData.reviewSessions=Object.keys(_rv||{}).length;}catch(e){}
+  // Count mastered flashcards
+  try{var _rm=getReviewData?getReviewData():{};achData.mastered=Object.values(_rm||{}).filter(function(c){return c.interval>=30;}).length;}catch(e){}
+  function _achProgress(m){
+    // Extract target number from milestone description
+    var id=m.id;
+    var p=0;
+    if(id==='first-correct')return Math.min(1,achData.totalCorrect)*100;
+    if(id.startsWith('streak-')){var t=parseInt(id.split('-')[1]);return Math.min(100,Math.round(achData.streak/t*100));}
+    if(id.startsWith('xp-')){var t=parseInt(id.split('-')[1]);return Math.min(100,Math.round(achData.xp/t*100));}
+    if(id.startsWith('topics-')){var t=parseInt(id.split('-')[1]);return Math.min(100,Math.round(achData.topicsChecked/t*100));}
+    if(id==='unit-complete')return Math.min(100,achData.unitsComplete*100);
+    if(id==='all-units')return Math.min(100,Math.round(achData.unitsComplete/11*100));
+    if(id==='perfect-unit')return Math.min(100,achData.perfectUnits*100);
+    if(id==='review-10')return Math.min(100,Math.round(achData.reviewSessions/10*100));
+    if(id==='review-50')return Math.min(100,Math.round(achData.reviewSessions/50*100));
+    if(id==='mastered-10')return Math.min(100,Math.round(achData.mastered/10*100));
+    return 0;
+  }
   milestones.forEach(m=>{
     const done=!!earned[m.id];
+    var pct=done?100:_achProgress(m);
     badgeHtml+='<div class="achieve-badge-card '+(done?'achieved':'locked')+'">'+
       '<div class="achieve-badge-icon">'+m.icon+'</div>'+
       '<div class="achieve-badge-name">'+m.name+'</div>'+
       '<div class="achieve-badge-desc">'+m.desc+'</div>'+
-      (done?'<div class="achieve-badge-earned">Earned ✓</div>':'<div class="achieve-badge-locked">Locked</div>')+
+      '<div class="ach-progress"><div class="ach-progress-fill" style="width:'+pct+'%"></div></div>'+
+      (done?'<div class="achieve-badge-earned">Earned ✓</div>':'<div class="achieve-badge-locked">'+pct+'%</div>')+
     '</div>';
   });
   badgeGrid.innerHTML=badgeHtml;
