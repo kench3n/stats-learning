@@ -5352,7 +5352,7 @@ function buildAchievementsPage(){
   // Count topics
   try{var _ts=getTopicState?getTopicState():{};achData.topicsChecked=Object.values(_ts).filter(Boolean).length;}catch(e){}
   // Count review sessions
-  try{var _rv=getReviewMeta?getReviewMeta():{};achData.reviewSessions=Object.keys(_rv||{}).length;}catch(e){}
+  try{var _rv=getReviewMeta?getReviewMeta():{};achData.reviewSessions=(_rv&&Number.isFinite(+_rv.sessions))?+_rv.sessions:0;}catch(e){}
   // Count mastered flashcards
   try{var _rm=getReviewData?getReviewData():{};achData.mastered=Object.values(_rm||{}).filter(function(c){return c.interval>=30;}).length;}catch(e){}
   function _achProgress(m){
