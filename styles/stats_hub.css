@@ -838,6 +838,12 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .dc-title{font-size:15px;font-weight:700;color:var(--amber);font-family:'Space Mono',monospace;}
 .dc-date{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
 .dc-streak{font-size:13px;color:var(--amber);font-weight:600;}
+.dc-history{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.dc-hist-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
+.dc-hist-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:12px;}
+.dc-hist-date{color:var(--muted);}
+.dc-hist-done{color:var(--green);}
+.dc-hist-miss{color:var(--muted);opacity:0.5;}
 .dc-problem{padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
 .dc-q{font-size:13px;color:var(--text);margin-bottom:8px;}
 .dc-ch{padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin:4px 0;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s;}

@@ -3760,6 +3760,23 @@ function updateDCStreak(){
   }
   el.textContent='\uD83D\uDD25 '+dcData.count;
 }
+function buildDCHistory(){
+  if(typeof document==='undefined')return;
+  var el=document.getElementById('dcHistory');if(!el)return;
+  var state=getDailyChallengeState();
+  var completed=state.completed&&typeof state.completed==='object'?state.completed:{};
+  // Build last 7 days
+  var today=new Date();today.setHours(0,0,0,0);
+  var html='<div class="dc-hist-title">Last 7 Days</div>';
+  for(var i=6;i>=0;i--){
+    var d=new Date(today);d.setDate(today.getDate()-i);
+    var iso=d.toISOString().slice(0,10);
+    var done=!!completed[iso];
+    var label=i===0?'Today':i===1?'Yesterday':iso.slice(5);
+    html+='<div class="dc-hist-row"><span class="dc-hist-date">'+label+'</span><span class="dc-hist-mark '+(done?'dc-hist-done':'dc-hist-miss')+'">'+(done?'✓':'✗')+'</span></div>';
+  }
+  el.innerHTML=html;
+}
 function completeDailyChallenge(){
   const state=getDailyChallengeState();
   const today=todayStr();
@@ -4182,6 +4199,7 @@ function buildDailyChallenge(){
   const dcDate=document.getElementById('dcDate');
   if(dcDate)dcDate.textContent=today;
   updateDCStreak();
+  buildDCHistory();
   const dcStatus=document.getElementById('dcStatus');
   const dcProblems=document.getElementById('dcProblems');
   if(!dcProblems)return;
