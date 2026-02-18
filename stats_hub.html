@@ -547,59 +547,6 @@
 
 <textarea id="shareOutput" aria-hidden="true" style="position:absolute;left:-9999px;top:0;"></textarea>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-</main>
-
-<!-- BOTTOM BAR -->
-<footer class="bottom-bar" role="status" aria-live="polite" aria-label="Overall progress">
-  <div class="bp-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="bp-fill" id="bpFill"></div></div>
-  <div class="bp-text" id="bpText">0 / 0 topics</div>
-</footer>
-
-<div class="pomo-widget" id="pomoWidget">
-  <button class="pomo-toggle" id="pomoToggle" data-action="togglePomoPanel" aria-label="Toggle study timer">⏱</button>
-  <div class="pomo-panel" id="pomoPanel" style="display:none;">
-    <div class="pomo-display" id="pomoDisplay">25:00</div>
-    <div class="pomo-label" id="pomoLabel">Focus Time</div>
-    <div class="pomo-controls">
-      <button data-action="startPomo" id="pomoStart">Start</button>
-      <button data-action="pausePomo" id="pomoPause" style="display:none;">Pause</button>
-      <button data-action="resetPomo" id="pomoReset">Reset</button>
-    </div>
-    <div class="pomo-presets">
-      <button data-action="pomoTime" data-val="15" class="pomo-preset">15m</button>
-      <button data-action="pomoTime" data-val="25" class="pomo-preset active">25m</button>
-      <button data-action="pomoTime" data-val="45" class="pomo-preset">45m</button>
-    </div>
-    <div class="pomo-stats">
-      <span id="pomoSessions">0</span> sessions today
-    </div>
-    <div class="pomodoro-history" id="pomodoroHistory"></div>
-  </div>
-</div>
-<div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none;" data-action="toggleShortcutsHelp">
-  <div class="shortcuts-modal" data-stop-propagation="true" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
-    <h3>Keyboard Shortcuts</h3>
-    <div class="shortcut-section">Navigation</div>
-    <div class="shortcut-row"><kbd>1</kbd>&ndash;<kbd>5</kbd> Home / Roadmap / Visualizer / Practice / Review</div>
-    <div class="shortcut-row"><kbd>6</kbd> Achievements &nbsp;<kbd>7</kbd> Flashcards &nbsp;<kbd>8</kbd> Create</div>
-    <div class="shortcut-row"><kbd>R</kbd> Jump to Review</div>
-    <div class="shortcut-section">Practice</div>
-    <div class="shortcut-row"><kbd>J</kbd> / <kbd>K</kbd> Next / Prev Problem</div>
-    <div class="shortcut-section">Flashcards</div>
-    <div class="shortcut-row"><kbd>Space</kbd> Flip Card</div>
-    <div class="shortcut-row"><kbd>→</kbd> Mark Know</div>
-    <div class="shortcut-row"><kbd>←</kbd> Mark Unsure</div>
-    <div class="shortcut-section">Interface</div>
-    <div class="shortcut-row"><kbd>F</kbd> Toggle Focus Mode (Practice)</div>
-    <div class="shortcut-row"><kbd>T</kbd> Toggle Timer</div>
-    <div class="shortcut-row"><kbd>D</kbd> Toggle Theme</div>
-    <div class="shortcut-row"><kbd>?</kbd> This Help</div>
-    <div class="shortcut-row"><kbd>Esc</kbd> Close Panel / Exit Focus</div>
-    <button class="shortcut-dl-btn" data-action="downloadShortcutCheatsheet">&#8595; Download Cheatsheet</button>
-    <button data-action="toggleShortcutsHelp">Close</button>
-  </div>
-</div>
-<script src="scripts/stats_hub.js" defer></script>
 <section class="page" id="page-create" role="tabpanel" aria-labelledby="tab-create">
   <header class="section-header">
     <p class="section-tag">Create Your Own</p>
@@ -739,6 +686,59 @@
   </div>
   <div id="generalCertArea" style="text-align:center;margin:8px 0;"></div>
 </section>
+</main>
+
+<!-- BOTTOM BAR -->
+<footer class="bottom-bar" role="status" aria-live="polite" aria-label="Overall progress">
+  <div class="bp-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="bp-fill" id="bpFill"></div></div>
+  <div class="bp-text" id="bpText">0 / 0 topics</div>
+</footer>
+
+<div class="pomo-widget" id="pomoWidget">
+  <button class="pomo-toggle" id="pomoToggle" data-action="togglePomoPanel" aria-label="Toggle study timer">⏱</button>
+  <div class="pomo-panel" id="pomoPanel" style="display:none;">
+    <div class="pomo-display" id="pomoDisplay">25:00</div>
+    <div class="pomo-label" id="pomoLabel">Focus Time</div>
+    <div class="pomo-controls">
+      <button data-action="startPomo" id="pomoStart">Start</button>
+      <button data-action="pausePomo" id="pomoPause" style="display:none;">Pause</button>
+      <button data-action="resetPomo" id="pomoReset">Reset</button>
+    </div>
+    <div class="pomo-presets">
+      <button data-action="pomoTime" data-val="15" class="pomo-preset">15m</button>
+      <button data-action="pomoTime" data-val="25" class="pomo-preset active">25m</button>
+      <button data-action="pomoTime" data-val="45" class="pomo-preset">45m</button>
+    </div>
+    <div class="pomo-stats">
+      <span id="pomoSessions">0</span> sessions today
+    </div>
+    <div class="pomodoro-history" id="pomodoroHistory"></div>
+  </div>
+</div>
+<div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none;" data-action="toggleShortcutsHelp">
+  <div class="shortcuts-modal" data-stop-propagation="true" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+    <h3>Keyboard Shortcuts</h3>
+    <div class="shortcut-section">Navigation</div>
+    <div class="shortcut-row"><kbd>1</kbd>&ndash;<kbd>5</kbd> Home / Roadmap / Visualizer / Practice / Review</div>
+    <div class="shortcut-row"><kbd>6</kbd> Achievements &nbsp;<kbd>7</kbd> Flashcards &nbsp;<kbd>8</kbd> Create</div>
+    <div class="shortcut-row"><kbd>R</kbd> Jump to Review</div>
+    <div class="shortcut-section">Practice</div>
+    <div class="shortcut-row"><kbd>J</kbd> / <kbd>K</kbd> Next / Prev Problem</div>
+    <div class="shortcut-section">Flashcards</div>
+    <div class="shortcut-row"><kbd>Space</kbd> Flip Card</div>
+    <div class="shortcut-row"><kbd>→</kbd> Mark Know</div>
+    <div class="shortcut-row"><kbd>←</kbd> Mark Unsure</div>
+    <div class="shortcut-section">Interface</div>
+    <div class="shortcut-row"><kbd>F</kbd> Toggle Focus Mode (Practice)</div>
+    <div class="shortcut-row"><kbd>T</kbd> Toggle Timer</div>
+    <div class="shortcut-row"><kbd>D</kbd> Toggle Theme</div>
+    <div class="shortcut-row"><kbd>?</kbd> This Help</div>
+    <div class="shortcut-row"><kbd>Esc</kbd> Close Panel / Exit Focus</div>
+    <button class="shortcut-dl-btn" data-action="downloadShortcutCheatsheet">&#8595; Download Cheatsheet</button>
+    <button data-action="toggleShortcutsHelp">Close</button>
+  </div>
+</div>
+<script src="scripts/stats_hub.js" defer></script>
 <div class="install-banner" id="installBanner" style="display:none;">
   <span class="install-text">📱 Install Stats Hub for offline access</span>
   <button class="install-btn" id="installBtn" data-action="installPWA">Install</button>
