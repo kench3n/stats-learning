@@ -431,6 +431,7 @@ canvas{display:block;width:100%;border-radius:8px;background:var(--bg3);border:1
 .pc-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);background:var(--bg3);padding:3px 9px;border-radius:4px;}
 .pc-diff{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:4px;}
 .d-e{background:rgba(52,211,153,0.1);color:var(--green);}.d-m{background:rgba(245,158,11,0.1);color:var(--amber);}.d-h{background:rgba(244,114,182,0.1);color:var(--pink);}
+.prob-rating-display{font-size:10px;color:var(--amber);letter-spacing:1px;}
 .pc-topic{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);margin-left:auto;}
 .pc-body{padding:16px 22px 18px;}
 .pc-q{font-size:15px;line-height:1.75;color:var(--text);}
