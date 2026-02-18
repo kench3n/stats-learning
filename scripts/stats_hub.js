@@ -4742,6 +4742,8 @@ function renderFlashcard(){
   const card=fcCards[fcIndex];
   container.innerHTML='<div class="fc-card" id="fcCard" onclick="flipCard()" role="button" tabindex="0" onkeydown="if(event.key===\"Enter\"||event.key===\" \"){event.preventDefault();flipCard();}"><div class="fc-front">'+card.front+'</div><div class="fc-back" style="display:none;">'+card.back+'</div></div>';
   setElText('fcProgress',(fcIndex+1)+' / '+fcCards.length);
+  var fill=document.getElementById('fcProgressFill');
+  if(fill&&fcCards.length>0)fill.style.width=Math.round((fcIndex+1)/fcCards.length*100)+'%';
 }
 
 function flipCard(){

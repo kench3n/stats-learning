@@ -918,6 +918,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .fc-mode-btn.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
 .fc-mode-btn:hover:not(.active){border-color:var(--cyan);color:var(--cyan);}
 
+.fc-progress-bar{height:4px;background:var(--border);border-radius:2px;margin:0 auto 8px;max-width:480px;overflow:hidden;}
+.fc-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:2px;transition:width 0.4s;}
 .fc-container{display:flex;justify-content:center;padding:20px 0;}
 .fc-card{width:100%;max-width:480px;min-height:240px;padding:32px;background:var(--bg2);border:2px solid var(--border);border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;transition:border-color 0.3s;font-size:16px;line-height:1.6;margin:0 auto;}
 .fc-card:hover{border-color:var(--cyan);}
