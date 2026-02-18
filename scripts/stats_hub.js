@@ -1600,7 +1600,7 @@ function _renderStepHint(id,prob,ht){
   var step=_st.stepHintProgress[id]||0;
   var steps=prob.steps||[];
   var stepsHtml='<div class="step-hint-text"><div class="step-count-display">Step '+(step+1)+' of '+steps.length+'</div>';
-  for(var i=0;i<=step;i++){stepsHtml+='<div class="step-hint-line">'+steps[i]+'</div>';}
+  for(var i=0;i<=step;i++){stepsHtml+='<div class="step-hint-line">'+_esc(steps[i])+'</div>';}
   stepsHtml+='</div>';
   if(step<steps.length-1){
     stepsHtml+='<button class="step-hint-btn" onclick="showNextStep(\''+id+'\')">' + 'Next Step →</button>';
