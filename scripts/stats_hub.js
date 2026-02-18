@@ -1485,7 +1485,7 @@ function buildFormulaSearchHistory(){
   el.style.display='';
   var html='';
   hist.slice(0,3).forEach(function(q){
-    html+='<button class="formula-history-chip" onclick="var inp=document.getElementById(\'formulaSearch\');if(inp){inp.value='+JSON.stringify(q)+';filterFormulas('+JSON.stringify(q)+');}">'+q+'</button>';
+    html+='<button class="formula-history-chip" onclick="var inp=document.getElementById(\'formulaSearch\');if(inp){inp.value='+JSON.stringify(q)+';filterFormulas('+JSON.stringify(q)+');}">'+_esc(q)+'</button>';
   });
   el.innerHTML=html;
 }
