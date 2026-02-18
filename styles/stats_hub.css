@@ -932,6 +932,8 @@ body.focus-mode .pc.incorrect{opacity:0.2;}
 .filter-chip{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;transition:all 0.2s;}
 .filter-chip:hover{border-color:var(--cyan);color:var(--cyan);}
 .filter-chip.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
+.hint-usage-info{text-align:right;padding:0 24px 4px;max-width:780px;margin:0 auto;}
+.hint-usage-label{font-size:11px;color:var(--muted);}
 
 /* ===== PHASE 15: ANALYTICS, PDF EXPORT, CALENDAR ===== */
 .export-pdf-btn{background:none;border:1px solid var(--cyan);border-radius:6px;padding:6px 14px;color:var(--cyan);font-size:12px;cursor:pointer;font-family:'Space Mono',monospace;margin-top:8px;}

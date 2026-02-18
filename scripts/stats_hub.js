@@ -1226,6 +1226,25 @@ function showHint(id){
   if(ht)ht.style.display='block';
   if(hb)hb.style.display='none';
   awardXP(1,'hint-'+id);
+  // Track hint usage
+  if(typeof localStorage!=='undefined'){
+    try{
+      var usage=JSON.parse(localStorage.getItem('sh-hint-usage')||'{}');
+      var key='unit-'+currentUnit;
+      usage[key]=(usage[key]||0)+1;
+      localStorage.setItem('sh-hint-usage',JSON.stringify(usage));
+      buildHintUsageInfo();
+    }catch(e){}
+  }
+}
+function buildHintUsageInfo(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  var el=document.getElementById('hintUsageLabel');if(!el)return;
+  try{
+    var usage=JSON.parse(localStorage.getItem('sh-hint-usage')||'{}');
+    var count=usage['unit-'+currentUnit]||0;
+    el.textContent=count>0?'Hints used: '+count:'';
+  }catch(e){}
 }
 
 // ===================== CELEBRATIONS =====================
@@ -1470,6 +1489,7 @@ buildProblems=function(unit=currentUnit){
   buildUnitXPBar(unit);
   buildDiffInsight(unit);
   updateFilterCounts(unit);
+  buildHintUsageInfo();
   _saveRecentUnit(unit);
   buildTagFilter();
   if(typeof localStorage!=='undefined'){try{var savedSort=localStorage.getItem('sh-problem-sort')||'default';if(savedSort!=='default'){var sel=document.getElementById('problemSort');if(sel)sel.value=savedSort;sortProblems(savedSort);}}catch(e){}};
