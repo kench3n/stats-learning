@@ -560,6 +560,18 @@ function updateRoadmapNavBadge(){
   badge.style.display=remaining>0?'':'none';
 }
 
+function checkRoadmapComplete(){
+  if(typeof document==='undefined'||typeof localStorage==='undefined')return;
+  if(localStorage.getItem('sh-cert-shown')==='1')return;
+  var total=0;['l1','l2','l3'].forEach(function(lk){(RM[lk]||[]).forEach(function(c){total+=c.topics.length;});});
+  var state=getTopicState();
+  var checked=Object.values(state).filter(Boolean).length;
+  if(checked>=total&&total>0){
+    localStorage.setItem('sh-cert-shown','1');
+    var modal=document.getElementById('rmCertModal');
+    if(modal)modal.style.display='flex';
+  }
+}
 function searchRoadmapTopics(q){
   if(typeof document==='undefined')return;
   var clr=document.getElementById('rmSearchClear');if(clr)clr.style.display=q?'':'none';
@@ -603,6 +615,7 @@ function toggleTopic(el){
   if(checked){
     awardXP(XP_TABLE.topic,'topic');
     recordActivity();
+    checkRoadmapComplete();
   }
 }
 function restoreTopics(){
