@@ -1153,6 +1153,8 @@ body.reading-mode{--bg:#050508;--bg2:#0a0a0f;--fg:#d0d0d8;}
 .sort-bar{display:flex;align-items:center;gap:8px;padding:6px 0 4px;}
 .sort-bar select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:12px;padding:3px 8px;cursor:pointer;}
 .sort-bar select:focus{outline:2px solid var(--cyan);border-color:var(--cyan);}
+.expand-all-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:11px;padding:3px 10px;margin-left:auto;}
+.expand-all-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 .mastery-badge{font-size:10px;font-weight:700;border-radius:10px;padding:2px 8px;border:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
 .mastery-badge[data-level="apprentice"]{color:var(--cyan);border-color:var(--cyan);}
 .mastery-badge[data-level="practitioner"]{color:var(--green);border-color:var(--green);}
